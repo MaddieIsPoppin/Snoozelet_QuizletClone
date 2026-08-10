@@ -5,6 +5,7 @@ A local-first study app inspired by Quizlet, with extra focus on a Learn flow th
 ## Features
 
 - Create decks with terms and definitions
+- Add an optional image and accessible description to individual cards
 - Import cards from uploaded CSV, pasted CSV, tab-separated text, or `term - definition` lines
 - Study with Learn, Flashcards, Multiple Choice, and Typed Answer modes
 - Spaced repetition using a lightweight SM-2-style scheduler in SQLite
@@ -123,6 +124,18 @@ TURSO_AUTH_TOKEN=your-token
 ```
 
 The app also accepts `LIBSQL_DATABASE_URL` and `LIBSQL_AUTH_TOKEN` if you prefer those names.
+
+## Card Image Uploads
+
+Card images use signed direct uploads to Cloudinary. Create a Cloudinary account, then add these values to `.env.local` for local development and to your Netlify environment variables for deployment:
+
+```text
+CLOUDINARY_CLOUD_NAME=your-cloud-name
+CLOUDINARY_API_KEY=your-api-key
+CLOUDINARY_API_SECRET=your-api-secret
+```
+
+Keep `CLOUDINARY_API_SECRET` private. Existing text-only cards continue to work when Cloudinary is not configured; only the image upload control will be unavailable.
 
 ## Deploy Locally First
 

@@ -9,6 +9,7 @@ import {
 
 import TextField from "@/components/TextField";
 import DeckCardList from "@/components/DeckCardList";
+import ImageUploadField from "@/components/ImageUploadField";
 
 import { requireUser } from "@/lib/auth";
 import { getCards, getDeck } from "@/lib/db";
@@ -541,6 +542,8 @@ export default async function DeckPage({ params }) {
                   required
                 />
               </label>
+
+              <ImageUploadField />
 
 
               <button

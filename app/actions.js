@@ -6,6 +6,18 @@ import { addCards, createDeckWithCards, deleteCard, deleteDeck, updateCard } fro
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
 
+function cardImageFromForm(formData) {
+  if (String(formData.get("imageUploadPending") || "") === "1") {
+    throw new Error("Wait for the image upload to finish before saving");
+  }
+
+  return {
+    imageUrl: String(formData.get("imageUrl") || ""),
+    imagePublicId: String(formData.get("imagePublicId") || ""),
+    imageAlt: String(formData.get("imageAlt") || ""),
+  };
+}
+
 const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
 const MAX_IMPORT_CARDS = 5000;
 
@@ -86,7 +98,7 @@ export async function addCardAction(formData) {
   const term = String(formData.get("term") || "").trim();
   const definition = String(formData.get("definition") || "").trim();
 
-  await addCards(deckId, [{ term, definition }], user.id);
+  await addCards(deckId, [{ term, definition, ...cardImageFromForm(formData) }], user.id);
   revalidatePath(`/decks/${deckId}`);
 }
 
@@ -113,7 +125,14 @@ export async function updateCardAction(formData) {
   const term = String(formData.get("term") || "").trim();
   const definition = String(formData.get("definition") || "").trim();
 
-  await updateCard({ cardId, deckId, term, definition, userId: user.id });
+  await updateCard({
+    cardId,
+    deckId,
+    term,
+    definition,
+    ...cardImageFromForm(formData),
+    userId: user.id,
+  });
   revalidatePath(`/decks/${deckId}`);
 }
 

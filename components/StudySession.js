@@ -1351,6 +1351,10 @@ function goToNextFlashcard() {
 
   answer={expectedAnswer}
 
+  imageUrl={currentCard.imageUrl}
+
+  imageAlt={currentCard.imageAlt}
+
   onResult={
     handleFlashcardResult
   }

@@ -5026,6 +5026,51 @@ div > span {
   line-height: 1;
 }
 
+.card-image-field {
+  display: grid;
+  gap: 10px;
+  margin: 0;
+  padding: 14px;
+  border: 1px solid rgba(175, 190, 235, 0.2);
+  border-radius: 12px;
+}
+
+.card-image-field legend {
+  padding: 0 6px;
+  color: var(--cream);
+  font-weight: 800;
+}
+
+.card-image-preview {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 12px;
+}
+
+.card-image-preview img,
+.deck-card-image {
+  width: min(100%, 240px);
+  max-height: 180px;
+  object-fit: contain;
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.deck-card-image {
+  margin-top: 14px;
+}
+
+.flashcard-answer-image {
+  display: block;
+  width: min(100%, 480px);
+  max-height: 320px;
+  margin: 18px auto 0;
+  object-fit: contain;
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.05);
+}
+
 .shortcut-key {
   margin-right: 3px;
 

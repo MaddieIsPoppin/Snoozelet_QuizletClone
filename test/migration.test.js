@@ -39,6 +39,7 @@ test("review idempotency migration preserves existing review rows", async () => 
 
   const db = await import(`../lib/db.js?migration=${randomUUID()}`);
   const columns = await db.queryAll("PRAGMA table_info(review_logs)");
+  const cardColumns = await db.queryAll("PRAGMA table_info(cards)");
   const indexes = await db.queryAll("PRAGMA index_list(review_logs)");
   const preserved = await db.queryOne("SELECT * FROM review_logs WHERE id = 1");
   const versions = await db.queryAll("SELECT version FROM schema_migrations ORDER BY version");
@@ -59,7 +60,10 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(preserved.answer, "answer");
   assert.equal(preserved.expected, "answer");
   assert.equal(preserved.attempt_id, null);
-  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3]);
+  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4]);
+  assert.ok(cardColumns.some((column) => column.name === "image_url"));
+  assert.ok(cardColumns.some((column) => column.name === "image_public_id"));
+  assert.ok(cardColumns.some((column) => column.name === "image_alt"));
   assert.equal(Number(versions.at(-1).version), latestSchemaVersion);
   assert.match(cardPlan.map(({ detail }) => detail).join(" "), /idx_cards_deck_id/);
   assert.match(duePlan.map(({ detail }) => detail).join(" "), /idx_study_stats_deck_due/);

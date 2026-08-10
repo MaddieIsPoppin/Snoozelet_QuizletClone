@@ -5,10 +5,13 @@ import {
   useEffect,
   useState,
 } from "react";
+import CardImage from "@/components/CardImage";
 
 export default function FlashcardQuestion({
   prompt,
   answer,
+  imageUrl,
+  imageAlt,
   onResult,
   onPrevious,
   onNext,
@@ -209,6 +212,12 @@ export default function FlashcardQuestion({
           <div className="flashcard-answer">
             {answer}
           </div>
+
+          <CardImage
+            src={imageUrl}
+            alt={imageAlt || ""}
+            className="flashcard-answer-image"
+          />
 
           <p>
             Did you know it?

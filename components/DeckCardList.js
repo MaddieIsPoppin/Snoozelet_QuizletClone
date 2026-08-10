@@ -8,6 +8,8 @@ import {
 } from "@/app/actions";
 
 import TextField from "@/components/TextField";
+import CardImage from "@/components/CardImage";
+import ImageUploadField from "@/components/ImageUploadField";
 
 export default function DeckCardList({
   cards = [],
@@ -291,6 +293,12 @@ export default function DeckCardList({
 
                     </div>
 
+                    <CardImage
+                      src={card.imageUrl}
+                      alt={card.imageAlt || ""}
+                      className="deck-card-image"
+                    />
+
 
                     <div className="deck-term-stats">
 
@@ -375,6 +383,12 @@ export default function DeckCardList({
                             required
                           />
                         </label>
+
+                        <ImageUploadField
+                          initialUrl={card.imageUrl}
+                          initialPublicId={card.imagePublicId}
+                          initialAlt={card.imageAlt}
+                        />
 
 
                         <button

@@ -60,7 +60,13 @@ test("database integration", async (suite) => {
         deckId,
         [
           { term: "Mitochondria", definition: "Produces ATP" },
-          { term: "Nucleus", definition: "Stores DNA" },
+          {
+            term: "Nucleus",
+            definition: "Stores DNA",
+            imageUrl: "https://res.cloudinary.com/demo/image/upload/v1/snoozelet/cards/nucleus.png",
+            imagePublicId: "snoozelet/cards/nucleus",
+            imageAlt: "A cell nucleus",
+          },
         ],
         ownerId
       ),
@@ -69,6 +75,10 @@ test("database integration", async (suite) => {
 
     const cards = await db.getCards(deckId, ownerId);
     assert.equal(cards.length, 2);
+    const illustrated = cards.find((card) => card.term === "Nucleus");
+    assert.equal(illustrated.imagePublicId, "snoozelet/cards/nucleus");
+    assert.equal(illustrated.imageAlt, "A cell nucleus");
+    assert.equal(cards.find((card) => card.term === "Mitochondria").imageUrl, null);
 
     for (const card of cards) {
       const stat = await db.queryOne(
