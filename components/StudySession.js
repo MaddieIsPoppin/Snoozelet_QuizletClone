@@ -3,357 +3,33 @@
 import {
   useEffect,
   useMemo,
-  useRef,
   useState,
 } from "react";
 
 import { useRouter } from "next/navigation";
+import useReviewSaver from "@/hooks/useReviewSaver";
 
 import XpNotice from "@/components/XpNotice";
 import TestResults from "@/components/TestResults";
-import { createTestPlan, selectLearnCards } from "@/lib/study";
+import LearnQuestion from "@/components/LearnQuestion";
+import {
+  advanceStudyQueue,
+  answerForDirection,
+  generateTestQuestions,
+  isStudyAnswerCorrect,
+  makeMultipleChoiceOptions,
+  makeTrueFalseQuestion,
+  normalizeFlexibleAnswer,
+  promptForDirection,
+  questionTypeLabel,
+  selectLearnCards,
+  shuffle,
+} from "@/lib/study";
 
 import FlashcardQuestion from "@/components/FlashcardQuestion";
 import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
 import TypedQuestion from "@/components/TypedQuestion";
 import TrueFalseQuestion from "@/components/TrueFalseQuestion";
-
-
-/* =========================================================
-   GENERAL HELPERS
-   ========================================================= */
-
-
-function shuffle(items) {
-  const copy = [...items];
-
-  for (
-    let i = copy.length - 1;
-    i > 0;
-    i -= 1
-  ) {
-    const j = Math.floor(
-      Math.random() * (i + 1)
-    );
-
-    [copy[i], copy[j]] = [
-      copy[j],
-      copy[i],
-    ];
-  }
-
-  return copy;
-}
-
-
-function normalize(value) {
-  return String(value || "")
-    .trim()
-    .toLowerCase()
-    .replace(/\s+/g, " ");
-}
-
-
-function normalizeFlexible(value) {
-  return normalize(value)
-    .replace(/&/g, "and")
-    .replace(
-      /[.,/#!$%^*;:{}=\-_`~()?'"[\]\\]/g,
-      ""
-    )
-    .replace(/\s+/g, " ")
-    .trim();
-}
-
-
-function levenshtein(a, b) {
-  const first =
-    normalizeFlexible(a);
-
-  const second =
-    normalizeFlexible(b);
-
-  const matrix =
-    Array.from(
-      {
-        length:
-          first.length + 1,
-      },
-      () =>
-        Array(
-          second.length + 1
-        ).fill(0)
-    );
-
-  for (
-    let i = 0;
-    i <= first.length;
-    i += 1
-  ) {
-    matrix[i][0] = i;
-  }
-
-  for (
-    let j = 0;
-    j <= second.length;
-    j += 1
-  ) {
-    matrix[0][j] = j;
-  }
-
-  for (
-    let i = 1;
-    i <= first.length;
-    i += 1
-  ) {
-    for (
-      let j = 1;
-      j <= second.length;
-      j += 1
-    ) {
-      const cost =
-        first[i - 1] ===
-        second[j - 1]
-          ? 0
-          : 1;
-
-      matrix[i][j] =
-        Math.min(
-          matrix[i - 1][j] + 1,
-          matrix[i][j - 1] + 1,
-          matrix[i - 1][j - 1] +
-            cost
-        );
-    }
-  }
-
-  return matrix[
-    first.length
-  ][second.length];
-}
-
-
-function isAnswerCorrect(
-  answer,
-  expected,
-  grading = "lenient"
-) {
-  if (grading === "strict") {
-    return (
-      normalize(answer) ===
-      normalize(expected)
-    );
-  }
-
-  if (
-    grading === "flexible"
-  ) {
-    return (
-      normalizeFlexible(
-        answer
-      ) ===
-      normalizeFlexible(
-        expected
-      )
-    );
-  }
-
-  const first =
-    normalizeFlexible(answer);
-
-  const second =
-    normalizeFlexible(expected);
-
-  if (first === second) {
-    return true;
-  }
-
-  if (!first || !second) {
-    return false;
-  }
-
-  const distance =
-    levenshtein(
-      first,
-      second
-    );
-
-  const longest =
-    Math.max(
-      first.length,
-      second.length
-    );
-
-  if (longest <= 4) {
-    return distance <= 1;
-  }
-
-  if (longest <= 10) {
-    return distance <= 2;
-  }
-
-  return (
-    distance <=
-    Math.max(
-      2,
-      Math.floor(
-        longest * 0.15
-      )
-    )
-  );
-}
-
-
-function makeMultipleChoiceOptions(
-  card,
-  cards,
-  answerDirection
-) {
-  const correct =
-    answerDirection ===
-    "definition"
-      ? card.definition
-      : card.term;
-
-  const alternatives =
-    cards
-      .filter(
-        (item) =>
-          item.id !== card.id
-      )
-      .map((item) =>
-        answerDirection ===
-        "definition"
-          ? item.definition
-          : item.term
-      )
-      .filter(
-        (value) =>
-          normalize(value) !==
-          normalize(correct)
-      );
-
-  return shuffle([
-    correct,
-    ...shuffle(
-      alternatives
-    ).slice(0, 3),
-  ]);
-}
-
-
-function makeTrueFalseQuestion(
-  card,
-  cards,
-  answerDirection
-) {
-  const shouldBeTrue =
-    Math.random() >= 0.5;
-
-  const correctAnswer =
-    answerDirection ===
-    "definition"
-      ? card.definition
-      : card.term;
-
-  if (
-    shouldBeTrue ||
-    cards.length < 2
-  ) {
-    return {
-      displayedAnswer:
-        correctAnswer,
-
-      correctValue:
-        "True",
-    };
-  }
-
-  const alternatives =
-    cards.filter(
-      (item) =>
-        item.id !== card.id
-    );
-
-  const randomCard =
-    alternatives[
-      Math.floor(
-        Math.random() *
-          alternatives.length
-      )
-    ];
-
-  return {
-    displayedAnswer:
-      answerDirection ===
-      "definition"
-        ? randomCard.definition
-        : randomCard.term,
-
-    correctValue:
-      "False",
-  };
-}
-
-
-function questionTypeLabel(
-  type
-) {
-  if (type === "multiple") {
-    return "Multiple choice";
-  }
-
-  if (type === "typed") {
-    return "Written";
-  }
-
-  if (
-    type === "truefalse" ||
-    type === "true-false"
-  ) {
-    return "True / False";
-  }
-
-  if (type === "flashcard") {
-    return "Flashcard";
-  }
-
-  return type;
-}
-
-
-function generateTestQuestions(
-  cards,
-  count,
-  types,
-  answerDirection
-) {
-  return createTestPlan(cards, count, types).map(({ card, type }, index) => {
-    if (type === "multiple") {
-      return {
-        id: `${card.id}-${index}`,
-        card,
-        type,
-        options: makeMultipleChoiceOptions(card, cards, answerDirection),
-      };
-    }
-
-    if (type === "truefalse") {
-      return {
-        id: `${card.id}-${index}`,
-        card,
-        type,
-        ...makeTrueFalseQuestion(card, cards, answerDirection),
-      };
-    }
-
-    return {
-      id: `${card.id}-${index}`,
-      card,
-      type: "typed",
-    };
-  });
-}
 
 
 /* =========================================================
@@ -447,36 +123,14 @@ export default function StudySession({
   ] = useState(false);
 
 
-  /* ---------------------------------------------------------
-     XP
-     --------------------------------------------------------- */
-
-  const [
-    xpNotice,
-    setXpNotice,
-  ] = useState(null);
-
-  const xpTimerRef =
-    useRef(null);
-
-  const [
-    reviewStatus,
-    setReviewStatus,
-  ] = useState("idle");
-
-  const [
+  const {
+    beginAttemptGeneration,
+    resetReviewState,
     reviewError,
-    setReviewError,
-  ] = useState("");
-
-  const savingAttemptRef =
-    useRef(null);
-
-  const attemptIdsRef =
-    useRef(new Map());
-
-  const attemptGenerationRef =
-    useRef(0);
+    reviewStatus,
+    saveReview,
+    xpNotice,
+  } = useReviewSaver({ mode, answerDirection, grading });
 
 
   /* ---------------------------------------------------------
@@ -526,23 +180,6 @@ export default function StudySession({
 
 
   /* ---------------------------------------------------------
-     XP TIMER CLEANUP
-     --------------------------------------------------------- */
-
-  useEffect(() => {
-    return () => {
-      if (
-        xpTimerRef.current
-      ) {
-        window.clearTimeout(
-          xpTimerRef.current
-        );
-      }
-    };
-  }, []);
-
-
-  /* ---------------------------------------------------------
      CURRENT QUESTION
      --------------------------------------------------------- */
 
@@ -563,22 +200,14 @@ export default function StudySession({
       : null;
 
 
-  const prompt =
-    currentCard
-      ? answerDirection ===
-        "definition"
-        ? currentCard.term
-        : currentCard.definition
-      : "";
+  const prompt = currentCard
+    ? promptForDirection(currentCard, answerDirection)
+    : "";
 
 
-  const expectedAnswer =
-    currentCard
-      ? answerDirection ===
-        "definition"
-        ? currentCard.definition
-        : currentCard.term
-      : "";
+  const expectedAnswer = currentCard
+    ? answerForDirection(currentCard, answerDirection)
+    : "";
 
 
   /* ---------------------------------------------------------
@@ -649,182 +278,7 @@ export default function StudySession({
     setTypedAnswer("");
     setFeedback(null);
     setSelectedChoice(null);
-    setReviewStatus("idle");
-    setReviewError("");
-  }
-
-
-  function showXpNotice(
-    data
-  ) {
-    if (!data?.xpGained) {
-      return;
-    }
-
-    if (
-      xpTimerRef.current
-    ) {
-      window.clearTimeout(
-        xpTimerRef.current
-      );
-    }
-
-    setXpNotice({
-      amount:
-        data.xpGained,
-
-      totalXp:
-        data.progress
-          ?.totalXp,
-
-      level:
-        data.progress
-          ?.level,
-    });
-
-    xpTimerRef.current =
-      window.setTimeout(
-        () => {
-          setXpNotice(null);
-        },
-        2000
-      );
-  }
-
-
-  async function saveReview(
-    card,
-    wasCorrect,
-    reviewMode,
-    userAnswer = "",
-    options = {}
-  ) {
-    const questionKey =
-      mode === "test"
-        ? testQuestion?.id
-        : currentIndex;
-
-    const attemptKey = [
-      attemptGenerationRef.current,
-      mode,
-      reviewMode,
-      card.id,
-      questionKey,
-      answerDirection,
-    ].join(":");
-
-    let attemptId =
-      attemptIdsRef.current.get(
-        attemptKey
-      );
-
-    if (!attemptId) {
-      attemptId =
-        window.crypto.randomUUID();
-
-      attemptIdsRef.current.set(
-        attemptKey,
-        attemptId
-      );
-    }
-
-    if (
-      savingAttemptRef.current ===
-      attemptId
-    ) {
-      return null;
-    }
-
-    savingAttemptRef.current =
-      attemptId;
-
-    setReviewStatus("saving");
-    setReviewError("");
-
-    try {
-      const response =
-        await fetch(
-          "/api/review",
-          {
-            method:
-              "POST",
-
-            headers: {
-              "Content-Type":
-                "application/json",
-            },
-
-            body:
-              JSON.stringify({
-                attemptId,
-
-                cardId:
-                  card.id,
-
-                mode:
-                  reviewMode,
-
-                answer:
-                  userAnswer,
-
-                answerDirection,
-
-                grading,
-
-                selfAssessedCorrect:
-                  reviewMode ===
-                  "flashcard"
-                    ? wasCorrect
-                    : undefined,
-
-                presentedAnswer:
-                  options
-                    .presentedAnswer,
-              }),
-          }
-        );
-
-      const data =
-        await response.json();
-
-      if (
-        !response.ok
-      ) {
-        throw new Error(
-          data.error ||
-            "Could not save review"
-        );
-      }
-
-      showXpNotice(
-        data
-      );
-
-      setReviewStatus("success");
-
-      return data;
-    } catch (error) {
-      console.error(
-        "Could not save review:",
-        error
-      );
-
-      setReviewStatus("error");
-      setReviewError(
-        error.message ||
-          "Could not save review"
-      );
-
-      return null;
-    } finally {
-      if (
-        savingAttemptRef.current ===
-        attemptId
-      ) {
-        savingAttemptRef.current =
-          null;
-      }
-    }
+    resetReviewState();
   }
 
 
@@ -840,56 +294,29 @@ export default function StudySession({
   function moveToNextNormalCard(
     wasCorrect
   ) {
-    const card =
-      queue[
-        currentIndex
-      ];
+    const transition = advanceStudyQueue({
+      queue,
+      currentIndex,
+      wasCorrect,
+      requeueMissed: mode === "learn",
+    });
 
-    if (!card) {
+    if (!transition) {
       return;
     }
 
-    if (wasCorrect) {
-      setCorrect(
-        (value) =>
-          value + 1
-      );
-    } else {
-      setMissed(
-        (value) =>
-          value + 1
-      );
+    setCorrect((value) => value + transition.correctDelta);
+    setMissed((value) => value + transition.missedDelta);
+    setQueue(transition.queue);
 
-      if (
-        mode === "learn"
-      ) {
-        setQueue(
-          (existing) => [
-            ...existing,
-            card,
-          ]
-        );
-      }
-    }
-
-    const nextIndex =
-      currentIndex + 1;
-
-    if (
-      nextIndex >=
-        queue.length &&
-      (
-        wasCorrect ||
-        mode !== "learn"
-      )
-    ) {
+    if (transition.complete) {
       finishNormalSession();
 
       return;
     }
 
     setCurrentIndex(
-      nextIndex
+      transition.currentIndex
     );
 
     resetAnswerState();
@@ -914,7 +341,7 @@ export default function StudySession({
     }
 
     const wasCorrect =
-      isAnswerCorrect(
+      isStudyAnswerCorrect(
         typedAnswer,
         expectedAnswer,
         grading
@@ -936,7 +363,8 @@ export default function StudySession({
       currentCard,
       wasCorrect,
       "typed",
-      typedAnswer
+      typedAnswer,
+      { questionKey: currentIndex }
     );
 
     if (!saved) {
@@ -980,10 +408,10 @@ export default function StudySession({
     }
 
     const wasCorrect =
-      normalizeFlexible(
+      normalizeFlexibleAnswer(
         choice
       ) ===
-      normalizeFlexible(
+      normalizeFlexibleAnswer(
         expectedAnswer
       );
 
@@ -1007,7 +435,8 @@ export default function StudySession({
       currentCard,
       wasCorrect,
       "multiple",
-      choice
+      choice,
+      { questionKey: currentIndex }
     );
 
     if (!saved) {
@@ -1100,7 +529,8 @@ function goToNextFlashcard() {
       "flashcard",
       wasCorrect
         ? "Got it"
-        : "Missed"
+        : "Missed",
+      { questionKey: currentIndex }
     );
 
     if (!saved) {
@@ -1171,6 +601,7 @@ function goToNextFlashcard() {
       `test-${question.type}`,
       String(userAnswer),
       {
+        questionKey: question.id,
         presentedAnswer:
           question.type ===
           "truefalse"
@@ -1552,7 +983,7 @@ function goToNextFlashcard() {
             type="button"
 
             onClick={() => {
-              attemptGenerationRef.current += 1;
+              beginAttemptGeneration();
 
               setQueue(
                 mode === "learn" && studyScope === "targeted"
@@ -2000,7 +1431,7 @@ function goToNextFlashcard() {
             }
 
             normalizeFlexible={
-              normalizeFlexible
+                normalizeFlexibleAnswer
             }
 
             onChoose={
@@ -2048,7 +1479,8 @@ function goToNextFlashcard() {
                 currentCard,
                 wasCorrect,
                 reviewMode,
-                userAnswer
+                userAnswer,
+                { questionKey: currentIndex }
               );
 
               if (!saved) {
@@ -2068,259 +1500,5 @@ function goToNextFlashcard() {
       </section>
 
     </section>
-  );
-}
-
-
-/* =========================================================
-   LEARN MODE
-   ========================================================= */
-
-
-function LearnQuestion({
-  card,
-  cards,
-  answerDirection,
-  grading,
-  onResult,
-}) {
-
-  const [
-    questionType,
-    setQuestionType,
-  ] = useState(
-    () =>
-      Math.random() >= 0.5
-        ? "multiple"
-        : "typed"
-  );
-
-
-  const [
-    answer,
-    setAnswer,
-  ] = useState("");
-
-
-  const [
-    feedback,
-    setFeedback,
-  ] = useState(null);
-
-
-  const [
-    selectedChoice,
-    setSelectedChoice,
-  ] = useState(null);
-
-
-  const prompt =
-    answerDirection ===
-    "definition"
-      ? card.term
-      : card.definition;
-
-
-  const expected =
-    answerDirection ===
-    "definition"
-      ? card.definition
-      : card.term;
-
-
-  const options =
-    useMemo(
-      () =>
-        makeMultipleChoiceOptions(
-          card,
-          cards,
-          answerDirection
-        ),
-      [
-        card,
-        cards,
-        answerDirection,
-      ]
-    );
-
-
-  function resetLearnQuestion() {
-    setAnswer("");
-
-    setFeedback(null);
-
-    setSelectedChoice(
-      null
-    );
-
-    setQuestionType(
-      Math.random() >= 0.5
-        ? "multiple"
-        : "typed"
-    );
-  }
-
-
-  async function finishLearnQuestion(
-    wasCorrect,
-    reviewMode,
-    userAnswer
-  ) {
-    const saved = await onResult({
-      wasCorrect,
-      reviewMode,
-      userAnswer,
-      expected,
-    });
-
-    if (saved) {
-      resetLearnQuestion();
-    }
-  }
-
-
-  /* ---------------------------------------------------------
-     LEARN MULTIPLE CHOICE
-     --------------------------------------------------------- */
-
-  if (
-    questionType ===
-    "multiple"
-  ) {
-
-    function chooseLearnAnswer(
-      choice
-    ) {
-      if (feedback) {
-        return;
-      }
-
-      const wasCorrect =
-        normalizeFlexible(
-          choice
-        ) ===
-        normalizeFlexible(
-          expected
-        );
-
-      setSelectedChoice(
-        choice
-      );
-
-      setFeedback({
-        correct:
-          wasCorrect,
-
-        expected,
-      });
-    }
-
-
-    return (
-      <MultipleChoiceQuestion
-        prompt={
-          prompt
-        }
-
-        options={
-          options
-        }
-
-        expectedAnswer={
-          expected
-        }
-
-        feedback={
-          feedback
-        }
-
-        selectedChoice={
-          selectedChoice
-        }
-
-        normalizeFlexible={
-          normalizeFlexible
-        }
-
-        onChoose={
-          chooseLearnAnswer
-        }
-
-        onContinue={() =>
-          finishLearnQuestion(
-            feedback.correct,
-            "multiple",
-            selectedChoice
-          )
-        }
-      />
-    );
-  }
-
-
-  /* ---------------------------------------------------------
-     LEARN TYPED
-     --------------------------------------------------------- */
-
-
-  function submitLearnTyped(
-    event
-  ) {
-    event.preventDefault();
-
-    if (feedback) {
-      return;
-    }
-
-    const wasCorrect =
-      isAnswerCorrect(
-        answer,
-        expected,
-        grading
-      );
-
-    setFeedback({
-      correct:
-        wasCorrect,
-
-      expected,
-    });
-  }
-
-
-  return (
-    <TypedQuestion
-      prompt={
-        prompt
-      }
-
-      answerDirection={
-        answerDirection
-      }
-
-      typedAnswer={
-        answer
-      }
-
-      setTypedAnswer={
-        setAnswer
-      }
-
-      feedback={
-        feedback
-      }
-
-      onSubmit={
-        submitLearnTyped
-      }
-
-      onContinue={() =>
-        finishLearnQuestion(
-          feedback.correct,
-          "typed",
-          answer
-        )
-      }
-    />
   );
 }

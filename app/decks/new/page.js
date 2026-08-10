@@ -1,7 +1,7 @@
 import Link from "next/link";
 import { createDeckAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
-import SpanishTextField from "@/components/SpanishTextField";
+import TextField from "@/components/TextField";
 
 export default async function NewDeckPage() {
   await requireUser();
@@ -29,7 +29,7 @@ export default async function NewDeckPage() {
           </label>
           <label>
             Add cards now
-            <SpanishTextField
+            <TextField
               textarea
               name="cards"
               rows="10"

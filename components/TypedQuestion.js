@@ -1,6 +1,6 @@
 "use client";
 
-import SpanishTextField from "@/components/SpanishTextField";
+import TextField from "@/components/TextField";
 
 export default function TypedQuestion({
   prompt,
@@ -25,7 +25,7 @@ export default function TypedQuestion({
         className="typed-answer-form"
         onSubmit={onSubmit}
       >
-        <SpanishTextField
+        <TextField
           name="answer"
           value={typedAnswer}
           onChange={(event) =>
