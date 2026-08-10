@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
 import {
   assignDeckFolderAction,
   createDeckFolderAction,
@@ -11,6 +11,26 @@ import {
 export default function DeckLibrary({ decks, folders }) {
   const [folder, setFolder] = useState("all");
   const [query, setQuery] = useState("");
+  const [draggedDeckId, setDraggedDeckId] = useState(null);
+  const [dropTarget, setDropTarget] = useState(null);
+  const [isMoving, startTransition] = useTransition();
+  function moveDeck(deckId, folderId) {
+    const formData = new FormData();
+    formData.set("deckId", deckId);
+    formData.set("folderId", folderId);
+    startTransition(async () => {
+      await assignDeckFolderAction(formData);
+      setDraggedDeckId(null);
+      setDropTarget(null);
+    });
+  }
+  function folderDropProps(folderId) {
+    return {
+      onDragOver: (event) => { event.preventDefault(); setDropTarget(folderId); },
+      onDragLeave: () => setDropTarget(null),
+      onDrop: (event) => { event.preventDefault(); if (draggedDeckId) moveDeck(draggedDeckId, folderId); },
+    };
+  }
   const visibleDecks = useMemo(() => {
     const normalized = query.trim().toLowerCase();
     return decks.filter((deck) => {
@@ -33,12 +53,12 @@ export default function DeckLibrary({ decks, folders }) {
         <button className={folder === "all" ? "active" : ""} onClick={() => setFolder("all")} type="button">
           <span>All decks</span><small>{decks.length}</small>
         </button>
-        <button className={folder === "unfiled" ? "active" : ""} onClick={() => setFolder("unfiled")} type="button">
+        <button {...folderDropProps("")} className={`${folder === "unfiled" ? "active " : ""}${dropTarget === "" ? "drop-target" : ""}`} onClick={() => setFolder("unfiled")} type="button">
           <span>No folder</span><small>{decks.filter((deck) => !deck.folder_id).length}</small>
         </button>
         {folders.map((item) => (
           <div className="folder-row" key={item.id}>
-            <button className={folder === String(item.id) ? "active" : ""} onClick={() => setFolder(String(item.id))} type="button">
+            <button {...folderDropProps(String(item.id))} className={`${folder === String(item.id) ? "active " : ""}${dropTarget === String(item.id) ? "drop-target" : ""}`} onClick={() => setFolder(String(item.id))} type="button">
               <span>{item.name}</span><small>{item.deck_count}</small>
             </button>
             <form action={deleteDeckFolderAction}>
@@ -63,7 +83,7 @@ export default function DeckLibrary({ decks, folders }) {
         {visibleDecks.length ? (
           <div className="compact-deck-grid">
             {visibleDecks.map((deck) => (
-              <article className="library-deck-card" key={deck.id}>
+              <article className={`library-deck-card${String(draggedDeckId) === String(deck.id) ? " is-dragging" : ""}`} key={deck.id} draggable onDragStart={() => setDraggedDeckId(String(deck.id))} onDragEnd={() => { setDraggedDeckId(null); setDropTarget(null); }}>
                 <Link href={`/decks/${deck.id}`}>
                   <span className="library-deck-icon">▤</span>
                   <div><h2>{deck.title}</h2><p>{deck.description || "Ready when you are."}</p></div>
@@ -77,6 +97,7 @@ export default function DeckLibrary({ decks, folders }) {
             ))}
           </div>
         ) : <div className="workspace-empty"><strong>No decks found</strong><p>Create a deck or choose another folder.</p></div>}
+        {isMoving ? <p className="library-move-status" role="status">Moving deck…</p> : null}
       </section>
     </div>
   );

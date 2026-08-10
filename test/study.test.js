@@ -65,6 +65,18 @@ test("multiple-choice options contain one correct answer and unique distractors"
   assert.equal(new Set(options).size, options.length);
 });
 
+test("multiple-choice generation prioritizes related cards as harder distractors", () => {
+  const cards = [
+    { id: 1, term: "Cellular respiration in plants", definition: "Mitochondria release energy" },
+    { id: 2, term: "Cellular respiration in animals", definition: "Glucose reacts with oxygen" },
+    { id: 3, term: "Medieval history", definition: "The feudal system" },
+    { id: 4, term: "Plate tectonics", definition: "Continental movement" },
+    { id: 5, term: "Poetry", definition: "Language arranged in verse" },
+  ];
+  const options = makeMultipleChoiceOptions(cards[0], cards, "definition", () => 0.5);
+  assert.ok(options.includes("Glucose reacts with oxygen"));
+});
+
 test("true/false generation is deterministic and direction-aware with injected randomness", () => {
   const cards = [
     { id: 1, term: "A", definition: "One" },

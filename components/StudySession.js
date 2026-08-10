@@ -3,6 +3,7 @@
 import {
   useEffect,
   useMemo,
+  useRef,
   useState,
 } from "react";
 
@@ -59,6 +60,9 @@ export default function StudySession({
     mounted,
     setMounted,
   ] = useState(false);
+
+  const questionStartedAt = useRef(Date.now());
+  const [answerStreak, setAnswerStreak] = useState(0);
 
 
   /* ---------------------------------------------------------
@@ -280,6 +284,7 @@ export default function StudySession({
     setFeedback(null);
     setSelectedChoice(null);
     resetReviewState();
+    questionStartedAt.current = Date.now();
   }
 
 
@@ -657,6 +662,8 @@ function goToNextFlashcard() {
 
       correct:
         authoritativeCorrect,
+
+      durationMs: Math.max(0, Date.now() - questionStartedAt.current),
     };
 
     const updatedResults = [
@@ -680,33 +687,22 @@ function goToNextFlashcard() {
       );
     }
 
-    const nextIndex =
-      testIndex + 1;
-
-    if (
-      nextIndex >=
-      testQuestions.length
-    ) {
-      setTestFinished(
-        true
-      );
-
-      setTestResults(
-        updatedResults
-      );
-
-      router.refresh();
-
-      return true;
-    }
-
-    setTestIndex(
-      nextIndex
-    );
-
-    resetAnswerState();
+    setAnswerStreak((value) => authoritativeCorrect ? value + 1 : 0);
+    setFeedback({ correct: authoritativeCorrect, expected: String(saved.expected ?? correctAnswer) });
 
     return true;
+  }
+
+  function continueTestQuestion() {
+    if (!feedback) return;
+    const nextIndex = testIndex + 1;
+    if (nextIndex >= testQuestions.length) {
+      setTestFinished(true);
+      router.refresh();
+      return;
+    }
+    setTestIndex(nextIndex);
+    resetAnswerState();
   }
 
 
@@ -715,6 +711,7 @@ function goToNextFlashcard() {
   ) {
     if (
       !testQuestion ||
+      feedback ||
       testQuestion.type !==
         "truefalse"
     ) {
@@ -726,6 +723,7 @@ function goToNextFlashcard() {
       testQuestion
         .correctValue;
 
+    setSelectedChoice(answer);
     submitTestAnswer(
       answer,
       wasCorrect,
@@ -1142,8 +1140,13 @@ function goToNextFlashcard() {
 
         <MascotCoach
           compact
+          mood={feedback ? (feedback.correct ? "happy" : "sad") : "normal"}
           messages={
-            mode === "test"
+            feedback?.correct && answerStreak >= 2
+              ? [`${answerStreak} correct in a row!`, "You are building real momentum."]
+              : feedback && !feedback.correct
+                ? ["That one was tricky. You have the right answer now.", "A mistake is useful when you review it."]
+              : mode === "test"
               ? ["Read each question twice.", "Unsure? Rule out what cannot be right."]
               : ["Take your time; recall matters more than speed.", "Say the answer before revealing it."]
           }
@@ -1329,7 +1332,7 @@ function goToNextFlashcard() {
           QUESTION AREA
           ----------------------------------------------------- */}
 
-      <section className="study-card">
+      <section className={`study-card${feedback ? (feedback.correct ? " feedback-flash-correct" : " feedback-flash-wrong") : ""}`}>
 
 
         {/* TRUE / FALSE */}
@@ -1343,6 +1346,10 @@ function goToNextFlashcard() {
               testQuestion
                 .displayedAnswer
             }
+
+            feedback={feedback}
+            selectedAnswer={selectedChoice}
+            onContinue={continueTestQuestion}
 
             onAnswer={
               handleTrueFalse
@@ -1416,7 +1423,7 @@ function goToNextFlashcard() {
             }
 
             onContinue={
-              continueAfterTyped
+              mode === "test" ? continueTestQuestion : continueAfterTyped
             }
           />
 
@@ -1453,7 +1460,7 @@ function goToNextFlashcard() {
             }
 
             onContinue={
-              continueAfterChoice
+              mode === "test" ? continueTestQuestion : continueAfterChoice
             }
           />
 

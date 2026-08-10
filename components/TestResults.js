@@ -47,6 +47,9 @@ export default function TestResults({
   const mistakes = testResults.filter(
     (result) => !result.correct
   );
+  const totalTimeMs = testResults.reduce((sum, result) => sum + (result.durationMs || 0), 0);
+  const averageSeconds = total ? Math.round(totalTimeMs / total / 1000) : 0;
+  const slowest = [...testResults].sort((a, b) => (b.durationMs || 0) - (a.durationMs || 0))[0];
 
   const typeStats = [
     "multiple",
@@ -159,8 +162,15 @@ export default function TestResults({
             </span>
             <p>Score</p>
           </div>
+          <div><span>{averageSeconds}s</span><p>Average time</p></div>
         </div>
       </section>
+
+      {slowest ? (
+        <p className="test-timing-note">
+          Most time spent: <strong>{slowest.prompt}</strong> ({Math.round((slowest.durationMs || 0) / 1000)}s)
+        </p>
+      ) : null}
 
       {typeStats.length > 0 ? (
         <section className="test-breakdown">
@@ -183,6 +193,7 @@ export default function TestResults({
                   <span>
                     {stat.percentage}%
                   </span>
+                  <span>{Math.round((result.durationMs || 0) / 1000)}s</span>
 
                   <p>
                     {questionTypeLabel(
