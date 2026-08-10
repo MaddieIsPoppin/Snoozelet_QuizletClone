@@ -60,7 +60,7 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(preserved.answer, "answer");
   assert.equal(preserved.expected, "answer");
   assert.equal(preserved.attempt_id, null);
-  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4]);
+  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5]);
   assert.ok(cardColumns.some((column) => column.name === "image_url"));
   assert.ok(cardColumns.some((column) => column.name === "image_public_id"));
   assert.ok(cardColumns.some((column) => column.name === "image_alt"));

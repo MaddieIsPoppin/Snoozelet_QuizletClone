@@ -42,6 +42,20 @@ test("database integration", async (suite) => {
     description: "Integration test deck",
   });
 
+  await suite.test("organizes owned decks into user-private folders", async () => {
+    const folderId = await db.createDeckFolder({ name: "Biology", userId: ownerId });
+    await db.assignDeckFolder({ deckId, folderId, userId: ownerId });
+    assert.equal((await db.getDecks(ownerId)).find((deck) => Number(deck.id) === deckId).folder_id, folderId);
+    assert.equal((await db.getDeckFolders(ownerId))[0].name, "Biology");
+
+    await assert.rejects(
+      db.assignDeckFolder({ deckId, folderId, userId: otherUserId }),
+      /Folder not found/
+    );
+    await db.deleteDeckFolder({ folderId, userId: ownerId });
+    assert.equal((await db.getDecks(ownerId)).find((deck) => Number(deck.id) === deckId).folder_id, null);
+  });
+
   await suite.test("enforces user ownership when reading and adding cards", async () => {
     assert.equal((await db.getDeck(deckId, ownerId)).title, "Owned deck");
     assert.equal(await db.getDeck(deckId, otherUserId), null);

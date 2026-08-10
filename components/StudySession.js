@@ -30,6 +30,7 @@ import FlashcardQuestion from "@/components/FlashcardQuestion";
 import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
 import TypedQuestion from "@/components/TypedQuestion";
 import TrueFalseQuestion from "@/components/TrueFalseQuestion";
+import MascotCoach from "@/components/MascotCoach";
 
 
 /* =========================================================
@@ -1138,6 +1139,15 @@ function goToNextFlashcard() {
             {deck.title}
           </h1>
         </div>
+
+        <MascotCoach
+          compact
+          messages={
+            mode === "test"
+              ? ["Read each question twice.", "Unsure? Rule out what cannot be right."]
+              : ["Take your time; recall matters more than speed.", "Say the answer before revealing it."]
+          }
+        />
 
 
         {mode !== "test" ? (

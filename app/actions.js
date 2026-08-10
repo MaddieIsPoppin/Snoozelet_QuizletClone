@@ -2,7 +2,16 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { addCards, createDeckWithCards, deleteCard, deleteDeck, updateCard } from "@/lib/db";
+import {
+  addCards,
+  assignDeckFolder,
+  createDeckFolder,
+  createDeckWithCards,
+  deleteCard,
+  deleteDeck,
+  deleteDeckFolder,
+  updateCard,
+} from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
 
@@ -151,4 +160,26 @@ export async function deleteDeckAction(formData) {
   await deleteDeck(deckId, user.id);
   revalidatePath("/");
   redirect("/");
+}
+
+export async function createDeckFolderAction(formData) {
+  const user = await requireUser();
+  await createDeckFolder({ name: formData.get("name"), userId: user.id });
+  revalidatePath("/library");
+}
+
+export async function assignDeckFolderAction(formData) {
+  const user = await requireUser();
+  await assignDeckFolder({
+    deckId: formData.get("deckId"),
+    folderId: formData.get("folderId"),
+    userId: user.id,
+  });
+  revalidatePath("/library");
+}
+
+export async function deleteDeckFolderAction(formData) {
+  const user = await requireUser();
+  await deleteDeckFolder({ folderId: formData.get("folderId"), userId: user.id });
+  revalidatePath("/library");
 }

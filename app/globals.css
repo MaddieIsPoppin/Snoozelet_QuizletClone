@@ -4597,6 +4597,82 @@ div > span {
 
 }
 
+/* Clear two-step launch flows */
+.launcher-card {
+  padding: clamp(20px, 3vw, 34px);
+  border: 1px solid rgba(175, 190, 235, .16);
+  border-radius: 22px;
+  background: rgba(17, 24, 56, .72);
+}
+
+.launcher-step { display: flex; align-items: flex-start; gap: 13px; margin-bottom: 16px; }
+.launcher-step h2 { margin: 0 0 4px; font-size: 1.15rem; }
+.launcher-step p { margin: 0; color: var(--muted); font-size: .82rem; }
+.step-number { display: grid; place-items: center; width: 28px; height: 28px; flex: 0 0 28px; border-radius: 50%; background: var(--primary); color: white; font-weight: 900; }
+.launcher-divider { height: 1px; margin: 26px 0; background: rgba(175,190,235,.13); }
+
+.deck-choice-grid { display: grid; grid-template-columns: repeat(4, minmax(0,1fr)); gap: 10px; }
+.deck-choice-grid button, .activity-choice-grid button {
+  display: grid;
+  grid-template-columns: auto minmax(0,1fr) auto;
+  align-items: center;
+  gap: 11px;
+  min-height: 76px;
+  padding: 13px;
+  border: 1px solid rgba(175,190,235,.15);
+  border-radius: 13px;
+  background: rgba(255,255,255,.025);
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+}
+.deck-choice-grid button:hover, .activity-choice-grid button:hover { border-color: rgba(156,142,255,.5); background: rgba(126,108,225,.08); }
+.deck-choice-grid button.selected, .activity-choice-grid button.selected { border-color: #8f7cff; background: rgba(126,108,225,.16); box-shadow: inset 0 0 0 1px rgba(143,124,255,.2); }
+.deck-choice-grid strong, .deck-choice-grid small, .activity-choice-grid strong, .activity-choice-grid small { display: block; }
+.deck-choice-grid small, .activity-choice-grid small { margin-top: 4px; color: var(--muted); font-size: .7rem; line-height: 1.35; }
+.deck-choice-grid button > b, .activity-choice-grid button > b { color: #a99cff; }
+.deck-choice-icon, .activity-choice-icon { display: grid; place-items: center; width: 34px; height: 34px; border-radius: 9px; background: rgba(126,108,225,.14); color: #c5beff; font-size: 1.05rem; }
+
+.activity-choice-grid { display: grid; grid-template-columns: repeat(2, minmax(0,1fr)); gap: 10px; }
+.activity-choice-grid strong em { display: inline-block; margin-left: 8px; padding: 3px 6px; border-radius: 5px; background: rgba(105,216,174,.13); color: #83e4c0; font-size: .56rem; font-style: normal; text-transform: uppercase; letter-spacing: .04em; }
+.launcher-footer { display: flex; align-items: center; justify-content: space-between; gap: 20px; margin-top: 24px; padding: 16px 18px; border-radius: 14px; background: rgba(5,10,30,.5); }
+.launcher-footer strong, .launcher-footer span { display: block; }
+.launcher-footer span { margin-top: 3px; color: var(--muted); font-size: .75rem; }
+.launcher-start { min-width: 165px; text-align: center; }
+
+.game-choice-grid { display: grid; grid-template-columns: repeat(3, minmax(0,1fr)); gap: 12px; }
+.game-choice-grid button { position: relative; min-height: 180px; padding: 20px; border: 1px solid rgba(175,190,235,.15); border-radius: 17px; background: rgba(255,255,255,.025); color: var(--cream); text-align: left; cursor: pointer; }
+.game-choice-grid button:hover { transform: translateY(-2px); border-color: rgba(156,142,255,.45); }
+.game-choice-grid button.selected { border-color: #8f7cff; background: linear-gradient(145deg, rgba(126,108,225,.2), rgba(255,255,255,.025)); }
+.game-choice-icon { display: grid; place-items: center; width: 42px; height: 42px; margin-bottom: 16px; border-radius: 12px; background: rgba(243,199,126,.11); color: #f3c77e; font-size: 1.3rem; }
+.game-choice-grid small, .game-choice-grid strong { display: block; }
+.game-choice-grid small { color: #bcb4ff; font-size: .65rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+.game-choice-grid strong { margin: 4px 0 7px; font-size: 1.2rem; }
+.game-choice-grid p { margin: 0; color: var(--muted); font-size: .78rem; line-height: 1.5; }
+.game-choice-grid b { position: absolute; top: 18px; right: 18px; color: var(--muted); font-size: .68rem; }
+.game-choice-grid button.selected b { color: #bcb4ff; }
+.launcher-select-label { display: grid; gap: 7px; color: var(--muted); font-size: .75rem; font-weight: 800; }
+.launcher-select-label select { width: 100%; padding: 13px 14px; border: 1px solid rgba(175,190,235,.18); border-radius: 11px; background: rgba(5,10,30,.7); color: var(--cream); font: inherit; }
+.launcher-warning { margin: 10px 0 0; color: #f3c77e; font-size: .78rem; }
+
+.library-guidance { margin: -4px 0 14px; color: var(--muted); font-size: .76rem; }
+.library-card-actions { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 13px; }
+.library-card-actions .button { min-height: 36px; padding: 8px 10px; text-align: center; font-size: .72rem; }
+.library-organize { margin-top: 9px; }
+.library-organize summary { padding: 6px 2px; color: var(--muted); font-size: .7rem; cursor: pointer; }
+.library-organize label { display: grid; gap: 5px; margin-top: 6px; color: var(--muted); font-size: .68rem; }
+.new-folder-form > strong { font-size: .76rem; }
+
+@media (max-width: 1050px) {
+  .deck-choice-grid { grid-template-columns: repeat(2, minmax(0,1fr)); }
+}
+
+@media (max-width: 760px) {
+  .deck-choice-grid, .activity-choice-grid, .game-choice-grid { grid-template-columns: 1fr; }
+  .launcher-footer { align-items: stretch; flex-direction: column; }
+  .launcher-start { width: 100%; }
+}
+
 
 @media (max-width: 520px) {
 
@@ -5069,6 +5145,165 @@ div > span {
   object-fit: contain;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.05);
+}
+
+/* Page-based application workspace */
+.shell-v3 .snooze-content {
+  min-height: 100vh;
+  padding: 30px clamp(20px, 3vw, 46px);
+}
+
+.workspace-page {
+  width: min(1180px, 100%);
+  margin: 0 auto;
+}
+
+.workspace-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 24px;
+}
+
+.workspace-header h1 {
+  margin: 4px 0 6px;
+  font-size: clamp(1.8rem, 3vw, 2.7rem);
+}
+
+.workspace-header p { margin: 0; color: var(--muted); }
+
+.sidebar-companion {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  min-height: 88px;
+  padding: 10px 12px;
+  overflow: hidden;
+  border: 1px solid rgba(175, 190, 235, 0.16);
+  border-radius: 16px;
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.sidebar-companion .snoo-giraffe-wrap { width: 52px; height: 70px; flex: 0 0 52px; }
+.sidebar-companion .snoo-giraffe { width: 52px; transform: translateY(4px); }
+.sidebar-companion strong, .sidebar-companion small { display: block; }
+.sidebar-companion small { margin-top: 3px; color: var(--muted); font-size: .7rem; }
+
+.mascot-coach {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  width: min(390px, 100%);
+  padding: 12px 16px 12px 8px;
+  border: 1px solid rgba(156, 142, 255, .24);
+  border-radius: 18px;
+  background: rgba(126, 108, 225, .09);
+  color: var(--cream);
+  text-align: left;
+  cursor: pointer;
+}
+
+.mascot-coach .snoo-giraffe-wrap { width: 76px; height: 84px; flex: 0 0 76px; overflow: hidden; }
+.mascot-coach .snoo-giraffe { width: 68px; transform: translateY(2px); }
+.mascot-coach span, .mascot-coach strong, .mascot-coach small { display: block; }
+.mascot-coach strong { margin-bottom: 3px; color: #bcb4ff; font-size: .72rem; text-transform: uppercase; letter-spacing: .08em; }
+.mascot-coach small { margin-top: 5px; color: var(--muted); font-size: .66rem; }
+.mascot-coach.compact { width: 310px; padding-block: 8px; }
+.mascot-coach.compact .snoo-giraffe-wrap { width: 54px; height: 62px; flex-basis: 54px; }
+.mascot-coach.compact .snoo-giraffe { width: 50px; }
+
+.dashboard-focus-card {
+  display: grid;
+  grid-template-columns: minmax(0, 1.3fr) minmax(300px, .7fr);
+  align-items: center;
+  gap: 32px;
+  min-height: 250px;
+  padding: clamp(26px, 4vw, 46px);
+  border: 1px solid rgba(175, 190, 235, .18);
+  border-radius: 24px;
+  background: linear-gradient(135deg, rgba(107, 88, 211, .2), rgba(25, 33, 72, .7));
+}
+.dashboard-focus-card h2 { margin: 7px 0; font-size: clamp(1.8rem, 3vw, 3rem); }
+.dashboard-focus-card p { color: var(--muted); }
+.focus-kicker { color: #bcb4ff; font-weight: 800; text-transform: uppercase; letter-spacing: .1em; font-size: .72rem; }
+
+.metric-strip { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; margin: 18px 0; }
+.metric-strip article, .progress-summary article { padding: 18px 20px; border: 1px solid rgba(175, 190, 235, .15); border-radius: 16px; background: rgba(17, 24, 56, .72); }
+.metric-strip span, .progress-summary span { display: block; color: var(--muted); font-size: .78rem; }
+.metric-strip strong, .progress-summary strong { display: block; margin-top: 5px; font-size: 1.5rem; }
+
+.dashboard-shortcuts { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.dashboard-shortcuts a { display: flex; gap: 12px; align-items: center; min-height: 92px; padding: 16px; border: 1px solid rgba(175, 190, 235, .14); border-radius: 16px; background: rgba(255,255,255,.035); }
+.dashboard-shortcuts a > span { color: #bcb4ff; font-size: 1.35rem; }
+.dashboard-shortcuts strong, .dashboard-shortcuts small { display: block; }
+.dashboard-shortcuts small { margin-top: 4px; color: var(--muted); }
+
+.library-workspace { display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 20px; min-height: 570px; }
+.folder-panel, .library-decks { border: 1px solid rgba(175, 190, 235, .14); border-radius: 18px; background: rgba(17, 24, 56, .64); }
+.folder-panel { padding: 14px; }
+.folder-panel-heading { display: flex; justify-content: space-between; padding: 8px 8px 14px; }
+.folder-panel > button, .folder-row > button { display: flex; justify-content: space-between; width: 100%; padding: 10px; border: 0; border-radius: 10px; background: transparent; color: var(--cream); cursor: pointer; text-align: left; }
+.folder-panel button.active { background: rgba(126, 108, 225, .18); color: #c8c2ff; }
+.folder-panel small { color: var(--muted); }
+.folder-row { display: grid; grid-template-columns: minmax(0, 1fr) 28px; align-items: center; }
+.folder-delete { border: 0; background: transparent; color: var(--muted); cursor: pointer; font-size: 1.1rem; }
+.new-folder-form { display: grid; gap: 8px; margin-top: 14px; padding-top: 14px; border-top: 1px solid rgba(175, 190, 235, .12); }
+.new-folder-form input, .library-toolbar input, .library-deck-card select { width: 100%; padding: 10px 12px; border: 1px solid rgba(175, 190, 235, .18); border-radius: 10px; background: rgba(5, 10, 30, .65); color: var(--cream); }
+.new-folder-form button { padding: 9px; border: 0; border-radius: 9px; background: rgba(126, 108, 225, .18); color: #d6d1ff; cursor: pointer; }
+.library-decks { padding: 18px; }
+.library-toolbar { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-bottom: 16px; }
+.compact-deck-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; }
+.library-deck-card { padding: 16px; border: 1px solid rgba(175, 190, 235, .13); border-radius: 14px; background: rgba(255,255,255,.035); }
+.library-deck-card > a { display: flex; gap: 12px; min-height: 66px; }
+.library-deck-icon { color: #bcb4ff; font-size: 1.4rem; }
+.library-deck-card h2 { margin: 0 0 4px; font-size: 1rem; }
+.library-deck-card p { margin: 0; color: var(--muted); font-size: .78rem; }
+.library-deck-meta { display: flex; gap: 10px; margin: 13px 0 10px; color: var(--muted); font-size: .72rem; }
+
+.mode-deck-list { display: grid; gap: 12px; }
+.mode-deck-list article { display: grid; grid-template-columns: minmax(180px, .7fr) 1.3fr; align-items: center; gap: 20px; padding: 18px 20px; border: 1px solid rgba(175,190,235,.14); border-radius: 16px; background: rgba(17,24,56,.65); }
+.mode-deck-list h2, .game-deck-grid h2 { margin: 0 0 4px; font-size: 1.05rem; }
+.mode-deck-list p, .game-deck-grid p { margin: 0; color: var(--muted); font-size: .8rem; }
+.mode-pills { display: flex; flex-wrap: wrap; justify-content: flex-end; gap: 8px; }
+.mode-pills a, .game-links a { padding: 8px 12px; border: 1px solid rgba(175,190,235,.17); border-radius: 9px; font-size: .78rem; }
+.mode-pills a.primary { background: var(--primary); border-color: transparent; color: white; }
+
+.game-deck-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 14px; }
+.game-deck-grid article { padding: 20px; border: 1px solid rgba(175,190,235,.15); border-radius: 18px; background: linear-gradient(145deg, rgba(126,108,225,.1), rgba(17,24,56,.72)); }
+.game-deck-heading { display: flex; gap: 12px; align-items: center; margin-bottom: 18px; }
+.game-deck-heading > span { font-size: 1.5rem; color: #f3c77e; }
+.game-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; text-align: center; }
+
+.progress-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.progress-summary small { color: var(--muted); }
+.recent-panel { margin-top: 18px; padding: 20px; border: 1px solid rgba(175,190,235,.14); border-radius: 18px; background: rgba(17,24,56,.65); }
+.recent-panel h2 { margin-top: 0; }
+.recent-panel article { display: grid; grid-template-columns: 10px 1fr auto; align-items: center; gap: 12px; padding: 10px 0; border-top: 1px solid rgba(175,190,235,.1); }
+.recent-panel article small { display: block; color: var(--muted); margin-top: 2px; }
+.recent-panel article b { font-size: .75rem; color: var(--muted); }
+.review-dot { width: 8px; height: 8px; border-radius: 50%; background: #e57b8c; }
+.review-dot.correct { background: #69d8ae; }
+.workspace-empty { display: grid; place-items: center; gap: 12px; min-height: 260px; color: var(--muted); text-align: center; }
+
+.study-header > .mascot-coach { margin-left: auto; }
+
+@media (max-width: 1050px) {
+  .dashboard-shortcuts, .metric-strip, .progress-summary { grid-template-columns: repeat(2, 1fr); }
+  .game-deck-grid { grid-template-columns: repeat(2, 1fr); }
+}
+
+@media (max-width: 760px) {
+  .shell-v3 .snooze-content { padding: 20px 14px 92px; }
+  .workspace-header, .dashboard-focus-card { display: flex; flex-direction: column; align-items: stretch; }
+  .workspace-header .mascot-coach { width: 100%; }
+  .library-workspace { grid-template-columns: 1fr; }
+  .folder-panel { max-height: 250px; overflow: auto; }
+  .compact-deck-grid, .game-deck-grid { grid-template-columns: 1fr; }
+  .mode-deck-list article { grid-template-columns: 1fr; }
+  .mode-pills { justify-content: flex-start; }
+  .dashboard-shortcuts { grid-template-columns: 1fr; }
+  .study-header > .mascot-coach { display: none; }
 }
 
 .shortcut-key {

@@ -1,5 +1,7 @@
 "use client";
 
+import MascotCoach from "@/components/MascotCoach";
+
 function questionTypeLabel(type) {
   if (type === "multiple") {
     return "Multiple choice";
@@ -100,6 +102,15 @@ export default function TestResults({
             .
           </p>
         </div>
+        <MascotCoach
+          compact
+          mood={percentage >= 60 ? "happy" : "normal"}
+          messages={
+            percentage >= 80
+              ? ["That was strong work!", "A quick review now will help it stick."]
+              : ["Every miss points to what to practise next.", "Review the mistakes, then try again."]
+          }
+        />
       </div>
 
       <section className="test-score-card">

@@ -2,159 +2,49 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import SnoozeMascot from "@/components/SnoozeMascot";
+
+const navigation = [
+  { href: "/", label: "Dashboard", icon: "⌂", exact: true },
+  { href: "/library", label: "My decks", icon: "▤" },
+  { href: "/study", label: "Study", icon: "◫" },
+  { href: "/games", label: "Games", icon: "✦" },
+  { href: "/progress", label: "Progress", icon: "↗" },
+];
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
+  const authPage = ["/login", "/signup", "/setup"].some((path) => pathname.startsWith(path));
+  if (authPage) return children;
 
-  function isActive(path) {
-    if (path === "/") {
-      return pathname === "/";
-    }
-
-    return pathname.startsWith(path);
-  }
+  const active = (item) => {
+    if (item.exact) return pathname === item.href;
+    if (item.href === "/library" && pathname.startsWith("/decks")) return true;
+    return pathname.startsWith(item.href);
+  };
 
   return (
-    <div className="snooze-app">
-
-      {/* Night sky background */}
-      <div className="night-sky" aria-hidden="true">
-        <span className="sky-star s1">✦</span>
-        <span className="sky-star s2">·</span>
-        <span className="sky-star s3">✧</span>
-        <span className="sky-star s4">✦</span>
-        <span className="sky-star s5">·</span>
-        <span className="sky-star s6">✦</span>
-        <span className="sky-star s7">✧</span>
-      </div>
-
-      {/* Sidebar */}
+    <div className="snooze-app shell-v3">
+      <div className="night-sky" aria-hidden="true" />
       <aside className="snooze-sidebar">
-
-        <Link href="/" className="sidebar-brand">
-          <div className="sidebar-brand-icon">
-            ☾
-          </div>
-
-          <div>
-            <strong>Snoozelet</strong>
-            <span>Night Study</span>
-          </div>
-        </Link>
-
-        <nav className="main-nav">
-
-          <Link
-            href="/"
-            className={
-              isActive("/")
-                ? "nav-item active"
-                : "nav-item"
-            }
-          >
-            <span className="nav-symbol">⌂</span>
-            Home
-          </Link>
-
-          <Link href="/#decks" className="nav-item">
-            <span className="nav-symbol">▰</span>
-            My decks
-          </Link>
-
-          <Link href="/#study" className="nav-item">
-            <span className="nav-symbol">◫</span>
-            Study
-          </Link>
-
-          <Link href="/#games" className="nav-item">
-            <span className="nav-symbol">✦</span>
-            Games
-          </Link>
-
-          <Link href="/#progress" className="nav-item">
-            <span className="nav-symbol">↗</span>
-            Progress
-          </Link>
-
+        <Link href="/" className="sidebar-brand"><span className="sidebar-brand-icon">☾</span><div><strong>Snoozelet</strong><span>Study companion</span></div></Link>
+        <nav className="main-nav" aria-label="Main navigation">
+          {navigation.map((item) => <Link href={item.href} className={active(item) ? "nav-item active" : "nav-item"} key={item.href}><span className="nav-symbol">{item.icon}</span>{item.label}</Link>)}
         </nav>
-
-        <div className="sidebar-divider" />
-
-        <Link
-          href="/decks/new"
-          className="sidebar-new-deck"
-        >
-          <span>＋</span>
-          Create deck
-        </Link>
-
+        <Link href="/decks/new" className="sidebar-new-deck"><span>＋</span>Create deck</Link>
         <div className="sidebar-spacer" />
-
-        <div className="sidebar-night-message">
-          <span className="sidebar-night-icon">☾</span>
-
-          <div>
-            <strong>Night Study</strong>
-            <span>Study at your own pace.</span>
-          </div>
-
-          <span className="sidebar-night-star">✦</span>
-        </div>
-
+        <Link className="sidebar-companion" href="/study">
+          <SnoozeMascot variant="sidebar" mood="happy" />
+          <span><strong>Snoo is ready</strong><small>Let&apos;s study together</small></span>
+        </Link>
       </aside>
-
-      {/* Main application */}
       <div className="snooze-main">
-
-        {/* Only visible on mobile */}
-        <header className="snooze-topbar">
-
-          <Link href="/" className="mobile-brand">
-            <span className="mobile-brand-icon">☾</span>
-            <strong>Snoozelet</strong>
-          </Link>
-
-          <div className="topbar-spacer" />
-
-          <Link
-            href="/decks/new"
-            className="topbar-new-deck"
-          >
-            ＋ New deck
-          </Link>
-
-        </header>
-
-        <div className="snooze-content">
-          {children}
-        </div>
-
-        <nav className="mobile-bottom-nav">
-
-          <Link href="/">
-            <span>⌂</span>
-            Home
-          </Link>
-
-          <Link href="/#decks">
-            <span>▰</span>
-            Decks
-          </Link>
-
-          <Link href="/#study">
-            <span>◫</span>
-            Study
-          </Link>
-
-          <Link href="/#games">
-            <span>✦</span>
-            Games
-          </Link>
-
+        <header className="snooze-topbar"><Link href="/" className="mobile-brand"><span>☾</span><strong>Snoozelet</strong></Link><Link href="/decks/new" className="topbar-new-deck">＋ New deck</Link></header>
+        <div className="snooze-content">{children}</div>
+        <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
+          {navigation.slice(0, 4).map((item) => <Link href={item.href} className={active(item) ? "active" : ""} key={item.href}><span>{item.icon}</span>{item.label === "My decks" ? "Decks" : item.label}</Link>)}
         </nav>
-
       </div>
-
     </div>
   );
 }
