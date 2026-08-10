@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 const games = [
+  { id: "hot-potato", icon: "💣", name: "Hot Potato", description: "Keep the fuse alive by answering correctly.", note: "Survival" },
+  { id: "dungeon", icon: "⚔", name: "Dungeon Crawler", description: "Battle card monsters and protect your health.", note: "Adventure" },
   { id: "match", icon: "◇", name: "Match", description: "Pair terms and definitions as quickly as you can.", note: "Quick warm-up" },
   { id: "blast", icon: "✦", name: "Blast", description: "Answer rapidly and build a high-scoring streak.", note: "Fast paced" },
   { id: "blocks", icon: "▦", name: "Blocks", description: "Clear blocks by choosing the correct answers.", note: "Puzzle mode" },

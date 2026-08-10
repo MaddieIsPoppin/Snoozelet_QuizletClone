@@ -5510,6 +5510,60 @@ div > span {
   .night-sky::after { animation: none; }
 }
 
+/* Study arcade expansion */
+.blast-customize-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 12px; width: min(720px, 100%); }
+.blast-customize-grid label { display: grid; gap: 7px; color: var(--text-soft); font-size: .78rem; font-weight: 750; }
+.blast-customize-grid select { min-height: 44px; padding: 9px 12px; border: 1px solid rgba(175,190,235,.2); border-radius: 11px; background: rgba(5,13,35,.7); color: var(--cream); }
+.blast-customize-grid .blast-toggle { display: flex; align-items: center; gap: 9px; padding: 12px; border: 1px solid rgba(175,190,235,.16); border-radius: 11px; background: rgba(255,255,255,.035); }
+
+.study-pet-habitat { display: grid; grid-template-columns: 1fr 280px; align-items: center; min-height: 260px; margin-bottom: 24px; padding: 26px 32px; overflow: hidden; border: 1px solid rgba(105,216,174,.25); border-radius: 24px; background: radial-gradient(circle at 85% 20%, rgba(99,230,194,.2), transparent 13rem), linear-gradient(130deg, rgba(23,65,83,.62), rgba(54,43,112,.55)); box-shadow: 0 22px 55px rgba(2,8,27,.22); }
+.pet-copy h2 { margin: 5px 0 8px; font-size: clamp(1.6rem,3vw,2.4rem); }
+.pet-copy > p:last-of-type { max-width: 620px; color: var(--muted); }
+.pet-growth-track { width: min(520px,100%); height: 12px; margin-top: 18px; overflow: hidden; border-radius: 999px; background: rgba(4,13,34,.65); }
+.pet-growth-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#69d8ae,#8f7cff); box-shadow: 0 0 18px rgba(105,216,174,.5); }
+.pet-copy small { display: block; margin-top: 8px; color: #9edccc; }
+.pet-stage { position: relative; height: 220px; display: flex; justify-content: center; overflow: hidden; }
+.pet-stage > span { position: absolute; z-index: 4; top: 5px; right: 4px; padding: 6px 10px; border-radius: 999px; background: rgba(5,14,37,.65); color: #bff1e4; font-size: .7rem; font-weight: 800; }
+.pet-stage .snoo-hero { min-height: 235px; transform-origin: bottom; }
+.pet-stage .snoo-giraffe { width: 120px; height: 230px; }
+.pet-stage-1 .snoo-hero { transform: scale(.68); }
+.pet-stage-2 .snoo-hero { transform: scale(.78); }
+.pet-stage-3 .snoo-hero { transform: scale(.88); }
+.pet-stage-4 .snoo-hero { transform: scale(.96); }
+.pet-stage-5 .snoo-hero { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(105,216,174,.35)); }
+
+.game-choice-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
+.game-choice-grid .game-hot-potato { background: linear-gradient(145deg,rgba(138,66,38,.18),rgba(255,255,255,.025)); }
+.game-choice-grid .game-dungeon { background: linear-gradient(145deg,rgba(75,48,132,.25),rgba(255,255,255,.025)); }
+
+.adventure-game { display: grid; gap: 18px; }
+.adventure-intro { display: grid; grid-template-columns: 1fr 280px; align-items: center; min-height: 430px; padding: clamp(28px,5vw,60px); overflow: hidden; border: 1px solid rgba(175,190,235,.2); border-radius: 28px; background: radial-gradient(circle at 80% 25%,rgba(230,112,65,.2),transparent 15rem),linear-gradient(135deg,rgba(41,35,91,.92),rgba(12,27,58,.9)); }
+.adventure-intro h1 { margin: 6px 0 12px; font-size: clamp(2.8rem,7vw,6rem); }
+.adventure-intro p:not(.eyebrow) { max-width: 660px; color: var(--muted); font-size: 1.05rem; line-height: 1.65; }
+.adventure-intro .snoo-hero { min-height: 390px; }
+.adventure-hud { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 15px 20px; border: 1px solid rgba(175,190,235,.2); border-radius: 16px; background: rgba(9,20,49,.76); }
+.adventure-hud strong { font-size: 1.2rem; }
+.potato-stage,.dungeon-stage { min-height: 290px; display: grid; place-items: center; align-content: center; padding: 30px; border: 1px solid rgba(175,190,235,.18); border-radius: 24px; text-align: center; background: radial-gradient(circle,rgba(216,82,57,.16),transparent 14rem),rgba(14,25,59,.7); }
+.dungeon-stage { background: radial-gradient(circle,rgba(126,88,219,.22),transparent 15rem),rgba(14,25,59,.7); }
+.potato-stage h1,.dungeon-stage h1 { margin: 8px 0 0; font-size: clamp(1.8rem,4vw,3.2rem); }
+.study-bomb,.study-monster { font-size: 5rem; filter: drop-shadow(0 12px 20px rgba(0,0,0,.3)); animation: arcade-float 1.5s ease-in-out infinite alternate; }
+@keyframes arcade-float { to { transform: translateY(-8px) rotate(3deg); } }
+.adventure-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
+.adventure-options button { min-height: 76px; padding: 15px; border: 1px solid rgba(175,190,235,.2); border-radius: 15px; background: rgba(27,44,89,.82); color: var(--cream); font-weight: 750; cursor: pointer; }
+.adventure-options button:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(105,216,174,.5); }
+.adventure-options button.correct { border-color: #69d8ae; background: rgba(33,112,87,.4); }
+.adventure-feedback { margin: 0; padding: 12px; border-radius: 12px; text-align: center; font-weight: 850; }
+.adventure-feedback.correct { color: #91e8c6; background: rgba(34,115,88,.24); }
+.adventure-feedback.wrong { color: #ff9da7; background: rgba(143,46,63,.22); }
+.adventure-results .snoo-giraffe-wrap { width: 100px; margin: auto; }
+
+@media (max-width: 760px) {
+  .blast-customize-grid,.adventure-options { grid-template-columns: 1fr; }
+  .study-pet-habitat,.adventure-intro { grid-template-columns: 1fr; }
+  .pet-stage { margin-top: 10px; }
+  .adventure-intro .snoo-hero { min-height: 300px; }
+}
+
 .shortcut-key {
   margin-right: 3px;
 

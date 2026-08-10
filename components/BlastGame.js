@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { shuffle } from "@/lib/collections";
+import useReviewSaver from "@/hooks/useReviewSaver";
+import XpNotice from "@/components/XpNotice";
 
 function normalize(value) {
   return String(value || "")
@@ -38,6 +40,7 @@ export default function BlastGame({
   deck,
   cards = [],
 }) {
+  const { saveReview, xpNotice } = useReviewSaver({ mode: "multiple", answerDirection: "definition", grading: "lenient" });
   const [mounted, setMounted] = useState(false);
 
   const [gameStarted, setGameStarted] = useState(false);
@@ -64,6 +67,10 @@ export default function BlastGame({
   const [locked, setLocked] = useState(false);
 
   const [timeLeft, setTimeLeft] = useState(6000);
+  const [baseTime, setBaseTime] = useState(8);
+  const [betweenQuestions, setBetweenQuestions] = useState(900);
+  const [startingLives, setStartingLives] = useState(3);
+  const [speedUp, setSpeedUp] = useState(true);
 
   const timerRef = useRef(null);
   const roundStartedRef = useRef(null);
@@ -110,10 +117,8 @@ export default function BlastGame({
     answerDirection,
   ]);
 
-  const roundDuration = Math.max(
-    2500,
-    6000 - currentIndex * 120
-  );
+  const durationForRound = (index) => Math.max(2500, baseTime * 1000 - (speedUp ? index * 120 : 0));
+  const roundDuration = durationForRound(currentIndex);
 
   function stopRoundTimer() {
     if (timerRef.current) {
@@ -160,7 +165,7 @@ export default function BlastGame({
     setCombo(0);
     setBestCombo(0);
 
-    setLives(3);
+    setLives(startingLives);
 
     setCorrectCount(0);
     setWrongCount(0);
@@ -174,7 +179,7 @@ export default function BlastGame({
     setGameStarted(true);
 
     window.setTimeout(() => {
-      startRoundTimer(6000);
+      startRoundTimer(durationForRound(0));
     }, 100);
   }
 
@@ -189,12 +194,9 @@ export default function BlastGame({
 
       window.setTimeout(() => {
         startRoundTimer(
-          Math.max(
-            2500,
-            6000 - nextIndex * 120
-          )
+          durationForRound(nextIndex)
         );
-      }, 120);
+      }, betweenQuestions);
 
       return;
     }
@@ -203,12 +205,9 @@ export default function BlastGame({
 
     window.setTimeout(() => {
       startRoundTimer(
-        Math.max(
-          2500,
-          6000 - nextIndex * 120
-        )
+        durationForRound(nextIndex)
       );
-    }, 120);
+    }, betweenQuestions);
   }
 
   function endGame() {
@@ -250,10 +249,10 @@ export default function BlastGame({
 
         nextQuestion();
       }
-    }, 700);
+    }, betweenQuestions);
   }
 
-  function handleAnswer(option, index) {
+  async function handleAnswer(option, index) {
     if (
       locked ||
       gameOver ||
@@ -268,6 +267,12 @@ export default function BlastGame({
     const isCorrect =
       normalize(option) ===
       normalize(correctAnswer);
+
+    const saved = await saveReview(currentCard, isCorrect, "multiple", option, { questionKey: `blast-${currentIndex}-${roundStartedRef.current}` });
+    if (!saved) {
+      setLocked(false);
+      return;
+    }
 
     setFeedbackId(index);
 
@@ -307,7 +312,7 @@ export default function BlastGame({
         setLocked(false);
 
         nextQuestion();
-      }, 500);
+      }, betweenQuestions);
 
       return;
     }
@@ -330,7 +335,7 @@ export default function BlastGame({
 
         nextQuestion();
       }
-    }, 700);
+    }, betweenQuestions);
   }
 
   if (!mounted) {
@@ -410,9 +415,16 @@ export default function BlastGame({
           </div>
 
           <div className="blast-rules">
-            <span>3 lives</span>
-            <span>Faster every round</span>
+            <span>{startingLives} lives</span>
+            <span>{speedUp ? "Faster every round" : "Steady timer"}</span>
             <span>Combo score multiplier</span>
+          </div>
+
+          <div className="blast-customize-grid">
+            <label>Seconds per question<select value={baseTime} onChange={(event) => setBaseTime(Number(event.target.value))}><option value="6">6 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="20">20 seconds</option></select></label>
+            <label>Pause after each answer<select value={betweenQuestions} onChange={(event) => setBetweenQuestions(Number(event.target.value))}><option value="400">Quick — 0.4s</option><option value="900">Normal — 0.9s</option><option value="1500">Relaxed — 1.5s</option><option value="2500">Study pace — 2.5s</option></select></label>
+            <label>Lives<select value={startingLives} onChange={(event) => setStartingLives(Number(event.target.value))}><option value="1">1 life</option><option value="3">3 lives</option><option value="5">5 lives</option><option value="10">10 lives</option></select></label>
+            <label className="blast-toggle"><input type="checkbox" checked={speedUp} onChange={(event) => setSpeedUp(event.target.checked)} /> Speed up each round</label>
           </div>
 
           <button
@@ -502,6 +514,7 @@ export default function BlastGame({
 
   return (
     <section className="study-shell blast-game">
+      <XpNotice notice={xpNotice} />
       <div className="blast-hud">
         <div>
           <span className="blast-hud-label">
@@ -526,7 +539,7 @@ export default function BlastGame({
 
           <strong>
             {"♥".repeat(lives)}
-            {"♡".repeat(3 - lives)}
+            {"♡".repeat(startingLives - lives)}
           </strong>
         </div>
       </div>
