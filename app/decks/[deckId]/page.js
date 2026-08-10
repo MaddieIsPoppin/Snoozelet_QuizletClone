@@ -581,7 +581,6 @@ export default async function DeckPage({ params }) {
             <form
               action={importCardsAction}
               className="form-stack"
-              encType="multipart/form-data"
             >
 
               <input

@@ -417,6 +417,25 @@ export default function StudySession({
   const xpTimerRef =
     useRef(null);
 
+  const [
+    reviewStatus,
+    setReviewStatus,
+  ] = useState("idle");
+
+  const [
+    reviewError,
+    setReviewError,
+  ] = useState("");
+
+  const savingAttemptRef =
+    useRef(null);
+
+  const attemptIdsRef =
+    useRef(new Map());
+
+  const attemptGenerationRef =
+    useRef(0);
+
 
   /* ---------------------------------------------------------
      TEST STATE
@@ -606,6 +625,8 @@ export default function StudySession({
     setTypedAnswer("");
     setFeedback(null);
     setSelectedChoice(null);
+    setReviewStatus("idle");
+    setReviewError("");
   }
 
 
@@ -652,8 +673,50 @@ export default function StudySession({
     wasCorrect,
     reviewMode,
     userAnswer = "",
-    expected = ""
+    options = {}
   ) {
+    const questionKey =
+      mode === "test"
+        ? testQuestion?.id
+        : currentIndex;
+
+    const attemptKey = [
+      attemptGenerationRef.current,
+      mode,
+      reviewMode,
+      card.id,
+      questionKey,
+      answerDirection,
+    ].join(":");
+
+    let attemptId =
+      attemptIdsRef.current.get(
+        attemptKey
+      );
+
+    if (!attemptId) {
+      attemptId =
+        window.crypto.randomUUID();
+
+      attemptIdsRef.current.set(
+        attemptKey,
+        attemptId
+      );
+    }
+
+    if (
+      savingAttemptRef.current ===
+      attemptId
+    ) {
+      return null;
+    }
+
+    savingAttemptRef.current =
+      attemptId;
+
+    setReviewStatus("saving");
+    setReviewError("");
+
     try {
       const response =
         await fetch(
@@ -669,14 +732,10 @@ export default function StudySession({
 
             body:
               JSON.stringify({
-                deckId:
-                  deck.id,
+                attemptId,
 
                 cardId:
                   card.id,
-
-                correct:
-                  wasCorrect,
 
                 mode:
                   reviewMode,
@@ -684,7 +743,19 @@ export default function StudySession({
                 answer:
                   userAnswer,
 
-                expected,
+                answerDirection,
+
+                grading,
+
+                selfAssessedCorrect:
+                  reviewMode ===
+                  "flashcard"
+                    ? wasCorrect
+                    : undefined,
+
+                presentedAnswer:
+                  options
+                    .presentedAnswer,
               }),
           }
         );
@@ -705,6 +776,8 @@ export default function StudySession({
         data
       );
 
+      setReviewStatus("success");
+
       return data;
     } catch (error) {
       console.error(
@@ -712,7 +785,21 @@ export default function StudySession({
         error
       );
 
+      setReviewStatus("error");
+      setReviewError(
+        error.message ||
+          "Could not save review"
+      );
+
       return null;
+    } finally {
+      if (
+        savingAttemptRef.current ===
+        attemptId
+      ) {
+        savingAttemptRef.current =
+          null;
+      }
     }
   }
 
@@ -790,7 +877,7 @@ export default function StudySession({
      ======================================================= */
 
 
-  function handleTypedSubmit(
+  async function handleTypedSubmit(
     event
   ) {
     event.preventDefault();
@@ -812,7 +899,7 @@ export default function StudySession({
     if (
       mode === "test"
     ) {
-      submitTestAnswer(
+      await submitTestAnswer(
         typedAnswer,
         wasCorrect,
         expectedAnswer
@@ -821,21 +908,24 @@ export default function StudySession({
       return;
     }
 
-    setFeedback({
-      correct:
-        wasCorrect,
-
-      expected:
-        expectedAnswer,
-    });
-
-    saveReview(
+    const saved = await saveReview(
       currentCard,
       wasCorrect,
       "typed",
-      typedAnswer,
-      expectedAnswer
+      typedAnswer
     );
+
+    if (!saved) {
+      return;
+    }
+
+    setFeedback({
+      correct:
+        saved.correct,
+
+      expected:
+        saved.expected,
+    });
   }
 
 
@@ -855,7 +945,7 @@ export default function StudySession({
      ======================================================= */
 
 
-  function handleMultipleChoice(
+  async function handleMultipleChoice(
     choice
   ) {
     if (
@@ -880,7 +970,7 @@ export default function StudySession({
     if (
       mode === "test"
     ) {
-      submitTestAnswer(
+      await submitTestAnswer(
         choice,
         wasCorrect,
         expectedAnswer
@@ -889,21 +979,24 @@ export default function StudySession({
       return;
     }
 
-    setFeedback({
-      correct:
-        wasCorrect,
-
-      expected:
-        expectedAnswer,
-    });
-
-    saveReview(
+    const saved = await saveReview(
       currentCard,
       wasCorrect,
       "multiple",
-      choice,
-      expectedAnswer
+      choice
     );
+
+    if (!saved) {
+      return;
+    }
+
+    setFeedback({
+      correct:
+        saved.correct,
+
+      expected:
+        saved.expected,
+    });
   }
 
 
@@ -970,25 +1063,28 @@ function goToNextFlashcard() {
   resetAnswerState();
 }
 
-  function handleFlashcardResult(
+  async function handleFlashcardResult(
     wasCorrect
   ) {
     if (!currentCard) {
       return;
     }
 
-    saveReview(
+    const saved = await saveReview(
       currentCard,
       wasCorrect,
       "flashcard",
       wasCorrect
         ? "Got it"
-        : "Missed",
-      expectedAnswer
+        : "Missed"
     );
 
+    if (!saved) {
+      return;
+    }
+
     moveToNextNormalCard(
-      wasCorrect
+      saved.correct
     );
   }
 
@@ -1027,6 +1123,8 @@ function goToNextFlashcard() {
 
 
   function buildTest() {
+    attemptGenerationRef.current += 1;
+
     const enabledTypes =
       Object.entries(
         testTypes
@@ -1151,7 +1249,7 @@ function goToNextFlashcard() {
      ======================================================= */
 
 
-  function submitTestAnswer(
+  async function submitTestAnswer(
     userAnswer,
     wasCorrect,
     correctAnswer
@@ -1162,8 +1260,30 @@ function goToNextFlashcard() {
       ];
 
     if (!question) {
-      return;
+      return false;
     }
+
+    const saved = await saveReview(
+      question.card,
+      wasCorrect,
+      `test-${question.type}`,
+      String(userAnswer),
+      {
+        presentedAnswer:
+          question.type ===
+          "truefalse"
+            ? question
+                .displayedAnswer
+            : undefined,
+      }
+    );
+
+    if (!saved) {
+      return false;
+    }
+
+    const authoritativeCorrect =
+      saved.correct;
 
     const result = {
       id:
@@ -1197,11 +1317,12 @@ function goToNextFlashcard() {
 
       correctAnswer:
         String(
-          correctAnswer
+          saved.expected ??
+            correctAnswer
         ),
 
       correct:
-        wasCorrect,
+        authoritativeCorrect,
     };
 
     const updatedResults = [
@@ -1213,7 +1334,7 @@ function goToNextFlashcard() {
       updatedResults
     );
 
-    if (wasCorrect) {
+    if (authoritativeCorrect) {
       setCorrect(
         (value) =>
           value + 1
@@ -1224,18 +1345,6 @@ function goToNextFlashcard() {
           value + 1
       );
     }
-
-    saveReview(
-      question.card,
-      wasCorrect,
-      `test-${question.type}`,
-      String(
-        userAnswer
-      ),
-      String(
-        correctAnswer
-      )
-    );
 
     const nextIndex =
       testIndex + 1;
@@ -1254,7 +1363,7 @@ function goToNextFlashcard() {
 
       router.refresh();
 
-      return;
+      return true;
     }
 
     setTestIndex(
@@ -1262,6 +1371,8 @@ function goToNextFlashcard() {
     );
 
     resetAnswerState();
+
+    return true;
   }
 
 
@@ -1606,6 +1717,8 @@ function goToNextFlashcard() {
             type="button"
 
             onClick={() => {
+              attemptGenerationRef.current += 1;
+
               setQueue(
                 shuffle(cards)
               );
@@ -1888,6 +2001,26 @@ function goToNextFlashcard() {
         notice={xpNotice}
       />
 
+      {reviewStatus ===
+      "saving" ? (
+        <p
+          className="helper"
+          role="status"
+        >
+          Saving review...
+        </p>
+      ) : null}
+
+      {reviewStatus ===
+      "error" ? (
+        <p
+          className="auth-error"
+          role="alert"
+        >
+          {reviewError}. Try again.
+        </p>
+      ) : null}
+
 
       {/* -----------------------------------------------------
           PROGRESS BAR
@@ -2064,24 +2197,28 @@ function goToNextFlashcard() {
               grading
             }
 
-            onResult={({
+            onResult={async ({
               wasCorrect,
               reviewMode,
               userAnswer,
-              expected,
             }) => {
 
-              saveReview(
+              const saved = await saveReview(
                 currentCard,
                 wasCorrect,
                 reviewMode,
-                userAnswer,
-                expected
+                userAnswer
               );
 
+              if (!saved) {
+                return false;
+              }
+
               moveToNextNormalCard(
-                wasCorrect
+                saved.correct
               );
+
+              return true;
             }}
           />
 
@@ -2183,19 +2320,21 @@ function LearnQuestion({
   }
 
 
-  function finishLearnQuestion(
+  async function finishLearnQuestion(
     wasCorrect,
     reviewMode,
     userAnswer
   ) {
-    onResult({
+    const saved = await onResult({
       wasCorrect,
       reviewMode,
       userAnswer,
       expected,
     });
 
-    resetLearnQuestion();
+    if (saved) {
+      resetLearnQuestion();
+    }
   }
 
 

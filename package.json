@@ -7,8 +7,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "test": "node --test test/*.test.js",
-    "test:watch": "node --test --watch test/*.test.js",
+    "test": "node --test --test-concurrency=1 test/*.test.js",
+    "test:watch": "node --test --test-concurrency=1 --watch test/*.test.js",
     "lint": "eslint .",
     "check": "npm run lint && npm test",
     "db:seed": "node scripts/seed.js",
@@ -16,12 +16,16 @@
   },
   "dependencies": {
     "@libsql/client": "^0.17.2",
-    "next": "^15.1.6",
+    "next": "^15.5.21",
     "react": "^19.0.0",
     "react-dom": "^19.0.0"
   },
   "devDependencies": {
     "eslint": "^9.18.0",
-    "eslint-config-next": "^15.1.6"
+    "eslint-config-next": "^15.5.23"
+  },
+  "overrides": {
+    "postcss": "^8.5.23",
+    "sharp": "^0.35.0"
   }
 }
