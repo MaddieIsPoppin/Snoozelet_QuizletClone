@@ -585,10 +585,18 @@ strong {
   font-weight: 850;
 }
 
-.brand img {
+.brand img,
+.brand .brand-mark {
   width: 34px;
   height: 34px;
   flex: 0 0 auto;
+}
+
+.brand-mark {
+  display: inline-block;
+  width: 48px;
+  height: 48px;
+  background: url("/focus-mark.svg") center / contain no-repeat;
 }
 
 .brand span {
@@ -796,7 +804,8 @@ strong {
   padding: clamp(24px, 6vw, 44px);
 }
 
-.auth-panel img {
+.auth-panel img,
+.auth-panel .brand-mark {
   width: 48px;
   height: 48px;
 }

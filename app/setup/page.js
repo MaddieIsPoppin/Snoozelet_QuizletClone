@@ -1,4 +1,5 @@
 import Link from "next/link";
+import BrandMark from "@/components/BrandMark";
 import { isHostedWithoutDatabase } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -10,7 +11,7 @@ export default function SetupPage() {
   return (
     <main className="page narrow">
       <section className="auth-panel">
-        <img src="/focus-mark.svg" alt="" />
+        <BrandMark />
         <p className="eyebrow">Deployment setup</p>
         <h1>{missingDatabase ? "Connect the database" : "Setup looks ready"}</h1>
         {missingDatabase ? (

@@ -125,9 +125,9 @@ export default function AppShell({ children }) {
 
         </header>
 
-        <main className="snooze-content">
+        <div className="snooze-content">
           {children}
-        </main>
+        </div>
 
         <nav className="mobile-bottom-nav">
 

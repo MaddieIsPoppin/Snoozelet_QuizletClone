@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { loginAction } from "@/app/actions";
+import BrandMark from "@/components/BrandMark";
 import { redirectIfSignedIn, userCount } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +14,7 @@ export default async function LoginPage({ searchParams }) {
     return (
       <main className="page narrow">
         <section className="auth-panel">
-          <img src="/focus-mark.svg" alt="" />
+          <BrandMark />
           <p className="eyebrow">Snoozelet</p>
           <h1>Create your account</h1>
           <p>No accounts exist yet. The first account will claim any decks already on this device.</p>
@@ -28,7 +29,7 @@ export default async function LoginPage({ searchParams }) {
   return (
     <main className="page narrow">
       <section className="auth-panel">
-        <img src="/focus-mark.svg" alt="" />
+        <BrandMark />
         <p className="eyebrow">Welcome back</p>
         <h1>Log in</h1>
         {params?.error ? <p className="auth-error">That username or password did not match.</p> : null}

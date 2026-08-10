@@ -1,17 +1,14 @@
 import { NextResponse } from "next/server";
-import { getDatabaseConfigStatus, queryOne } from "@/lib/db";
+import { isHostedWithoutDatabase, queryOne } from "@/lib/db";
 
 export const runtime = "nodejs";
 
 export async function GET() {
-  const config = getDatabaseConfigStatus();
-
-  if (!config.hasUrl || !config.hasToken) {
+  if (isHostedWithoutDatabase()) {
     return NextResponse.json(
       {
         ok: false,
-        database: "missing-env",
-        config
+        database: "unavailable"
       },
       { status: 503 }
     );
@@ -21,18 +18,15 @@ export async function GET() {
     const result = await queryOne("SELECT 1 AS ok");
     return NextResponse.json({
       ok: true,
-      database: result?.ok === 1 ? "connected" : "unexpected-result",
-      config
+      database: result?.ok === 1 ? "connected" : "unavailable"
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json(
       {
         ok: false,
-        database: "connection-error",
-        error: error?.message || "Unknown database error",
-        config
+        database: "unavailable"
       },
-      { status: 500 }
+      { status: 503 }
     );
   }
 }

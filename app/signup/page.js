@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { signUpAction } from "@/app/actions";
+import BrandMark from "@/components/BrandMark";
 import { redirectIfSignedIn } from "@/lib/auth";
 
 export const dynamic = "force-dynamic";
@@ -11,7 +12,7 @@ export default async function SignUpPage() {
   return (
     <main className="page narrow">
       <section className="auth-panel">
-        <img src="/focus-mark.svg" alt="" />
+        <BrandMark />
         <p className="eyebrow">Private accounts</p>
         <h1>Make your study space</h1>
         <p>Each account has its own decks and review history on this device.</p>

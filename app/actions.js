@@ -2,9 +2,31 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { addCards, createDeck, deleteCard, deleteDeck, updateCard } from "@/lib/db";
+import { addCards, createDeckWithCards, deleteCard, deleteDeck, updateCard } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
+
+const MAX_IMPORT_BYTES = 2 * 1024 * 1024;
+const MAX_IMPORT_CARDS = 5000;
+
+function assertImportSize(value, label = "Import") {
+  if (Buffer.byteLength(value, "utf8") > MAX_IMPORT_BYTES) {
+    throw new Error(`${label} must be 2 MB or smaller`);
+  }
+}
+
+function assertCardCount(cards) {
+  if (cards.length > MAX_IMPORT_CARDS) {
+    throw new Error(`Imports are limited to ${MAX_IMPORT_CARDS} cards`);
+  }
+  return cards;
+}
+
+async function parseUploadedCards(file) {
+  if (!file || file.size === 0) return [];
+  if (file.size > MAX_IMPORT_BYTES) throw new Error("CSV file must be 2 MB or smaller");
+  return parseCards(await file.text(), "csv");
+}
 
 export async function signUpAction(formData) {
   const username = String(formData.get("username") || "").trim();
@@ -45,15 +67,14 @@ export async function createDeckAction(formData) {
     throw new Error("Deck title is required");
   }
 
-  const deckId = await createDeck({ title, description, userId: user.id });
   const pasted = String(formData.get("cards") || "").trim();
   const csvFile = formData.get("csvFile");
-  if (pasted) {
-    await addCards(deckId, parseCards(pasted), user.id);
-  }
-  if (csvFile && csvFile.size > 0) {
-    await addCards(deckId, parseCards(await csvFile.text(), "csv"), user.id);
-  }
+  assertImportSize(pasted, "Pasted cards");
+  const cards = assertCardCount([
+    ...(pasted ? parseCards(pasted) : []),
+    ...(await parseUploadedCards(csvFile))
+  ]);
+  const deckId = await createDeckWithCards({ title, description, cards, userId: user.id });
 
   revalidatePath("/");
   redirect(`/decks/${deckId}`);
@@ -75,12 +96,13 @@ export async function importCardsAction(formData) {
   const raw = String(formData.get("cards") || "");
   const format = String(formData.get("format") || "auto");
   const csvFile = formData.get("csvFile");
-  const cards = parseCards(raw, format);
+  assertImportSize(raw, "Pasted cards");
+  const cards = assertCardCount([
+    ...parseCards(raw, format),
+    ...(await parseUploadedCards(csvFile))
+  ]);
 
   await addCards(deckId, cards, user.id);
-  if (csvFile && csvFile.size > 0) {
-    await addCards(deckId, parseCards(await csvFile.text(), "csv"), user.id);
-  }
   revalidatePath(`/decks/${deckId}`);
 }
 

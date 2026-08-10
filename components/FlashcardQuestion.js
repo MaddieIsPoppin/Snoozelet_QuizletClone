@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  useCallback,
   useEffect,
   useState,
 } from "react";
@@ -23,23 +24,23 @@ export default function FlashcardQuestion({
     );
   }
 
-  function markMissed() {
+  const markMissed = useCallback(() => {
     if (!revealed) {
       return;
     }
 
     setRevealed(false);
     onResult(false);
-  }
+  }, [onResult, revealed]);
 
-  function markCorrect() {
+  const markCorrect = useCallback(() => {
     if (!revealed) {
       return;
     }
 
     setRevealed(false);
     onResult(true);
-  }
+  }, [onResult, revealed]);
 
   /*
    * Keyboard controls
@@ -175,6 +176,8 @@ export default function FlashcardQuestion({
     onPrevious,
     onNext,
     onResult,
+    markCorrect,
+    markMissed,
   ]);
 
   return (

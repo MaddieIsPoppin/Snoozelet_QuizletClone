@@ -1,12 +1,6 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
-
 import BlocksGame from "@/components/BlocksGame";
-import { requireUser } from "@/lib/auth";
-import {
-  getDeck,
-  getStudySnapshot,
-} from "@/lib/db";
+import { loadStudyRoute } from "@/lib/study-route";
 
 export const dynamic =
   "force-dynamic";
@@ -17,27 +11,8 @@ export const runtime =
 export default async function BlocksPage({
   params,
 }) {
-  const user =
-    await requireUser();
-
-  const { deckId } =
-    await params;
-
-  const deck =
-    await getDeck(
-      deckId,
-      user.id
-    );
-
-  if (!deck) {
-    notFound();
-  }
-
-  const cards =
-    await getStudySnapshot(
-      deck.id,
-      user.id
-    );
+  const { cards, deck } =
+    await loadStudyRoute(params);
 
   return (
     <main className="page">

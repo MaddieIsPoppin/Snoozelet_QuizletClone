@@ -1,11 +1,7 @@
 import Link from "next/link";
-import { notFound } from "next/navigation";
 import StudySession from "@/components/StudySession";
-import { requireUser } from "@/lib/auth";
-import {
-  getDeck,
-  getStudySnapshot,
-} from "@/lib/db";
+import BrandMark from "@/components/BrandMark";
+import { loadStudyRoute } from "@/lib/study-route";
 import { normalizeTestTypes } from "@/lib/study";
 
 export const dynamic = "force-dynamic";
@@ -15,25 +11,8 @@ export default async function TestPage({
   params,
   searchParams,
 }) {
-  const user = await requireUser();
-
-  const { deckId } = await params;
-
   const query = await searchParams;
-
-  const deck = await getDeck(
-    deckId,
-    user.id
-  );
-
-  if (!deck) {
-    notFound();
-  }
-
-  const cards = await getStudySnapshot(
-    deck.id,
-    user.id
-  );
+  const { cards, deck } = await loadStudyRoute(params);
 
   const started =
     query?.start === "1";
@@ -64,10 +43,7 @@ export default async function TestPage({
             className="brand"
             href={`/decks/${deck.id}`}
           >
-            <img
-              src="/focus-mark.svg"
-              alt=""
-            />
+            <BrandMark />
 
             <span>{deck.title}</span>
           </Link>
@@ -195,10 +171,7 @@ export default async function TestPage({
           className="brand"
           href={`/decks/${deck.id}`}
         >
-          <img
-            src="/focus-mark.svg"
-            alt=""
-          />
+          <BrandMark />
 
           <span>{deck.title}</span>
         </Link>

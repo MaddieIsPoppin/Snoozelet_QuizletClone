@@ -4,6 +4,7 @@ import { randomUUID } from "node:crypto";
 import os from "node:os";
 import path from "node:path";
 import test from "node:test";
+import { latestSchemaVersion } from "../lib/migrations.js";
 
 test("review idempotency migration preserves existing review rows", async () => {
   const databasePath = path.join(os.tmpdir(), `snoozelet-legacy-${randomUUID()}.sqlite`);
@@ -40,6 +41,14 @@ test("review idempotency migration preserves existing review rows", async () => 
   const columns = await db.queryAll("PRAGMA table_info(review_logs)");
   const indexes = await db.queryAll("PRAGMA index_list(review_logs)");
   const preserved = await db.queryOne("SELECT * FROM review_logs WHERE id = 1");
+  const versions = await db.queryAll("SELECT version FROM schema_migrations ORDER BY version");
+  const cardPlan = await db.queryAll("EXPLAIN QUERY PLAN SELECT * FROM cards WHERE deck_id = 1");
+  const duePlan = await db.queryAll(
+    "EXPLAIN QUERY PLAN SELECT * FROM study_stats WHERE deck_id = 1 AND due_at <= '2026-01-01'"
+  );
+  const reviewPlan = await db.queryAll(
+    "EXPLAIN QUERY PLAN SELECT * FROM review_logs WHERE deck_id = 1 ORDER BY created_at DESC"
+  );
 
   assert.ok(columns.some((column) => column.name === "attempt_id"));
   assert.ok(
@@ -50,4 +59,13 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(preserved.answer, "answer");
   assert.equal(preserved.expected, "answer");
   assert.equal(preserved.attempt_id, null);
+  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3]);
+  assert.equal(Number(versions.at(-1).version), latestSchemaVersion);
+  assert.match(cardPlan.map(({ detail }) => detail).join(" "), /idx_cards_deck_id/);
+  assert.match(duePlan.map(({ detail }) => detail).join(" "), /idx_study_stats_deck_due/);
+  assert.match(reviewPlan.map(({ detail }) => detail).join(" "), /idx_review_logs_deck_created/);
+
+  const reopened = await import(`../lib/db.js?migration=${randomUUID()}`);
+  const reopenedVersions = await reopened.queryAll("SELECT version FROM schema_migrations");
+  assert.equal(reopenedVersions.length, latestSchemaVersion);
 });

@@ -83,6 +83,35 @@ test("database integration", async (suite) => {
     }
   });
 
+  await suite.test("creates a deck and its initial cards atomically", async () => {
+    await db.queryRun(`
+      CREATE TRIGGER fail_initial_stat
+      BEFORE INSERT ON study_stats
+      WHEN NEW.deck_id <> ${deckId}
+      BEGIN
+        SELECT RAISE(ABORT, 'forced initial-card rollback');
+      END
+    `);
+
+    try {
+      await assert.rejects(
+        db.createDeckWithCards({
+          userId: ownerId,
+          title: "Must roll back",
+          cards: [{ term: "Term", definition: "Definition" }],
+        }),
+        /forced initial-card rollback/
+      );
+    } finally {
+      await db.queryRun("DROP TRIGGER fail_initial_stat");
+    }
+
+    assert.equal(
+      await db.queryOne("SELECT id FROM decks WHERE title = ?", ["Must roll back"]),
+      null
+    );
+  });
+
   await suite.test("returns plain serializable rows without libSQL array descriptors", async () => {
     const [row] = await db.queryAll(
       "SELECT ? AS text_value, ? AS number_value, NULL AS null_value",

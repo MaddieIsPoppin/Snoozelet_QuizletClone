@@ -2,6 +2,7 @@ import Link from "next/link";
 import { createDeckAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import TextField from "@/components/TextField";
+import BrandMark from "@/components/BrandMark";
 
 export default async function NewDeckPage() {
   await requireUser();
@@ -10,7 +11,7 @@ export default async function NewDeckPage() {
     <main className="page narrow">
       <header className="topbar">
         <Link className="brand" href="/">
-          <img src="/focus-mark.svg" alt="" />
+          <BrandMark />
           <span>Snoozelet</span>
         </Link>
       </header>
