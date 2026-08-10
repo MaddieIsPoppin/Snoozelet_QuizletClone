@@ -91,10 +91,34 @@ test("server-side typed grading derives the expected answer from the card", () =
 
   assert.deepEqual(forged, {
     correct: false,
+    score: 0,
+    method: "protected-token-mismatch",
     expected: "Produces ATP",
     assessment: "objective",
   });
   assert.equal(correct.correct, true);
+});
+
+test("server-authoritative grading accepts conceptual paraphrases but ignores forged correctness", () => {
+  const card = {
+    term: "Atomicity",
+    definition: "Atomicity ensures that a transaction completes entirely or not at all.",
+  };
+  const paraphrase = gradeReview(
+    card,
+    validPayload({
+      answer: "Atomicity means the entire transaction must happen, otherwise none of it happens.",
+      correct: false,
+    })
+  );
+  const forged = gradeReview(
+    card,
+    validPayload({ answer: "Atomicity makes transactions execute faster.", correct: true })
+  );
+
+  assert.equal(paraphrase.correct, true);
+  assert.equal(paraphrase.method, "concept-similarity");
+  assert.equal(forged.correct, false);
 });
 
 test("server-side grading respects answer direction and canonical grading levels", () => {

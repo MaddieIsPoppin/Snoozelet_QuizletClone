@@ -5,11 +5,11 @@ import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
 import TypedQuestion from "@/components/TypedQuestion";
 import {
   answerForDirection,
-  isStudyAnswerCorrect,
   makeMultipleChoiceOptions,
   normalizeFlexibleAnswer,
   promptForDirection,
 } from "@/lib/study";
+import { isTypedCorrect } from "@/lib/grading";
 
 export default function LearnQuestion({
   card,
@@ -199,7 +199,7 @@ export default function LearnQuestion({
     }
 
     const wasCorrect =
-      isStudyAnswerCorrect(
+      isTypedCorrect(
         answer,
         expected,
         grading
@@ -250,4 +250,3 @@ export default function LearnQuestion({
     />
   );
 }
-

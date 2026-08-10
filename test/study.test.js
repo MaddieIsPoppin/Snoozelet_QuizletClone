@@ -5,7 +5,6 @@ import {
   advanceStudyQueue,
   createTestPlan,
   generateTestQuestions,
-  isStudyAnswerCorrect,
   makeMultipleChoiceOptions,
   makeTrueFalseQuestion,
   normalizeTestTypes,
@@ -117,10 +116,4 @@ test("Learn queue progression requeues misses and completes after a correct retr
   });
   assert.equal(retried.complete, true);
   assert.equal(retried.correctDelta, 1);
-});
-
-test("extracted study grading preserves existing client strictness behavior", () => {
-  assert.equal(isStudyAnswerCorrect("  ANSWER ", "answer", "strict"), true);
-  assert.equal(isStudyAnswerCorrect("answers", "answer", "lenient"), true);
-  assert.equal(isStudyAnswerCorrect("", "answer", "lenient"), false);
 });

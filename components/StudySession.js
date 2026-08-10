@@ -16,7 +16,6 @@ import {
   advanceStudyQueue,
   answerForDirection,
   generateTestQuestions,
-  isStudyAnswerCorrect,
   makeMultipleChoiceOptions,
   makeTrueFalseQuestion,
   normalizeFlexibleAnswer,
@@ -25,6 +24,7 @@ import {
   selectLearnCards,
   shuffle,
 } from "@/lib/study";
+import { isTypedCorrect } from "@/lib/grading";
 
 import FlashcardQuestion from "@/components/FlashcardQuestion";
 import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
@@ -341,7 +341,7 @@ export default function StudySession({
     }
 
     const wasCorrect =
-      isStudyAnswerCorrect(
+      isTypedCorrect(
         typedAnswer,
         expectedAnswer,
         grading
