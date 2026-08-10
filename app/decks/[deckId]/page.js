@@ -144,6 +144,30 @@ export default async function DeckPage({ params }) {
       </section>
 
 
+      {/* QUICK ADD — kept near the top so adding cards never requires a long scroll */}
+
+      <section className="quick-add-card" aria-labelledby="quick-add-heading">
+        <div className="quick-add-copy">
+          <p className="eyebrow">Build your deck</p>
+          <h2 id="quick-add-heading">Add a new card</h2>
+          <p>Capture the next idea now. You can add images and import full sets further down.</p>
+        </div>
+
+        <form action={addCardAction} className="quick-add-form">
+          <input name="deckId" type="hidden" value={deck.id} />
+          <label>
+            <span>Term or question</span>
+            <TextField name="term" placeholder="e.g. What does the mitochondrion do?" required />
+          </label>
+          <label>
+            <span>Answer</span>
+            <TextField name="definition" placeholder="e.g. Releases energy through cellular respiration" required />
+          </label>
+          <button className="button primary quick-add-button" type="submit">＋ Add card</button>
+        </form>
+      </section>
+
+
       {/* ====================================================
           STUDY
           ==================================================== */}
@@ -506,11 +530,11 @@ export default async function DeckPage({ params }) {
 
               <div>
                 <h3>
-                  Add one card
+                  Add a card with an image
                 </h3>
 
                 <p>
-                  Add a single term and definition.
+                  Add an illustrated card or a longer answer.
                 </p>
               </div>
 
