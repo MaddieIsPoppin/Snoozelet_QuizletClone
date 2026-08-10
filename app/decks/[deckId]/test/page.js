@@ -6,6 +6,7 @@ import {
   getDeck,
   getStudySnapshot,
 } from "@/lib/db";
+import { normalizeTestTypes } from "@/lib/study";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
@@ -37,20 +38,7 @@ export default async function TestPage({
   const started =
     query?.start === "1";
 
-  let selectedTypes =
-    query?.types || [
-      "multiple",
-      "typed",
-      "true-false",
-    ];
-
-  if (!Array.isArray(selectedTypes)) {
-    selectedTypes = [selectedTypes];
-  }
-
-  if (selectedTypes.length === 0) {
-    selectedTypes = ["multiple"];
-  }
+  const selectedTypes = normalizeTestTypes(query?.types);
 
   const requestedCount =
     query?.count === "all"
@@ -65,6 +53,8 @@ export default async function TestPage({
           cards.length
         )
       : cards.length;
+
+  const answerDirection = query?.answer === "term" ? "term" : "definition";
 
   if (!started) {
     return (
@@ -177,6 +167,15 @@ export default async function TestPage({
               </label>
             </fieldset>
 
+            <label>
+              Answer with
+
+              <select name="answer" defaultValue="definition">
+                <option value="definition">Definitions</option>
+                <option value="term">Terms</option>
+              </select>
+            </label>
+
             <button
               className="button primary"
               type="submit"
@@ -217,7 +216,8 @@ export default async function TestPage({
         cards={cards}
         mode="test"
         testCount={testCount}
-        testTypes={selectedTypes}
+        testTypes={selectedTypes.length > 0 ? selectedTypes : ["multiple"]}
+        initialAnswerDirection={answerDirection}
       />
     </main>
   );

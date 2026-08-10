@@ -11,7 +11,7 @@ import { useRouter } from "next/navigation";
 
 import XpNotice from "@/components/XpNotice";
 import TestResults from "@/components/TestResults";
-import TestBuilder from "@/components/TestBuilder";
+import { createTestPlan, selectLearnCards } from "@/lib/study";
 
 import FlashcardQuestion from "@/components/FlashcardQuestion";
 import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
@@ -322,6 +322,40 @@ function questionTypeLabel(
 }
 
 
+function generateTestQuestions(
+  cards,
+  count,
+  types,
+  answerDirection
+) {
+  return createTestPlan(cards, count, types).map(({ card, type }, index) => {
+    if (type === "multiple") {
+      return {
+        id: `${card.id}-${index}`,
+        card,
+        type,
+        options: makeMultipleChoiceOptions(card, cards, answerDirection),
+      };
+    }
+
+    if (type === "truefalse") {
+      return {
+        id: `${card.id}-${index}`,
+        card,
+        type,
+        ...makeTrueFalseQuestion(card, cards, answerDirection),
+      };
+    }
+
+    return {
+      id: `${card.id}-${index}`,
+      card,
+      type: "typed",
+    };
+  });
+}
+
+
 /* =========================================================
    MAIN STUDY SESSION
    ========================================================= */
@@ -331,6 +365,10 @@ export default function StudySession({
   deck,
   cards = [],
   mode = "learn",
+  studyScope = "targeted",
+  testCount = cards.length,
+  testTypes = ["multiple", "typed", "truefalse"],
+  initialAnswerDirection = "definition",
 }) {
   const router =
     useRouter();
@@ -354,7 +392,7 @@ export default function StudySession({
     answerDirection,
     setAnswerDirection,
   ] = useState(
-    "definition"
+    initialAnswerDirection
   );
 
   const [
@@ -367,7 +405,11 @@ export default function StudySession({
   const [
     queue,
     setQueue,
-  ] = useState(cards);
+  ] = useState(() =>
+    mode === "learn"
+      ? selectLearnCards(cards, studyScope)
+      : cards
+  );
 
   const [
     currentIndex,
@@ -442,35 +484,13 @@ export default function StudySession({
      --------------------------------------------------------- */
 
   const [
-    testStarted,
-    setTestStarted,
-  ] = useState(
-    mode !== "test"
-  );
-
-  const [
-    testQuestionCount,
-    setTestQuestionCount,
-  ] = useState(
-    Math.min(
-      cards.length,
-      20
-    )
-  );
-
-  const [
-    testTypes,
-    setTestTypes,
-  ] = useState({
-    multiple: true,
-    typed: true,
-    truefalse: true,
-  });
-
-  const [
     testQuestions,
     setTestQuestions,
-  ] = useState([]);
+  ] = useState(() =>
+    mode === "test"
+      ? generateTestQuestions(cards, testCount, testTypes, initialAnswerDirection)
+      : []
+  );
 
   const [
     testIndex,
@@ -493,12 +513,16 @@ export default function StudySession({
      --------------------------------------------------------- */
 
   useEffect(() => {
-    setQueue(
-      shuffle(cards)
-    );
+    const scopedCards = mode === "learn"
+      ? selectLearnCards(cards, studyScope)
+      : cards;
+
+    setQueue(mode === "learn" && studyScope === "targeted"
+      ? scopedCards
+      : shuffle(scopedCards));
 
     setMounted(true);
-  }, [cards]);
+  }, [cards, mode, studyScope]);
 
 
   /* ---------------------------------------------------------
@@ -1122,128 +1146,6 @@ function goToNextFlashcard() {
      ======================================================= */
 
 
-  function buildTest() {
-    attemptGenerationRef.current += 1;
-
-    const enabledTypes =
-      Object.entries(
-        testTypes
-      )
-        .filter(
-          ([, enabled]) =>
-            enabled
-        )
-        .map(
-          ([type]) =>
-            type
-        );
-
-    if (
-      enabledTypes.length ===
-      0
-    ) {
-      return;
-    }
-
-    const selectedCards =
-      shuffle(cards).slice(
-        0,
-        Math.min(
-          testQuestionCount,
-          cards.length
-        )
-      );
-
-    const questions =
-      selectedCards.map(
-        (
-          card,
-          index
-        ) => {
-          const type =
-            enabledTypes[
-              index %
-                enabledTypes.length
-            ];
-
-          if (
-            type ===
-            "multiple"
-          ) {
-            return {
-              id:
-                `${card.id}-${index}`,
-
-              card,
-
-              type,
-
-              options:
-                makeMultipleChoiceOptions(
-                  card,
-                  cards,
-                  answerDirection
-                ),
-            };
-          }
-
-          if (
-            type ===
-            "truefalse"
-          ) {
-            const generated =
-              makeTrueFalseQuestion(
-                card,
-                cards,
-                answerDirection
-              );
-
-            return {
-              id:
-                `${card.id}-${index}`,
-
-              card,
-
-              type,
-
-              ...generated,
-            };
-          }
-
-          return {
-            id:
-              `${card.id}-${index}`,
-
-            card,
-
-            type:
-              "typed",
-          };
-        }
-      );
-
-    setTestQuestions(
-      questions
-    );
-
-    setTestIndex(0);
-    setTestResults([]);
-
-    setCorrect(0);
-    setMissed(0);
-
-    setTestFinished(
-      false
-    );
-
-    setTestStarted(
-      true
-    );
-
-    resetAnswerState();
-  }
-
-
   /* =======================================================
      TEST ANSWERS
      ======================================================= */
@@ -1481,24 +1383,7 @@ function goToNextFlashcard() {
 
 
   function createAnotherTest() {
-    setTestStarted(
-      false
-    );
-
-    setTestFinished(
-      false
-    );
-
-    setTestQuestions([]);
-
-    setTestResults([]);
-
-    setTestIndex(0);
-
-    setCorrect(0);
-    setMissed(0);
-
-    resetAnswerState();
+    router.push(`/decks/${deck.id}/test`);
   }
 
 
@@ -1559,10 +1444,6 @@ function goToNextFlashcard() {
       false
     );
 
-    setTestStarted(
-      true
-    );
-
     resetAnswerState();
   }
 
@@ -1588,52 +1469,6 @@ function goToNextFlashcard() {
           session.
         </p>
       </section>
-    );
-  }
-
-
-  /* =======================================================
-     TEST BUILDER
-     ======================================================= */
-
-
-  if (
-    mode === "test" &&
-    !testStarted
-  ) {
-    return (
-      <TestBuilder
-        deck={deck}
-        cards={cards}
-
-        testQuestionCount={
-          testQuestionCount
-        }
-
-        setTestQuestionCount={
-          setTestQuestionCount
-        }
-
-        testTypes={
-          testTypes
-        }
-
-        setTestTypes={
-          setTestTypes
-        }
-
-        answerDirection={
-          answerDirection
-        }
-
-        setAnswerDirection={
-          setAnswerDirection
-        }
-
-        onStartTest={
-          buildTest
-        }
-      />
     );
   }
 
@@ -1720,7 +1555,13 @@ function goToNextFlashcard() {
               attemptGenerationRef.current += 1;
 
               setQueue(
-                shuffle(cards)
+                mode === "learn" && studyScope === "targeted"
+                  ? selectLearnCards(cards, studyScope)
+                  : shuffle(
+                      mode === "learn"
+                        ? selectLearnCards(cards, studyScope)
+                        : cards
+                    )
               );
 
               setCurrentIndex(
