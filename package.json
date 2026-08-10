@@ -7,6 +7,10 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
+    "test": "node --test test/*.test.js",
+    "test:watch": "node --test --watch test/*.test.js",
+    "lint": "eslint .",
+    "check": "npm run lint && npm test",
     "db:seed": "node scripts/seed.js",
     "db:reset": "node scripts/seed.js --reset"
   },

@@ -355,7 +355,7 @@ export default async function HomePage() {
             </h2>
 
             <p>
-              Create your first study set and we'll
+              Create your first study set and we&apos;ll
               get started.
             </p>
 
