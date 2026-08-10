@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { logoutAction } from "@/app/actions";
-import MascotCoach from "@/components/MascotCoach";
+import SnoozeMascot from "@/components/SnoozeMascot";
 import { requireUser } from "@/lib/auth";
 import { getDecks, getReviewTotals, getUserProgress } from "@/lib/db";
 
@@ -12,16 +12,17 @@ export default async function DashboardPage() {
     getDecks(user.id), getReviewTotals(user.id), getUserProgress(user.id),
   ]);
   const nextDeck = decks[0];
+  const displayName = user.username.includes("@") ? user.username.split("@")[0] : user.username;
 
   return (
     <main className="workspace-page dashboard-v3">
       <header className="workspace-header">
-        <div><p className="eyebrow">Your dashboard</p><h1>Good evening, {user.username}</h1><p>Choose one useful thing to do next.</p></div>
+        <div><p className="eyebrow">Your dashboard</p><h1>Ready to grow, {displayName}?</h1><p>Snoo has your next study step ready.</p></div>
         <form action={logoutAction}><button className="button" type="submit">Log out</button></form>
       </header>
 
       <section className="dashboard-focus-card">
-        <div>
+        <div className="dashboard-focus-copy">
           <span className="focus-kicker">Tonight&apos;s focus</span>
           <h2>{nextDeck ? nextDeck.title : "Create your first deck"}</h2>
           <p>{nextDeck ? `${nextDeck.due_count} cards due · ${nextDeck.weak_count} weak cards` : "Build a small deck and Snoo will help you practise it."}</p>
@@ -30,7 +31,10 @@ export default async function DashboardPage() {
             <Link className="button" href="/library">Open library</Link>
           </div>
         </div>
-        <MascotCoach messages={["Short sessions still count.", "Start with the cards that are due.", "A mistake is a card asking for another turn."]} />
+        <div className="dashboard-snoo-stage">
+          <div className="dashboard-snoo-message"><strong>Snoo&apos;s study plan</strong><span>{nextDeck ? `${nextDeck.due_count} cards are waiting. Let’s make a little progress together!` : "Let’s build your first deck together!"}</span></div>
+          <SnoozeMascot variant="hero" mood="happy" />
+        </div>
       </section>
 
       <section className="metric-strip">

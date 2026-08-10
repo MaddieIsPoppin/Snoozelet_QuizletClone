@@ -34,7 +34,7 @@ export default function AppShell({ children }) {
         <Link href="/decks/new" className="sidebar-new-deck"><span>＋</span>Create deck</Link>
         <div className="sidebar-spacer" />
         <Link className="sidebar-companion" href="/study">
-          <SnoozeMascot variant="sidebar" mood="happy" />
+          <SnoozeMascot variant="coach" mood="happy" />
           <span><strong>Snoo is ready</strong><small>Let&apos;s study together</small></span>
         </Link>
       </aside>

@@ -5,6 +5,8 @@ export default function SnoozeMascot({
   message = null,
   mood = "happy",
 }) {
+  const faceOnly = ["coach", "mini", "logo"].includes(variant);
+
   return (
     <div
       className={`snoo-giraffe-wrap snoo-${variant} snoo-${mood}`}
@@ -17,7 +19,7 @@ export default function SnoozeMascot({
 
       <div className="snoo-giraffe">
         <svg
-          viewBox="0 0 220 520"
+          viewBox={faceOnly ? "0 0 220 215" : "0 0 220 520"}
           role="img"
           aria-label="Snoo the giraffe"
         >
