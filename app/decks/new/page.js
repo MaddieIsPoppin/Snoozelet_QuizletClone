@@ -3,6 +3,7 @@ import { createDeckAction } from "@/app/actions";
 import { requireUser } from "@/lib/auth";
 import TextField from "@/components/TextField";
 import BrandMark from "@/components/BrandMark";
+import CardCreationGuide from "@/components/CardCreationGuide";
 
 export default async function NewDeckPage() {
   await requireUser();
@@ -44,6 +45,7 @@ export default async function NewDeckPage() {
           <p className="helper">
             Paste CSV, tab-separated text, or one term-definition pair per line.
           </p>
+          <CardCreationGuide />
           <div className="row-actions">
             <button className="button primary" type="submit">
               Create deck

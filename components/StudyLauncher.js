@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState } from "react";
 
 const modes = [
+  { id: "multiple-choice", icon: "A", name: "Multiple choice", description: "Choose between related answers from your deck." },
   { id: "learn", icon: "◎", name: "Learn", description: "A guided mix that adapts as you answer.", recommended: true },
   { id: "flashcards", icon: "▱", name: "Flashcards", description: "Flip through cards and rate your recall." },
   { id: "typed", icon: "⌨", name: "Written answers", description: "Type answers for stronger active recall." },

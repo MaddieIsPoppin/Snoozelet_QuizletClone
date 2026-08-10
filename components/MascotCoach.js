@@ -14,7 +14,7 @@ export default function MascotCoach({ messages, mood = "happy", compact = false 
       onClick={() => setIndex((current) => (current + 1) % safeMessages.length)}
       aria-label="Ask Snoo for another study tip"
     >
-      <SnoozeMascot variant={compact ? "sidebar" : "coach"} mood={mood} />
+      <SnoozeMascot variant="coach" mood={mood} />
       <span>
         <strong>Snoo says</strong>
         {safeMessages[index]}

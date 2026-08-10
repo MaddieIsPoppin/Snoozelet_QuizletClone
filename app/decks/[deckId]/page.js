@@ -10,6 +10,7 @@ import {
 import TextField from "@/components/TextField";
 import DeckCardList from "@/components/DeckCardList";
 import ImageUploadField from "@/components/ImageUploadField";
+import CardCreationGuide from "@/components/CardCreationGuide";
 
 import { requireUser } from "@/lib/auth";
 import { getCards, getDeck } from "@/lib/db";
@@ -245,6 +246,12 @@ export default async function DeckPage({ params }) {
 
           </Link>
 
+
+          <Link className="deck-mode-card" href={`/decks/${deck.id}/multiple-choice`}>
+            <div className="deck-mode-icon">A</div>
+            <div><h3>Multiple choice</h3><p>Choose the right answer from related cards.</p></div>
+            <span className="deck-mode-arrow">→</span>
+          </Link>
 
           <Link
             className="deck-mode-card"
@@ -482,6 +489,8 @@ export default async function DeckPage({ params }) {
 
         </div>
 
+
+        <CardCreationGuide />
 
         <div className="deck-manage-grid">
 
