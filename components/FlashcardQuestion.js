@@ -80,7 +80,9 @@ export default function FlashcardQuestion({
        */
       if (
         event.code === "Space" ||
-        event.key === "Enter"
+        event.key === "Enter" ||
+        event.key === "ArrowUp" ||
+        event.key === "ArrowDown"
       ) {
         event.preventDefault();
 
@@ -271,6 +273,11 @@ export default function FlashcardQuestion({
 
         <span>
           <kbd>Space</kbd>
+          Flip
+        </span>
+
+        <span>
+          <kbd>↑</kbd><kbd>↓</kbd>
           Flip
         </span>
 
