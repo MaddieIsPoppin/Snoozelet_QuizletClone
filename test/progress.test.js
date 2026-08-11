@@ -3,6 +3,7 @@ import assert from "node:assert/strict";
 
 import {
   calculateReviewSchedule,
+  flowMultiplierForCombo,
   levelFromXp,
   xpForReview,
 } from "../lib/progress.js";
@@ -22,6 +23,13 @@ test("XP awards preserve mode values and award nothing for incorrect reviews", (
   assert.equal(xpForReview("test-typed", true), 15);
   assert.equal(xpForReview("test-truefalse", true), 8);
   assert.equal(xpForReview("typed", false), 0);
+});
+
+test("Flow multipliers rise at the promised combo thresholds", () => {
+  assert.equal(flowMultiplierForCombo(4), 1);
+  assert.equal(flowMultiplierForCombo(5), 1.2);
+  assert.equal(flowMultiplierForCombo(8), 1.5);
+  assert.equal(flowMultiplierForCombo(12), 2);
 });
 
 test("level progress preserves threshold and post-threshold behavior", () => {

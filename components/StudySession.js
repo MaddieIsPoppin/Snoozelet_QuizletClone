@@ -66,6 +66,14 @@ export default function StudySession({
 
   const questionStartedAt = useRef(Date.now());
   const [answerStreak, setAnswerStreak] = useState(0);
+  const [bestCombo, setBestCombo] = useState(0);
+  const [sessionXp, setSessionXp] = useState(0);
+  const [masteredCards, setMasteredCards] = useState(() => new Set());
+  const [revengeCards, setRevengeCards] = useState(() => new Map());
+  const [moment, setMoment] = useState(null);
+  const [raceProgress, setRaceProgress] = useState(4);
+  const [latestProgress, setLatestProgress] = useState(null);
+  const [audioCue, setAudioCue] = useState(null);
 
 
   /* ---------------------------------------------------------
@@ -186,6 +194,31 @@ export default function StudySession({
     setMounted(true);
   }, [cards, mode, studyScope]);
 
+  useEffect(() => {
+    if (!audioCue) return;
+    const soundsEnabled = document.documentElement.dataset.sounds !== "false";
+    if (!soundsEnabled) return;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    const context = new AudioContext();
+    const gain = context.createGain();
+    const notes = audioCue.correct
+      ? (audioCue.type === "mastered" || audioCue.type === "revenge-complete" ? [523, 659, 784] : [540, 680])
+      : [230, 185];
+    gain.gain.setValueAtTime(.025, context.currentTime);
+    gain.gain.exponentialRampToValueAtTime(.001, context.currentTime + .34);
+    gain.connect(context.destination);
+    notes.forEach((frequency, index) => {
+      const oscillator = context.createOscillator();
+      oscillator.type = "sine";
+      oscillator.frequency.value = frequency * (audioCue.multiplier > 1 ? 1.08 : 1);
+      oscillator.connect(gain);
+      oscillator.start(context.currentTime + index * .075);
+      oscillator.stop(context.currentTime + .16 + index * .075);
+    });
+    window.setTimeout(() => context.close(), 500);
+  }, [audioCue]);
+
 
   /* ---------------------------------------------------------
      CURRENT QUESTION
@@ -286,8 +319,53 @@ export default function StudySession({
     setTypedAnswer("");
     setFeedback(null);
     setSelectedChoice(null);
+    setMoment(null);
     resetReviewState();
     questionStartedAt.current = Date.now();
+  }
+
+  function registerResult(card, saved, userAnswer = "") {
+    const nextStreak = Number(saved.combo ?? (saved.correct ? answerStreak + 1 : 0));
+
+    setAnswerStreak(nextStreak);
+    setBestCombo((value) => Math.max(value, nextStreak));
+    setSessionXp((value) => value + Number(saved.xpGained || 0));
+    if (saved.progress) setLatestProgress(saved.progress);
+    setAudioCue({ correct: saved.correct, type: saved.moment, multiplier: saved.flowMultiplier, nonce: Date.now() });
+    setRaceProgress((value) => {
+      const cardCount = Math.max(5, mode === "test" ? testQuestions.length : queue.length);
+      const step = 92 / cardCount;
+      return saved.correct
+        ? Math.min(96, value + step * (nextStreak >= 3 ? 1.35 : 1))
+        : Math.max(2, value - step * .55);
+    });
+
+    if (saved.moment === "revenge-added" || !saved.correct) {
+      setRevengeCards((current) => new Map(current).set(card.id, {
+        answer: userAnswer || "Your answer",
+        expected: saved.expected,
+      }));
+      setMoment({ type: "revenge-added", answer: userAnswer || "Your answer", expected: saved.expected });
+      return;
+    }
+
+    if (saved.moment === "revenge-complete") {
+      setRevengeCards((current) => {
+        const next = new Map(current);
+        next.delete(card.id);
+        return next;
+      });
+      setMoment({ type: "revenge-complete", xp: saved.bonusXp || 25 });
+      return;
+    }
+
+    if (saved.moment === "mastered") {
+      setMasteredCards((current) => new Set(current).add(card.id));
+      setMoment({ type: "mastered", xp: saved.bonusXp || 40 });
+      return;
+    }
+
+    setMoment({ type: "correct" });
   }
 
 
@@ -299,6 +377,25 @@ export default function StudySession({
     router.refresh();
   }
 
+  function restartSession(limit = null) {
+    beginAttemptGeneration();
+    const source = mode === "learn" ? selectLearnCards(cards, studyScope) : cards;
+    const prepared = mode === "learn" && studyScope === "targeted" ? source : shuffle(source);
+    setQueue(limit ? prepared.slice(0, limit) : prepared);
+    setCurrentIndex(0);
+    setCorrect(0);
+    setMissed(0);
+    setAnswerStreak(0);
+    setBestCombo(0);
+    setSessionXp(0);
+    setMasteredCards(new Set());
+    setRevengeCards(new Map());
+    setRaceProgress(4);
+    setLatestProgress(null);
+    setCompleted(false);
+    resetAnswerState();
+  }
+
 
   function moveToNextNormalCard(
     wasCorrect
@@ -307,7 +404,7 @@ export default function StudySession({
       queue,
       currentIndex,
       wasCorrect,
-      requeueMissed: mode === "learn",
+      requeueMissed: mode !== "test",
     });
 
     if (!transition) {
@@ -380,6 +477,8 @@ export default function StudySession({
       return;
     }
 
+    registerResult(currentCard, saved, typedAnswer);
+
     setFeedback({
       correct:
         saved.correct,
@@ -451,6 +550,8 @@ export default function StudySession({
     if (!saved) {
       return;
     }
+
+    registerResult(currentCard, saved, choice);
 
     setFeedback({
       correct:
@@ -545,6 +646,8 @@ function goToNextFlashcard() {
     if (!saved) {
       return;
     }
+
+    registerResult(currentCard, saved, wasCorrect ? "Got it" : "Missed");
 
     moveToNextNormalCard(
       saved.correct
@@ -690,7 +793,7 @@ function goToNextFlashcard() {
       );
     }
 
-    setAnswerStreak((value) => authoritativeCorrect ? value + 1 : 0);
+    registerResult(question.card, saved, String(userAnswer));
     setFeedback({ correct: authoritativeCorrect, expected: String(saved.expected ?? correctAnswer) });
 
     return true;
@@ -820,7 +923,7 @@ function goToNextFlashcard() {
   }
 
 
-  function reviewMistakes() {
+  function reviewMistakes(limit = null) {
     const missedResults =
       testResults.filter(
         (result) =>
@@ -835,7 +938,7 @@ function goToNextFlashcard() {
     }
 
     const missedCards =
-      missedResults
+      (limit ? missedResults.slice(0, limit) : missedResults)
         .map(
           (result) =>
             cards.find(
@@ -924,7 +1027,7 @@ function goToNextFlashcard() {
         }
 
         onReviewMistakes={
-          reviewMistakes
+          () => reviewMistakes()
         }
 
         onRetakeTest={
@@ -934,6 +1037,11 @@ function goToNextFlashcard() {
         onCreateAnotherTest={
           createAnotherTest
         }
+        onQuickContinue={() => testResults.some((result) => !result.correct) ? reviewMistakes(7) : retakeTest()}
+        bestCombo={bestCombo}
+        sessionXp={sessionXp}
+        masteredCount={masteredCards.size}
+        progress={latestProgress}
       />
     );
   }
@@ -969,10 +1077,21 @@ function goToNextFlashcard() {
             Session complete
           </p>
 
-          <h1>
-            {percentage}%
-            accuracy
-          </h1>
+          <h1>{total} questions. Momentum built.</h1>
+
+          <div className="session-stat-grid">
+            <div><strong>{correct}</strong><span>Correct</span></div>
+            <div><strong>{percentage}%</strong><span>Accuracy</span></div>
+            <div><strong>{bestCombo}</strong><span>Best combo</span></div>
+            <div><strong>{masteredCards.size}</strong><span>Cards mastered</span></div>
+          </div>
+
+          <div className="session-xp-total"><span>⭐</span><strong>+{sessionXp} XP</strong><small>earned this session</small></div>
+
+          {latestProgress ? <div className="session-level">
+            <div><strong>Level {latestProgress.level}</strong><span>{latestProgress.xpUntilNextLevel} XP until Level {latestProgress.level + 1}</span></div>
+            <div className="session-level-track"><span style={{ width: `${Math.min(100, (latestProgress.currentLevelXp / Math.max(1, latestProgress.xpForNextLevel)) * 100)}%` }} /></div>
+          </div> : null}
 
           <p>
             {correct} correct
@@ -984,36 +1103,12 @@ function goToNextFlashcard() {
             className="button primary"
             type="button"
 
-            onClick={() => {
-              beginAttemptGeneration();
-
-              setQueue(
-                mode === "learn" && studyScope === "targeted"
-                  ? selectLearnCards(cards, studyScope)
-                  : shuffle(
-                      mode === "learn"
-                        ? selectLearnCards(cards, studyScope)
-                        : cards
-                    )
-              );
-
-              setCurrentIndex(
-                0
-              );
-
-              setCorrect(0);
-
-              setMissed(0);
-
-              setCompleted(
-                false
-              );
-
-              resetAnswerState();
-            }}
+            onClick={() => restartSession(7)}
           >
-            Study again
+            Continue — only ~7 questions
           </button>
+
+          <button className="button" type="button" onClick={() => restartSession()}>Start a full session</button>
 
         </div>
       </section>
@@ -1110,6 +1205,11 @@ function goToNextFlashcard() {
         )
       : 0;
 
+  const flowMultiplier = answerStreak >= 12 ? 2 : answerStreak >= 8 ? 1.5 : answerStreak >= 5 ? 1.2 : 1;
+  const flowActive = answerStreak >= 5;
+  const isRevengeCard = revengeCards.has(currentCard.id);
+  const isClutchCard = !isRevengeCard && (Boolean(currentCard.weak) || Number(currentCard.incorrect_count || 0) >= 2);
+
 
   /* =======================================================
      ACTIVE STUDY SCREEN
@@ -1117,7 +1217,9 @@ function goToNextFlashcard() {
 
 
   return (
-    <section className="study-shell">
+    <section className={`study-shell${flowActive ? " flow-mode" : ""}`}>
+
+      {flowActive ? <div className="flow-banner" role="status"><strong>🔥 FLOW MODE</strong><span>{flowMultiplier.toFixed(1)}× momentum</span><small>Stay locked in.</small></div> : null}
 
       {/* -----------------------------------------------------
           HEADER
@@ -1257,6 +1359,11 @@ function goToNextFlashcard() {
 
       </div>
 
+      <div className="flashcard-race" aria-label={`Study race: ${correct} correct answers`}>
+        <div className="race-label"><strong>🏎️ Flashcard race</strong><span>{answerStreak >= 3 ? "BOOST ACTIVE 💨" : "Build a 3-card combo to boost"}</span></div>
+        <div className="race-track"><span className={answerStreak >= 3 ? "boosting" : ""} style={{ left: `calc(${raceProgress}% - 18px)` }}>🏎️</span><b>🏁</b></div>
+      </div>
+
 
       {/* -----------------------------------------------------
           SESSION SUMMARY
@@ -1277,6 +1384,8 @@ function goToNextFlashcard() {
         <span>
           {missed} missed
         </span>
+
+        <span>🔥 {answerStreak} combo</span>
 
       </div>
 
@@ -1336,6 +1445,12 @@ function goToNextFlashcard() {
           ----------------------------------------------------- */}
 
       <section className={`study-card${feedback ? (feedback.correct ? " feedback-flash-correct" : " feedback-flash-wrong") : ""}`}>
+
+        {!feedback && isRevengeCard ? <div className="challenge-banner revenge"><strong>⚡ REVENGE CARD</strong><span>You&apos;ve seen this one before. Take it back.</span></div> : null}
+        {!feedback && isClutchCard ? <div className="challenge-banner clutch"><strong>⚠️ CLUTCH CARD</strong><span>Get this right to Master it.</span></div> : null}
+        {feedback && moment?.type === "revenge-added" ? <div className="story-moment broken"><strong>COMBO BROKEN 💔</strong><span>You answered: {moment.answer}</span><span>Correct answer: {moment.expected}</span><b>⚡ REVENGE CARD ADDED</b></div> : null}
+        {feedback && moment?.type === "revenge-complete" ? <div className="story-moment complete"><strong>⚡ REVENGE COMPLETE</strong><span>You fixed a previous mistake.</span><b>+{moment.xp} XP</b></div> : null}
+        {feedback && moment?.type === "mastered" ? <div className="story-moment complete"><strong>💥 MASTERED</strong><span>{currentCard.term}</span><b>+{moment.xp} XP · Difficult victory.</b></div> : null}
 
 
         {/* TRUE / FALSE */}

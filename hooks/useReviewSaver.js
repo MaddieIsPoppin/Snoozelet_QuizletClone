@@ -10,6 +10,7 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
   const savingAttemptRef = useRef(null);
   const attemptIdsRef = useRef(new Map());
   const attemptGenerationRef = useRef(0);
+  const sessionIdRef = useRef(null);
 
   useEffect(() => () => {
     if (xpTimerRef.current) window.clearTimeout(xpTimerRef.current);
@@ -22,6 +23,8 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
 
   function beginAttemptGeneration() {
     attemptGenerationRef.current += 1;
+    sessionIdRef.current = window.crypto.randomUUID();
+    attemptIdsRef.current.clear();
   }
 
   function showXpNotice(data) {
@@ -32,6 +35,9 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
       amount: data.xpGained,
       totalXp: data.progress?.totalXp,
       level: data.progress?.level,
+      baseXp: data.baseXp,
+      bonusXp: data.bonusXp,
+      multiplier: data.flowMultiplier,
     });
     xpTimerRef.current = window.setTimeout(() => setXpNotice(null), 2000);
   }
@@ -58,6 +64,7 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
       attemptId = window.crypto.randomUUID();
       attemptIdsRef.current.set(attemptKey, attemptId);
     }
+    if (!sessionIdRef.current) sessionIdRef.current = window.crypto.randomUUID();
     if (savingAttemptRef.current === attemptId) return null;
 
     savingAttemptRef.current = attemptId;
@@ -70,6 +77,7 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
           attemptId,
+          sessionId: sessionIdRef.current,
           cardId: card.id,
           mode: reviewMode,
           answer: userAnswer,

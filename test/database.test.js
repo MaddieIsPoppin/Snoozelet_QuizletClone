@@ -246,6 +246,53 @@ test("database integration", async (suite) => {
     );
   });
 
+  await suite.test("awards authoritative Flow XP within one study session", async () => {
+    const flowDeckId = await db.createDeckWithCards({
+      userId: ownerId,
+      title: "Flow test",
+      cards: [{ term: "ATP", definition: "Produces ATP" }],
+    });
+    const [flowCard] = await db.getCards(flowDeckId, ownerId);
+    const sessionId = randomUUID();
+    const awards = [];
+    for (let index = 0; index < 5; index += 1) {
+      awards.push(await db.recordReview({
+        ...reviewFor(flowCard.id),
+        sessionId,
+        userId: ownerId,
+      }));
+    }
+    assert.deepEqual(awards.map((result) => Number(result.combo)), [1, 2, 3, 4, 5]);
+    assert.equal(awards[4].flowMultiplier, 1.2);
+    assert.equal(Number(awards[4].baseXp), 15);
+    assert.equal(Number(awards[4].xpGained), 18);
+  });
+
+  await suite.test("turns a session mistake into persistent Revenge and Mastery bonuses", async () => {
+    const storyDeckId = await db.createDeckWithCards({
+      userId: ownerId,
+      title: "Story test",
+      cards: [{ term: "Consistency", definition: "Produces ATP" }],
+    });
+    const [storyCard] = await db.getCards(storyDeckId, ownerId);
+    const sessionId = randomUUID();
+    const miss = await db.recordReview({
+      ...reviewFor(storyCard.id, { answer: "Atomicity", sessionId }),
+      userId: ownerId,
+    });
+    const revenge = await db.recordReview({ ...reviewFor(storyCard.id, { sessionId }), userId: ownerId });
+    await db.recordReview({ ...reviewFor(storyCard.id, { sessionId }), userId: ownerId });
+    const mastery = await db.recordReview({ ...reviewFor(storyCard.id, { sessionId }), userId: ownerId });
+
+    assert.equal(miss.moment, "revenge-added");
+    assert.equal(revenge.moment, "revenge-complete");
+    assert.equal(Number(revenge.bonusXp), 25);
+    assert.equal(Number(revenge.xpGained), 40);
+    assert.equal(mastery.moment, "mastered");
+    assert.equal(Number(mastery.bonusXp), 40);
+    assert.equal(Number(mastery.xpGained), 55);
+  });
+
   await suite.test("rejects review recording for a non-owner", async () => {
     const [card] = await db.getCards(deckId, ownerId);
     await assert.rejects(

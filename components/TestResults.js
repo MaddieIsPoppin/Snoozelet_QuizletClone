@@ -27,6 +27,11 @@ export default function TestResults({
   onReviewMistakes,
   onRetakeTest,
   onCreateAnotherTest,
+  onQuickContinue,
+  bestCombo = 0,
+  sessionXp = 0,
+  masteredCount = 0,
+  progress = null,
 }) {
   const total = testResults.length;
 
@@ -164,7 +169,14 @@ export default function TestResults({
             <p>Score</p>
           </div>
           <div><span>{averageSeconds}s</span><p>Average time</p></div>
+          <div><span>{bestCombo}</span><p>Best combo</p></div>
+          <div><span>{masteredCount}</span><p>Mastered</p></div>
+          <div><span>+{sessionXp}</span><p>XP earned</p></div>
         </div>
+        {progress ? <div className="session-level">
+          <div><strong>Level {progress.level}</strong><span>{progress.xpUntilNextLevel} XP until Level {progress.level + 1}</span></div>
+          <div className="session-level-track"><span style={{ width: `${Math.min(100, (progress.currentLevelXp / Math.max(1, progress.xpForNextLevel)) * 100)}%` }} /></div>
+        </div> : null}
       </section>
 
       {slowest ? (
@@ -370,9 +382,10 @@ export default function TestResults({
       )}
 
       <div className="row-actions test-result-actions">
+        <button className="button primary" type="button" onClick={onQuickContinue}>Continue — only ~7 questions</button>
         {mistakes.length > 0 ? (
           <button
-            className="button primary"
+            className="button"
             type="button"
             onClick={onReviewMistakes}
           >
