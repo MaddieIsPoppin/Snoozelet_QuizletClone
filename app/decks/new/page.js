@@ -17,7 +17,15 @@ export default async function NewDeckPage() {
         </Link>
       </header>
 
-      <section className="editor-panel">
+      <section className="mobile-review-only">
+        <span>☾</span>
+        <p className="eyebrow">Snoozelet on the go</p>
+        <h1>Create decks on Windows</h1>
+        <p>The mobile app is streamlined for reviewing and games. Use the Windows app when you want to create or import study content.</p>
+        <Link className="button primary" href="/study">Start reviewing</Link>
+      </section>
+
+      <section className="editor-panel desktop-authoring-only">
         <p className="eyebrow">New deck</p>
         <h1>Create a study set</h1>
         <form action={createDeckAction} className="form-stack">

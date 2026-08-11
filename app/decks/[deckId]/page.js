@@ -155,6 +155,11 @@ export default async function DeckPage({ params }) {
         </form>
       </details>
 
+      <aside className="mobile-companion-note">
+        <span>☾</span>
+        <div><strong>Ready for review</strong><p>Study this deck or play a game here. Add and edit cards from Snoozelet on Windows.</p></div>
+      </aside>
+
 
       {/* ====================================================
           STUDY
@@ -399,7 +404,7 @@ export default async function DeckPage({ params }) {
           CARDS
           ==================================================== */}
 
-      <section className="deck-section">
+      <section className="deck-section deck-content-section">
 
         <div className="deck-section-heading">
 

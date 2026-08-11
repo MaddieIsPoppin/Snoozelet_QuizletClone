@@ -16,6 +16,8 @@ const navigation = [
   { href: "/goals", label: "Exam plans", icon: "◎" },
 ];
 
+const mobileNavigation = [navigation[0], navigation[2], navigation[3], navigation[4]];
+
 export default function AppShell({ children }) {
   const pathname = usePathname();
   const authPage = ["/login", "/signup", "/setup"].some((path) => pathname.startsWith(path));
@@ -47,10 +49,10 @@ export default function AppShell({ children }) {
         </Link>
       </aside>
       <div className="snooze-main">
-        <header className="snooze-topbar"><Link href="/" className="mobile-brand"><span>☾</span><strong>Snoozelet</strong></Link><div className="topbar-actions"><ComfortSettings label="Settings" /><Link href="/decks/new" className="topbar-new-deck">＋ New deck</Link></div></header>
+        <header className="snooze-topbar"><Link href="/" className="mobile-brand"><span>☾</span><strong>Snoozelet</strong><small>On the go</small></Link><div className="topbar-actions"><ComfortSettings label="Settings" /><Link href="/decks/new" className="topbar-new-deck">＋ New deck</Link></div></header>
         <div className="snooze-content">{children}</div>
         <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-          {navigation.slice(0, 4).map((item) => <Link href={item.href} className={active(item) ? "active" : ""} key={item.href}><span>{item.icon}</span>{item.label === "My decks" ? "Decks" : item.label}</Link>)}
+          {mobileNavigation.map((item) => <Link href={item.href} className={active(item) ? "active" : ""} key={item.href}><span>{item.icon}</span>{item.label}</Link>)}
         </nav>
       </div>
     </div>

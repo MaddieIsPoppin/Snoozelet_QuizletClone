@@ -512,7 +512,8 @@ export default function StudySession({
   ) {
     if (
       !currentCard ||
-      feedback
+      feedback ||
+      selectedChoice !== null
     ) {
       return;
     }
@@ -532,11 +533,13 @@ export default function StudySession({
     if (
       mode === "test"
     ) {
-      await submitTestAnswer(
+      const submitted = await submitTestAnswer(
         choice,
         wasCorrect,
         expectedAnswer
       );
+
+      if (!submitted) setSelectedChoice(null);
 
       return;
     }
@@ -550,6 +553,7 @@ export default function StudySession({
     );
 
     if (!saved) {
+      setSelectedChoice(null);
       return;
     }
 

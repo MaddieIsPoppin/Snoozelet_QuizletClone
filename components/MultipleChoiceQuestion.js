@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 
 export default function MultipleChoiceQuestion({
   prompt,
@@ -13,6 +13,8 @@ export default function MultipleChoiceQuestion({
   onContinue,
   hint,
 }) {
+  const feedbackRef = useRef(null);
+
   useEffect(() => {
     if (window.matchMedia("(pointer: coarse)").matches) return undefined;
     function handleKeyDown(event) {
@@ -25,8 +27,19 @@ export default function MultipleChoiceQuestion({
     return () => window.removeEventListener("keydown", handleKeyDown);
   }, [feedback, onChoose, onContinue, options]);
 
+  useEffect(() => {
+    if (!feedback) return undefined;
+    const frame = window.requestAnimationFrame(() => {
+      feedbackRef.current?.scrollIntoView({
+        behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+        block: "nearest",
+      });
+    });
+    return () => window.cancelAnimationFrame(frame);
+  }, [feedback]);
+
   return (
-    <>
+    <div className={`multiple-choice-question${feedback ? " has-feedback" : ""}`}>
       <p className="eyebrow">
         Choose the correct answer
       </p>
@@ -55,7 +68,7 @@ export default function MultipleChoiceQuestion({
               className={className}
               type="button"
               key={`${choice}-${index}`}
-              disabled={Boolean(feedback)}
+              disabled={Boolean(feedback || selectedChoice !== null)}
               onClick={() => onChoose(choice)}
             >
               <kbd className="choice-key">{index + 1}</kbd>
@@ -67,11 +80,14 @@ export default function MultipleChoiceQuestion({
 
       {feedback ? (
         <div
+          ref={feedbackRef}
           className={
             feedback.correct
               ? "answer-feedback correct"
               : "answer-feedback incorrect"
           }
+          role="status"
+          aria-live="polite"
         >
           <h3>
             {feedback.correct
@@ -95,6 +111,6 @@ export default function MultipleChoiceQuestion({
           </button>
         </div>
       ) : null}
-    </>
+    </div>
   );
 }
