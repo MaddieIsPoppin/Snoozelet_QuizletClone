@@ -166,6 +166,19 @@ strong {
   color: white;
 }
 
+:focus-visible { outline: 3px solid var(--moon); outline-offset: 3px; }
+html[data-font-size="large"] { font-size: 112.5%; }
+html[data-font-size="xlarge"] { font-size: 125%; }
+html[data-dyslexic-font="true"] body { font-family: Verdana, Tahoma, Arial, sans-serif; letter-spacing: .025em; word-spacing: .08em; }
+html[data-theme="oled"] { --night-1000: #000; --night-975: #000; --night-950: #050505; --surface: #080808; --surface-2: #101010; --surface-3: #181818; }
+html[data-theme="light"] { color-scheme: light; --night-1000: #f3f5fb; --night-975: #fff; --night-950: #e8edf8; --cream: #15213d; --text: #15213d; --text-soft: #344362; --muted: #596783; --surface: rgba(255,255,255,.96); --surface-2: rgba(239,243,252,.96); --surface-3: rgba(222,230,246,.92); --surface-input: rgba(255,255,255,.95); --line: rgba(32,48,82,.15); --line-strong: rgba(32,48,82,.28); }
+html[data-theme="light"] body { background: linear-gradient(180deg,#fff,#eef2fa); }
+html[data-theme="light"] .night-sky { opacity: .08; }
+html[data-high-contrast="true"] { --muted: #fff; --line: rgba(255,255,255,.55); --line-strong: rgba(255,255,255,.8); }
+html[data-theme="light"][data-high-contrast="true"] { --muted: #111; --line: rgba(0,0,0,.55); --line-strong: rgba(0,0,0,.8); }
+html[data-reduced-motion="true"] *, html[data-reduced-motion="true"] *::before, html[data-reduced-motion="true"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
+html[data-celebrations="false"] .xp-earned-popup { animation: none !important; }
+
 
 /* ==========================================================
    3. GLOBAL NIGHT SKY
@@ -5362,6 +5375,38 @@ div > span {
 .game-links { display: grid; grid-template-columns: repeat(3, 1fr); gap: 7px; text-align: center; }
 
 .progress-summary { display: grid; grid-template-columns: repeat(4, 1fr); gap: 14px; }
+.topbar-actions { display: flex; align-items: center; gap: 10px; }
+.comfort-settings { position: relative; }
+.comfort-trigger { padding: 9px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 750; }
+.comfort-panel { position: absolute; z-index: 50; top: calc(100% + 10px); right: 0; width: min(330px,calc(100vw - 28px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--night-925); box-shadow: var(--shadow-lg); }
+.comfort-heading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
+.comfort-heading strong,.comfort-heading small { display: block; }
+.comfort-heading small { color: var(--muted); margin-top: 2px; }
+.comfort-heading button { border: 0; background: transparent; cursor: pointer; font-size: 1.4rem; }
+.comfort-panel > label:not(.comfort-switch) { display: grid; gap: 6px; margin: 10px 0; color: var(--muted); font-weight: 700; }
+.comfort-switch { display: flex; justify-content: space-between; align-items: center; gap: 20px; padding: 9px 0; }
+.comfort-switch input { width: 20px; height: 20px; accent-color: var(--accent); }
+.comfort-panel > .button { width: 100%; margin-top: 12px; }
+.motivation-grid { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 14px; }
+.motivation-grid article,.progress-section { padding: 20px; border: 1px solid var(--line); border-radius: 17px; background: var(--surface); }
+.motivation-grid h2 { margin: 4px 0 8px; }
+.motivation-grid p:last-child { color: var(--muted); }
+.daily-goal-card { display: grid; grid-template-columns: 1fr auto; gap: 10px 20px; }
+.daily-goal-card label { display: grid; gap: 4px; color: var(--muted); }
+.goal-track { height: 9px; overflow: hidden; border-radius: 999px; background: rgba(120,135,180,.18); }
+.goal-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,var(--accent),var(--success)); }
+.daily-goal-card .goal-track,.daily-goal-card > p { grid-column: 1 / -1; }
+.progress-section { margin-top: 18px; }
+.achievement-grid { display: grid; grid-template-columns: repeat(3,1fr); gap: 10px; }
+.achievement-grid article { display: flex; align-items: center; gap: 12px; padding: 13px; border: 1px solid var(--line); border-radius: 12px; }
+.achievement-grid article > span { font-size: 1.5rem; color: var(--moon); }
+.achievement-grid small,.mastery-list span { display: block; color: var(--muted); }
+.achievement-grid .locked { opacity: .52; }
+.mastery-list { display: grid; gap: 12px; }
+.mastery-list article { display: grid; grid-template-columns: minmax(150px,1fr) minmax(160px,2fr) 48px; align-items: center; gap: 14px; }
+.activity-heatmap { display: grid; grid-template-columns: repeat(12,1fr); grid-auto-flow: column; grid-template-rows: repeat(7,12px); gap: 4px; max-width: 520px; }
+.activity-heatmap span { border-radius: 3px; background: rgba(120,135,180,.14); }
+.activity-heatmap .heat-1 { background: rgba(105,216,174,.3); }.activity-heatmap .heat-2 { background: rgba(105,216,174,.5); }.activity-heatmap .heat-3 { background: rgba(105,216,174,.72); }.activity-heatmap .heat-4 { background: #69d8ae; }
 .progress-summary small { color: var(--muted); }
 .recent-panel { margin-top: 18px; padding: 20px; border: 1px solid rgba(175,190,235,.14); border-radius: 18px; background: rgba(17,24,56,.65); }
 .recent-panel h2 { margin-top: 0; }
@@ -5579,6 +5624,9 @@ div > span {
   .blast-customize-grid,.adventure-options { grid-template-columns: 1fr; }
   .study-pet-habitat,.adventure-intro { grid-template-columns: 1fr; }
   .deck-settings-form { grid-template-columns: 1fr; }
+  .motivation-grid,.achievement-grid { grid-template-columns: 1fr; }
+  .mastery-list article { grid-template-columns: 1fr 44px; }
+  .mastery-list article > div:first-child { grid-column: 1 / -1; }
   .pet-stage { margin-top: 10px; }
   .adventure-intro .snoo-hero { min-height: 300px; }
 }

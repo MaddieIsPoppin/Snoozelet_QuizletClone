@@ -4,6 +4,19 @@ import { useId, useState } from "react";
 import CardImage from "@/components/CardImage";
 import { cardImageLimits } from "@/lib/card-media";
 
+async function optimizeImage(file) {
+  if (file.type === "image/gif" || file.size < 500_000) return file;
+  const bitmap = await createImageBitmap(file);
+  const scale = Math.min(1, 1600 / Math.max(bitmap.width, bitmap.height));
+  const canvas = document.createElement("canvas");
+  canvas.width = Math.round(bitmap.width * scale);
+  canvas.height = Math.round(bitmap.height * scale);
+  canvas.getContext("2d").drawImage(bitmap, 0, 0, canvas.width, canvas.height);
+  bitmap.close();
+  const blob = await new Promise((resolve) => canvas.toBlob(resolve, "image/webp", .82));
+  return blob && blob.size < file.size ? new File([blob], `${file.name.replace(/\.[^.]+$/, "")}.webp`, { type: "image/webp" }) : file;
+}
+
 export default function ImageUploadField({
   initialUrl = "",
   initialPublicId = "",
@@ -31,6 +44,7 @@ export default function ImageUploadField({
 
     setStatus("uploading");
     try {
+      const uploadFile = await optimizeImage(file);
       const signatureResponse = await fetch("/api/uploads/image-signature", {
         method: "POST",
       });
@@ -38,7 +52,7 @@ export default function ImageUploadField({
       if (!signatureResponse.ok) throw new Error(signature.error || "Could not start upload");
 
       const formData = new FormData();
-      formData.set("file", file);
+      formData.set("file", uploadFile);
       formData.set("api_key", signature.apiKey);
       formData.set("timestamp", String(signature.timestamp));
       formData.set("signature", signature.signature);

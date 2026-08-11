@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect } from "react";
 import TextField from "@/components/TextField";
 
 export default function TypedQuestion({
@@ -11,7 +12,23 @@ export default function TypedQuestion({
   onSubmit,
   onContinue,
   hint,
+  draftKey,
 }) {
+  useEffect(() => {
+    if (!draftKey) return;
+    const saved = localStorage.getItem(`snoozelet-draft-${draftKey}`);
+    if (saved) setTypedAnswer(saved);
+  }, [draftKey, setTypedAnswer]);
+
+  function updateAnswer(value) {
+    setTypedAnswer(value);
+    if (draftKey) localStorage.setItem(`snoozelet-draft-${draftKey}`, value);
+  }
+
+  function continueAndClear() {
+    if (draftKey) localStorage.removeItem(`snoozelet-draft-${draftKey}`);
+    onContinue();
+  }
   return (
     <>
       <p className="eyebrow">
@@ -32,7 +49,7 @@ export default function TypedQuestion({
           name="answer"
           value={typedAnswer}
           onChange={(event) =>
-            setTypedAnswer(event.target.value)
+            updateAnswer(event.target.value)
           }
           placeholder="Your answer"
           autoFocus
@@ -73,7 +90,7 @@ export default function TypedQuestion({
           <button
             className="button primary"
             type="button"
-            onClick={onContinue}
+            onClick={continueAndClear}
           >
             Continue
           </button>

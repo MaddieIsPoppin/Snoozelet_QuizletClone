@@ -344,6 +344,17 @@ test("database integration", async (suite) => {
     assert.equal(Number(logCountAfter.count), Number(logCountBefore.count));
   });
 
+  await suite.test("builds private motivation summaries and backups", async () => {
+    const summary = await db.getMotivationSummary(ownerId);
+    assert.ok(summary.todayReviews >= 1);
+    assert.ok(summary.weeklyReviews >= summary.todayReviews);
+    assert.ok(summary.mastery.some((deck) => Number(deck.id) === deckId));
+    const backup = await db.getBackupData(ownerId);
+    assert.equal(backup.format, "snoozelet-backup");
+    assert.ok(backup.decks.some((deck) => deck.title === "Renamed deck"));
+    assert.equal((await db.getBackupData(otherUserId)).decks.length, 0);
+  });
+
   await suite.test("deleting a card removes its stats and review logs", async () => {
     const cards = await db.getCards(deckId, ownerId);
     const reviewedCard = cards.find((card) => card.term === "Mitochondria");

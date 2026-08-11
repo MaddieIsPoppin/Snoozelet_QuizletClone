@@ -1405,6 +1405,7 @@ function goToNextFlashcard() {
           /* TYPED */
 
           <TypedQuestion
+            key={currentCard.id}
             prompt={prompt}
 
             answerDirection={
@@ -1431,6 +1432,7 @@ function goToNextFlashcard() {
               mode === "test" ? continueTestQuestion : continueAfterTyped
             }
             hint={currentCard.hint}
+            draftKey={`${deck.id}-${mode}-${currentCard.id}-${answerDirection}`}
           />
 
 
