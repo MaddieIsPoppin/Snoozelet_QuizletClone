@@ -44,14 +44,18 @@ export default function TypedQuestion({
       <form
         className="typed-answer-form"
         onSubmit={onSubmit}
+        autoComplete="off"
       >
         <TextField
-          name="answer"
           value={typedAnswer}
           onChange={(event) =>
             updateAnswer(event.target.value)
           }
           placeholder="Your answer"
+          autoComplete="off"
+          autoCorrect="off"
+          autoCapitalize="none"
+          spellCheck={false}
           autoFocus
           required
         />
