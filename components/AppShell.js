@@ -35,7 +35,7 @@ export default function AppShell({ children }) {
           {navigation.map((item) => <Link href={item.href} className={active(item) ? "nav-item active" : "nav-item"} key={item.href}><span className="nav-symbol">{item.icon}</span>{item.label}</Link>)}
         </nav>
         <Link href="/decks/new" className="sidebar-new-deck"><span>＋</span>Create deck</Link>
-        <div className="sidebar-comfort"><ComfortSettings /></div>
+        <div className="sidebar-comfort"><ComfortSettings placement="sidebar" /></div>
         <div className="sidebar-spacer" />
         <Link className="sidebar-companion" href="/study">
           <SnoozeMascot variant="coach" mood="happy" />

@@ -167,13 +167,12 @@ strong {
 }
 
 :focus-visible { outline: 3px solid var(--moon); outline-offset: 3px; }
-html[data-font-size="large"] { font-size: 112.5%; }
-html[data-font-size="xlarge"] { font-size: 125%; }
+html[data-font-size="large"] body { font-size: 17px; }
+html[data-font-size="xlarge"] body { font-size: 18px; }
 html[data-dyslexic-font="true"] body { font-family: Verdana, Tahoma, Arial, sans-serif; letter-spacing: .025em; word-spacing: .08em; }
-html[data-theme="oled"] { --night-1000: #000; --night-975: #000; --night-950: #050505; --surface: #080808; --surface-2: #101010; --surface-3: #181818; }
-html[data-theme="light"] { color-scheme: light; --night-1000: #f3f5fb; --night-975: #fff; --night-950: #e8edf8; --cream: #15213d; --text: #15213d; --text-soft: #344362; --muted: #596783; --surface: rgba(255,255,255,.96); --surface-2: rgba(239,243,252,.96); --surface-3: rgba(222,230,246,.92); --surface-input: rgba(255,255,255,.95); --line: rgba(32,48,82,.15); --line-strong: rgba(32,48,82,.28); }
-html[data-theme="light"] body { background: linear-gradient(180deg,#fff,#eef2fa); }
-html[data-theme="light"] .night-sky { opacity: .08; }
+html[data-theme="light"] { color-scheme: light; --night-1000: #f5f7fc; --night-975: #f9faff; --night-950: #edf1fa; --night-925: #fff; --cream: #17213a; --text: #17213a; --text-soft: #33415f; --muted: #60708e; --muted-2: #71809b; --surface: #fff; --surface-2: #f3f6fc; --surface-3: #e9eef8; --surface-hover: #e7ecf8; --surface-input: #fff; --line: rgba(40,57,91,.14); --line-strong: rgba(40,57,91,.26); --accent-soft: rgba(91,80,222,.1); --shadow-sm: 0 6px 20px rgba(42,54,82,.08); --shadow: 0 16px 42px rgba(42,54,82,.1); --shadow-lg: 0 24px 64px rgba(42,54,82,.16); }
+html[data-theme="light"] body { background: #f5f7fc; }
+html[data-theme="light"] .night-sky { display: none; }
 html[data-high-contrast="true"] { --muted: #fff; --line: rgba(255,255,255,.55); --line-strong: rgba(255,255,255,.8); }
 html[data-theme="light"][data-high-contrast="true"] { --muted: #111; --line: rgba(0,0,0,.55); --line-strong: rgba(0,0,0,.8); }
 html[data-reduced-motion="true"] *, html[data-reduced-motion="true"] *::before, html[data-reduced-motion="true"] *::after { scroll-behavior: auto !important; animation-duration: .01ms !important; animation-iteration-count: 1 !important; transition-duration: .01ms !important; }
@@ -5190,6 +5189,42 @@ div > span {
   line-height: 1;
 }
 
+/* Complete light appearance: solid, readable surfaces rather than inverted night cards. */
+html[data-theme="light"] .snooze-sidebar {
+  border-right-color: #d9e0ee;
+  background: linear-gradient(180deg,#fff 0%,#f0f4fb 100%);
+  box-shadow: 12px 0 36px rgba(45,58,88,.08);
+}
+html[data-theme="light"] :is(.sidebar-brand,.nav-item,.sidebar-companion,.sidebar-companion strong) { color: #273550; }
+html[data-theme="light"] :is(.sidebar-brand > div:last-child > span,.sidebar-companion small) { color: #687894; }
+html[data-theme="light"] .nav-symbol { background: #e8edf8; color: #5268a5; }
+html[data-theme="light"] .nav-item:hover { border-color: #dce3f1; background: #edf1fa; color: #17213a; }
+html[data-theme="light"] .nav-item.active { border-color: #625ce1; background: linear-gradient(135deg,#6d61ee,#536bd8); color: #fff; }
+html[data-theme="light"] .sidebar-new-deck { border-color: #ddd39d; background: #fff9dd; color: #695a16; }
+html[data-theme="light"] .sidebar-companion { border-color: #cbdedc; background: linear-gradient(145deg,#eefaf6,#f0edff); }
+html[data-theme="light"] .sidebar-comfort .comfort-trigger { border-color: #d8dfed; background: #fff; color: #25324d; }
+html[data-theme="light"] .comfort-backdrop { background: rgba(32,43,67,.25); }
+html[data-theme="light"] .comfort-panel { border-color: #d8dfed; background: #fff; color: #17213a; }
+html[data-theme="light"] .comfort-panel select { border-color: #ccd5e6; background: #f7f9fd; color: #17213a; }
+html[data-theme="light"] .dashboard-v3 .workspace-header h1 { background: none; color: #17213a; -webkit-text-fill-color: #17213a; }
+html[data-theme="light"] .dashboard-focus-card { border-color: #d8e0ef; background: radial-gradient(circle at 83% 20%,rgba(105,216,174,.16),transparent 17rem),linear-gradient(135deg,#fff,#eef1ff); box-shadow: 0 22px 58px rgba(45,58,88,.12); }
+html[data-theme="light"] .dashboard-focus-copy h2 { color: #17213a; }
+html[data-theme="light"] .focus-kicker { color: #5b50ba; }
+html[data-theme="light"] .dashboard-snoo-message { border-color: #cddbdc; background: rgba(255,255,255,.94); box-shadow: 0 12px 30px rgba(45,58,88,.12); }
+html[data-theme="light"] .dashboard-snoo-message strong { color: #257b67; }
+html[data-theme="light"] :is(.metric-strip article,.progress-summary article,.dashboard-shortcuts a) { border-color: #dbe2ef; background: #fff; box-shadow: 0 10px 28px rgba(45,58,88,.08); }
+html[data-theme="light"] :is(.dashboard-shortcuts a:hover,.metric-strip article:hover) { border-color: #b9c6e1; background: #f8faff; }
+html[data-theme="light"] :is(.folder-panel,.library-decks,.library-deck-card,.mode-deck-list article,.game-deck-grid article,.launcher-card,.study-shell,.study-card,.recent-panel,.progress-section,.motivation-grid article,.deck-overview-card,.quick-add-card,.deck-tool-card,.deck-term-card,.deck-settings-editor) { border-color: #dbe2ef; background: #fff; box-shadow: 0 10px 30px rgba(45,58,88,.07); }
+html[data-theme="light"] :is(input,textarea,select) { border-color: #cdd6e7; background: #fff; color: #17213a; }
+html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button,.adventure-options button) { border-color: #cdd6e7; background: #f7f9fd; color: #25324d; }
+html[data-theme="light"] :is(.study-pet-habitat,.adventure-intro,.potato-stage,.dungeon-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
+html[data-theme="light"] .pet-growth-track { background: #dfe6f2; }
+html[data-theme="light"] .pet-copy small { color: #397966; }
+
+@media (max-width: 760px) {
+  .comfort-panel,.comfort-panel-sidebar { inset: auto 14px 82px; width: auto; max-height: calc(100vh - 110px); }
+}
+
 .card-image-field {
   display: grid;
   gap: 10px;
@@ -5381,8 +5416,9 @@ div > span {
 .sidebar-comfort { margin-top: 10px; }
 .sidebar-comfort .comfort-trigger { width: 100%; padding: 11px 14px; text-align: left; }
 .sidebar-comfort .comfort-trigger::before { content: "Aa"; display: inline-grid; place-items: center; width: 25px; height: 25px; margin-right: 9px; border-radius: 7px; background: rgba(131,120,255,.16); color: #c8c2ff; font-size: .68rem; }
-.sidebar-comfort .comfort-panel { right: auto; left: 0; }
-.comfort-panel { position: absolute; z-index: 50; top: calc(100% + 10px); right: 0; width: min(330px,calc(100vw - 28px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--night-925); box-shadow: var(--shadow-lg); }
+.comfort-backdrop { position: fixed; z-index: 80; inset: 0; border: 0; background: rgba(3,8,22,.38); cursor: default; }
+.comfort-panel { position: fixed; z-index: 81; top: 76px; right: 24px; width: min(350px,calc(100vw - 28px)); max-height: calc(100vh - 96px); overflow-y: auto; padding: 18px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--night-925); box-shadow: var(--shadow-lg); }
+.comfort-panel-sidebar { right: auto; left: calc(var(--sidebar-width) + 18px); }
 .comfort-heading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 .comfort-heading strong,.comfort-heading small { display: block; }
 .comfort-heading small { color: var(--muted); margin-top: 2px; }
@@ -5645,4 +5681,36 @@ div > span {
       255,
       0.18
     );
+}
+
+/* Final light-theme overrides must follow the night-specific visual expansion. */
+html[data-theme="light"] .snooze-sidebar { border-right-color: #d9e0ee; background: linear-gradient(180deg,#fff,#f0f4fb); box-shadow: 12px 0 36px rgba(45,58,88,.08); }
+html[data-theme="light"] :is(.sidebar-brand,.nav-item,.sidebar-companion,.sidebar-companion strong) { color: #273550; }
+html[data-theme="light"] :is(.sidebar-brand > div:last-child > span,.sidebar-companion small) { color: #687894; }
+html[data-theme="light"] .nav-symbol { background: #e8edf8; color: #5268a5; }
+html[data-theme="light"] .nav-item:hover { border-color: #dce3f1; background: #edf1fa; color: #17213a; }
+html[data-theme="light"] .nav-item.active { border-color: #625ce1; background: linear-gradient(135deg,#6d61ee,#536bd8); color: #fff; }
+html[data-theme="light"] .sidebar-new-deck { border-color: #ddd39d; background: #fff9dd; color: #695a16; }
+html[data-theme="light"] .sidebar-companion { border-color: #cbdedc; background: linear-gradient(145deg,#eefaf6,#f0edff); }
+html[data-theme="light"] .sidebar-comfort .comfort-trigger { border-color: #d8dfed; background: #fff; color: #25324d; }
+html[data-theme="light"] .comfort-backdrop { background: rgba(32,43,67,.25); }
+html[data-theme="light"] .comfort-panel { border-color: #d8dfed; background: #fff; color: #17213a; }
+html[data-theme="light"] .comfort-panel select { border-color: #ccd5e6; background: #f7f9fd; color: #17213a; }
+html[data-theme="light"] .dashboard-v3 .workspace-header h1 { background: none; color: #17213a; -webkit-text-fill-color: #17213a; }
+html[data-theme="light"] .dashboard-focus-card { border-color: #d8e0ef; background: radial-gradient(circle at 83% 20%,rgba(105,216,174,.16),transparent 17rem),linear-gradient(135deg,#fff,#eef1ff); box-shadow: 0 22px 58px rgba(45,58,88,.12); }
+html[data-theme="light"] .dashboard-focus-copy h2 { color: #17213a; }
+html[data-theme="light"] .focus-kicker { color: #5b50ba; }
+html[data-theme="light"] .dashboard-snoo-message { border-color: #cddbdc; background: rgba(255,255,255,.94); box-shadow: 0 12px 30px rgba(45,58,88,.12); }
+html[data-theme="light"] .dashboard-snoo-message strong { color: #257b67; }
+html[data-theme="light"] :is(.metric-strip article,.progress-summary article,.dashboard-shortcuts a) { border-color: #dbe2ef; background: #fff; box-shadow: 0 10px 28px rgba(45,58,88,.08); }
+html[data-theme="light"] :is(.dashboard-shortcuts a:hover,.metric-strip article:hover) { border-color: #b9c6e1; background: #f8faff; }
+html[data-theme="light"] :is(.folder-panel,.library-decks,.library-deck-card,.mode-deck-list article,.game-deck-grid article,.launcher-card,.study-shell,.study-card,.recent-panel,.progress-section,.motivation-grid article,.deck-overview-card,.quick-add-card,.deck-tool-card,.deck-term-card,.deck-settings-editor) { border-color: #dbe2ef; background: #fff; box-shadow: 0 10px 30px rgba(45,58,88,.07); }
+html[data-theme="light"] :is(input,textarea,select) { border-color: #cdd6e7; background: #fff; color: #17213a; }
+html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button,.adventure-options button) { border-color: #cdd6e7; background: #f7f9fd; color: #25324d; }
+html[data-theme="light"] :is(.study-pet-habitat,.adventure-intro,.potato-stage,.dungeon-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
+html[data-theme="light"] .pet-growth-track { background: #dfe6f2; }
+html[data-theme="light"] .pet-copy small { color: #397966; }
+
+@media (max-width: 760px) {
+  .comfort-panel,.comfort-panel-sidebar { inset: auto 14px 82px; width: auto; max-height: calc(100vh - 110px); }
 }
