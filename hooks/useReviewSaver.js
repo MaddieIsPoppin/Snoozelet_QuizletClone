@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useRef, useState } from "react";
+import { queueReview } from "@/lib/offline-reviews";
 
 export default function useReviewSaver({ mode, answerDirection, grading }) {
   const [xpNotice, setXpNotice] = useState(null);
@@ -49,7 +50,7 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
     userAnswer = "",
     options = {}
   ) {
-    const { questionKey, presentedAnswer } = options;
+    const { questionKey, presentedAnswer, offlineExpected = "" } = options;
     const attemptKey = [
       attemptGenerationRef.current,
       mode,
@@ -70,22 +71,23 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
     savingAttemptRef.current = attemptId;
     setReviewStatus("saving");
     setReviewError("");
+    const payload = {
+      attemptId,
+      sessionId: sessionIdRef.current,
+      cardId: card.id,
+      mode: reviewMode,
+      answer: userAnswer,
+      answerDirection,
+      grading,
+      selfAssessedCorrect: reviewMode === "flashcard" ? wasCorrect : undefined,
+      presentedAnswer,
+    };
 
     try {
       const response = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          attemptId,
-          sessionId: sessionIdRef.current,
-          cardId: card.id,
-          mode: reviewMode,
-          answer: userAnswer,
-          answerDirection,
-          grading,
-          selfAssessedCorrect: reviewMode === "flashcard" ? wasCorrect : undefined,
-          presentedAnswer,
-        }),
+        body: JSON.stringify(payload),
       });
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Could not save review");
@@ -94,6 +96,21 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
       setReviewStatus("success");
       return data;
     } catch (error) {
+      if (!navigator.onLine || error instanceof TypeError) {
+        try {
+          await queueReview(payload);
+          setReviewStatus("queued");
+          return {
+            cardId: card.id,
+            correct: Boolean(wasCorrect),
+            expected: offlineExpected,
+            xpGained: 0,
+            queued: true,
+          };
+        } catch (queueError) {
+          console.error("Could not queue offline review:", queueError);
+        }
+      }
       console.error("Could not save review:", error);
       setReviewStatus("error");
       setReviewError(error.message || "Could not save review");

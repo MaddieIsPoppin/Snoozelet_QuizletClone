@@ -5,6 +5,7 @@ import { usePathname } from "next/navigation";
 import SnoozeMascot from "@/components/SnoozeMascot";
 import ComfortSettings from "@/components/ComfortSettings";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
+import PwaControls from "@/components/PwaControls";
 
 const navigation = [
   { href: "/", label: "Observatory", icon: "⌂", exact: true },
@@ -29,6 +30,7 @@ export default function AppShell({ children }) {
   return (
     <div className="snooze-app shell-v3">
       <ServiceWorkerRegistration />
+      <PwaControls />
       <div className="night-sky" aria-hidden="true" />
       <aside className="snooze-sidebar">
         <Link href="/" className="sidebar-brand"><span className="sidebar-brand-icon">☾</span><div><strong>Snoozelet</strong><span>Study companion</span></div></Link>

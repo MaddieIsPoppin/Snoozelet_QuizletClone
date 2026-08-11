@@ -325,6 +325,7 @@ export default function StudySession({
   }
 
   function registerResult(card, saved, userAnswer = "") {
+    const wasRevenge = revengeCards.has(card.id);
     const nextStreak = Number(saved.combo ?? (saved.correct ? answerStreak + 1 : 0));
 
     setAnswerStreak(nextStreak);
@@ -349,7 +350,7 @@ export default function StudySession({
       return;
     }
 
-    if (saved.moment === "revenge-complete") {
+    if (saved.moment === "revenge-complete" || (saved.queued && wasRevenge)) {
       setRevengeCards((current) => {
         const next = new Map(current);
         next.delete(card.id);
@@ -470,7 +471,7 @@ export default function StudySession({
       wasCorrect,
       "typed",
       typedAnswer,
-      { questionKey: currentIndex }
+      { questionKey: currentIndex, offlineExpected: expectedAnswer }
     );
 
     if (!saved) {
@@ -544,7 +545,7 @@ export default function StudySession({
       wasCorrect,
       "multiple",
       choice,
-      { questionKey: currentIndex }
+      { questionKey: currentIndex, offlineExpected: expectedAnswer }
     );
 
     if (!saved) {
@@ -640,7 +641,7 @@ function goToNextFlashcard() {
       wasCorrect
         ? "Got it"
         : "Missed",
-      { questionKey: currentIndex }
+      { questionKey: currentIndex, offlineExpected: expectedAnswer }
     );
 
     if (!saved) {
@@ -720,6 +721,7 @@ function goToNextFlashcard() {
             ? question
                 .displayedAnswer
             : undefined,
+        offlineExpected: correctAnswer,
       }
     );
 
@@ -1418,6 +1420,8 @@ function goToNextFlashcard() {
         </p>
       ) : null}
 
+      {reviewStatus === "queued" ? <p className="offline-save-note" role="status">Saved on this device · XP and progress will sync when you reconnect.</p> : null}
+
 
       {/* -----------------------------------------------------
           PROGRESS BAR
@@ -1625,7 +1629,7 @@ function goToNextFlashcard() {
                 wasCorrect,
                 reviewMode,
                 userAnswer,
-                { questionKey: currentIndex }
+                { questionKey: currentIndex, offlineExpected: answerForDirection(currentCard, answerDirection) }
               );
 
               if (!saved) {
