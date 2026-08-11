@@ -1,4 +1,5 @@
 "use client";
+import { useEffect } from "react";
 
 export default function TrueFalseQuestion({
   prompt,
@@ -8,6 +9,16 @@ export default function TrueFalseQuestion({
   onAnswer,
   onContinue,
 }) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
+      if (feedback && event.key === "Enter") { event.preventDefault(); onContinue(); }
+      else if (!feedback && event.key.toLowerCase() === "t") onAnswer("True");
+      else if (!feedback && event.key.toLowerCase() === "f") onAnswer("False");
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [feedback, onAnswer, onContinue]);
   return (
     <>
       <p className="eyebrow">
@@ -27,6 +38,7 @@ export default function TrueFalseQuestion({
           disabled={Boolean(feedback)}
           onClick={() => onAnswer("True")}
         >
+          <kbd className="choice-key">T</kbd>
           True
         </button>
 
@@ -36,6 +48,7 @@ export default function TrueFalseQuestion({
           disabled={Boolean(feedback)}
           onClick={() => onAnswer("False")}
         >
+          <kbd className="choice-key">F</kbd>
           False
         </button>
       </div>

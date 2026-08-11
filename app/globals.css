@@ -4276,15 +4276,6 @@ div > span {
     );
 }
 
-.deck-game-blocks {
-  background:
-    linear-gradient(
-      145deg,
-      #1c5262,
-      #15303f
-    );
-}
-
 .deck-game-icon {
   width: 50px;
   height: 50px;
@@ -5220,9 +5211,35 @@ html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button,.
 html[data-theme="light"] :is(.study-pet-habitat,.adventure-intro,.potato-stage,.dungeon-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
 html[data-theme="light"] .pet-growth-track { background: #dfe6f2; }
 html[data-theme="light"] .pet-copy small { color: #397966; }
+html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.test-builder,.test-results .test-score-card) { border-color: #dbe2ef; background: #fff; color: #17213a; box-shadow: 0 10px 28px rgba(45,58,88,.08); }
 
 @media (max-width: 760px) {
   .comfort-panel,.comfort-panel-sidebar { inset: auto 14px 82px; width: auto; max-height: calc(100vh - 110px); }
+}
+
+/* Refined core game and test interactions. */
+.blast-target,.match-tile { position: relative; }
+.blast-key,.match-key,.choice-key { display: inline-grid; place-items: center; min-width: 24px; height: 24px; padding: 0 6px; border: 1px solid var(--line-strong); border-radius: 7px; background: rgba(255,255,255,.07); color: var(--muted); font: 800 .68rem/1 system-ui,sans-serif; box-shadow: none; }
+.blast-key { position: absolute; top: 10px; left: 10px; }
+.match-key { position: absolute; top: 10px; right: 10px; }
+.choice-key { margin-right: 8px; vertical-align: middle; }
+.blast-feedback.correct { background: var(--success-soft); color: #91e8c6; }
+.blast-feedback.wrong { background: var(--danger-soft); color: #ff9da7; }
+.test-builder { width: min(760px,100%); margin: 28px auto; padding: clamp(24px,5vw,44px); border-radius: 24px; }
+.test-builder > h1 { margin-bottom: 8px; font-size: clamp(2rem,5vw,3.4rem); }
+.test-builder > p:not(.eyebrow) { max-width: 640px; color: var(--muted); line-height: 1.65; }
+.test-builder-benefits { display: flex; flex-wrap: wrap; gap: 8px; margin: 20px 0 24px; }
+.test-builder-benefits span { padding: 7px 10px; border: 1px solid var(--line); border-radius: 999px; background: var(--accent-soft); color: var(--text-soft); font-size: .76rem; font-weight: 750; }
+.test-builder .test-options { grid-template-columns: repeat(3,minmax(0,1fr)); gap: 10px; }
+.test-builder .test-checkbox { align-items: flex-start; padding: 14px; border: 1px solid var(--line); border-radius: 12px; background: rgba(255,255,255,.025); }
+.test-checkbox strong,.test-checkbox small { display: block; }
+.test-checkbox small { margin-top: 4px; color: var(--muted); font-size: .7rem; line-height: 1.4; }
+.test-builder form > .button.primary { min-height: 50px; font-size: 1rem; }
+.test-results .test-score-card { border: 1px solid var(--line); background: linear-gradient(145deg,rgba(126,108,225,.13),rgba(105,216,174,.07)); }
+html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.test-builder,.test-results .test-score-card) { border-color: #dbe2ef; background: #fff; color: #17213a; box-shadow: 0 10px 28px rgba(45,58,88,.08); }
+
+@media (max-width: 760px) {
+  .test-builder .test-options { grid-template-columns: 1fr; }
 }
 
 .card-image-field {
@@ -5622,7 +5639,6 @@ html[data-theme="light"] .pet-copy small { color: #397966; }
 .pet-stage-5 .snoo-hero { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(105,216,174,.35)); }
 
 .game-choice-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-.game-choice-grid .game-hot-potato { background: linear-gradient(145deg,rgba(138,66,38,.18),rgba(255,255,255,.025)); }
 .game-choice-grid .game-dungeon { background: linear-gradient(145deg,rgba(75,48,132,.25),rgba(255,255,255,.025)); }
 
 .adventure-game { display: grid; gap: 18px; }

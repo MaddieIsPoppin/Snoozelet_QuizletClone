@@ -82,6 +82,7 @@ export default function TestResults({
           (right / results.length) *
             100
         ),
+        averageSeconds: Math.round(results.reduce((sum, result) => sum + (result.durationMs || 0), 0) / results.length / 1000),
       };
     })
     .filter(Boolean);
@@ -193,7 +194,7 @@ export default function TestResults({
                   <span>
                     {stat.percentage}%
                   </span>
-                  <span>{Math.round((result.durationMs || 0) / 1000)}s</span>
+                  <span>{stat.averageSeconds}s average</span>
 
                   <p>
                     {questionTypeLabel(

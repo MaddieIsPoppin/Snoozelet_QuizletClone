@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect } from "react";
+
 export default function MultipleChoiceQuestion({
   prompt,
   options,
@@ -11,6 +13,17 @@ export default function MultipleChoiceQuestion({
   onContinue,
   hint,
 }) {
+  useEffect(() => {
+    function handleKeyDown(event) {
+      if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
+      if (feedback && event.key === "Enter") { event.preventDefault(); onContinue(); return; }
+      const index = Number(event.key) - 1;
+      if (!feedback && index >= 0 && index < options.length) { event.preventDefault(); onChoose(options[index]); }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [feedback, onChoose, onContinue, options]);
+
   return (
     <>
       <p className="eyebrow">
@@ -44,6 +57,7 @@ export default function MultipleChoiceQuestion({
               disabled={Boolean(feedback)}
               onClick={() => onChoose(choice)}
             >
+              <kbd className="choice-key">{index + 1}</kbd>
               {choice}
             </button>
           );

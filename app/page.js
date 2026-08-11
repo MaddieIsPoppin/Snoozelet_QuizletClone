@@ -47,7 +47,7 @@ export default async function DashboardPage() {
       <section className="dashboard-shortcuts">
         <Link href="/library"><span>▤</span><div><strong>Organize decks</strong><small>Folders, search, and card management</small></div></Link>
         <Link href="/study"><span>◫</span><div><strong>Choose study mode</strong><small>Learn, flashcards, typed, or tests</small></div></Link>
-        <Link href="/games"><span>✦</span><div><strong>Play a study game</strong><small>Match, Blast, and Blocks</small></div></Link>
+        <Link href="/games"><span>✦</span><div><strong>Play a study game</strong><small>Match, Blast, and Dungeon</small></div></Link>
         <Link href="/progress"><span>↗</span><div><strong>Review progress</strong><small>Accuracy, XP, and recent work</small></div></Link>
       </section>
     </main>

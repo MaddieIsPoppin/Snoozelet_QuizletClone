@@ -49,7 +49,7 @@ export default async function TestPage({
           </Link>
         </header>
 
-        <section className="editor-panel">
+        <section className="editor-panel test-builder">
           <p className="eyebrow">
             Test
           </p>
@@ -59,9 +59,11 @@ export default async function TestPage({
           </h1>
 
           <p>
-            Choose how Snoozelet should
-            build your test.
+            Build a focused practice test, answer without distractions,
+            then review every result with clear feedback.
           </p>
+
+          <div className="test-builder-benefits"><span>Mixed question order</span><span>Automatic marking</span><span>Mistake review</span></div>
 
           <form
             method="GET"
@@ -117,7 +119,7 @@ export default async function TestPage({
                   value="multiple"
                 />
 
-                Multiple choice
+                <span><strong>Multiple choice</strong><small>Fast recognition with related distractors.</small></span>
               </label>
 
               <label className="test-checkbox">
@@ -128,7 +130,7 @@ export default async function TestPage({
                   value="typed"
                 />
 
-                Written
+                <span><strong>Written answers</strong><small>Strong active recall with flexible grading.</small></span>
               </label>
 
               <label className="test-checkbox">
@@ -139,7 +141,7 @@ export default async function TestPage({
                   value="true-false"
                 />
 
-                True / False
+                <span><strong>True or false</strong><small>Quickly check whether concepts connect.</small></span>
               </label>
             </fieldset>
 
@@ -156,7 +158,7 @@ export default async function TestPage({
               className="button primary"
               type="submit"
             >
-              Start Test
+              Build and start test
             </button>
           </form>
         </section>

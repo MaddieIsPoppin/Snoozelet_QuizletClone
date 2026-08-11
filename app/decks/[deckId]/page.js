@@ -408,36 +408,6 @@ export default async function DeckPage({ params }) {
           </Link>
 
 
-          <Link
-            className="deck-game-card deck-game-blocks"
-            href={`/decks/${deck.id}/blocks`}
-          >
-
-            <div className="deck-game-icon">
-              ▦
-            </div>
-
-            <div>
-              <p className="eyebrow">
-                Puzzle
-              </p>
-
-              <h3>
-                Blocks
-              </h3>
-
-              <p>
-                Match falling terms before your
-                stacks reach the loss line.
-              </p>
-            </div>
-
-            <span className="deck-game-arrow">
-              →
-            </span>
-
-          </Link>
-
         </div>
 
       </section>

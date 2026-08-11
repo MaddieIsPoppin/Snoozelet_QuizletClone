@@ -2,6 +2,8 @@
 
 import { useEffect, useMemo, useRef, useState } from "react";
 import { shuffle } from "@/lib/collections";
+import useReviewSaver from "@/hooks/useReviewSaver";
+import XpNotice from "@/components/XpNotice";
 
 function formatTime(milliseconds) {
   return (milliseconds / 1000).toFixed(2);
@@ -11,6 +13,7 @@ export default function MatchGame({
   deck,
   cards = [],
 }) {
+  const { saveReview, xpNotice } = useReviewSaver({ mode: "multiple", answerDirection: "definition", grading: "lenient" });
   const [mounted, setMounted] = useState(false);
 
   const [roundSize, setRoundSize] = useState(
@@ -38,6 +41,7 @@ export default function MatchGame({
 
   const [startTime, setStartTime] = useState(null);
   const [elapsedTime, setElapsedTime] = useState(0);
+  const [bestTime, setBestTime] = useState(null);
 
   const timerRef = useRef(null);
   const wrongTimerRef = useRef(null);
@@ -88,6 +92,7 @@ export default function MatchGame({
         pairId: card.id,
         type: "term",
         text: card.term,
+        card,
       });
 
       generatedTiles.push({
@@ -95,6 +100,7 @@ export default function MatchGame({
         pairId: card.id,
         type: "definition",
         text: card.definition,
+        card,
       });
     });
 
@@ -148,9 +154,13 @@ export default function MatchGame({
     }
 
     if (startTime) {
-      setElapsedTime(
-        Date.now() - startTime
-      );
+      const finalTime = Date.now() - startTime;
+      setElapsedTime(finalTime);
+      const key = `snoozelet-match-best-${deck.id}-${roundSize}`;
+      const previous = Number(localStorage.getItem(key)) || null;
+      const nextBest = previous ? Math.min(previous, finalTime) : finalTime;
+      localStorage.setItem(key, String(nextBest));
+      setBestTime(nextBest);
     }
 
     setGameFinished(true);
@@ -200,6 +210,8 @@ export default function MatchGame({
        * Flash both tiles green.
        */
       setCorrectTileIds(pairIds);
+      const matchedCard = selectedTile.card || tile.card;
+      saveReview(matchedCard, true, "multiple", matchedCard.definition, { questionKey: `match-${startTime}-${matchedCard.id}` });
 
       /*
        * Wait briefly so the user actually sees
@@ -256,6 +268,18 @@ export default function MatchGame({
         setSelectedTile(null);
       }, 650);
   }
+
+  useEffect(() => {
+    if (!gameStarted || gameFinished) return;
+    function handleKeyDown(event) {
+      if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
+      if (event.key === "Escape") { setSelectedTile(null); return; }
+      const tileIndex = Number(event.key) - 1;
+      if (tileIndex >= 0 && tileIndex < 9) document.querySelectorAll(".match-tile:not(:disabled)")[tileIndex]?.click();
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [gameStarted, gameFinished]);
 
   if (!mounted) {
     return (
@@ -360,6 +384,8 @@ export default function MatchGame({
             {formatTime(elapsedTime)} seconds
           </h1>
 
+          <p>{mistakes === 0 ? "Perfect round — every pair was clean." : mistakes <= 2 ? "Sharp matching. Try again to beat your time." : "Nice finish. A replay will make these pairs feel automatic."}</p>
+
           <div className="metrics-strip small">
             <div>
               <span>{matchedPairs}</span>
@@ -377,6 +403,7 @@ export default function MatchGame({
               </span>
               <p>Time</p>
             </div>
+            <div><span>{bestTime ? `${formatTime(bestTime)}s` : "—"}</span><p>Personal best</p></div>
           </div>
 
           <div className="row-actions">
@@ -409,6 +436,7 @@ export default function MatchGame({
    */
   return (
     <section className="study-shell match-game">
+      <XpNotice notice={xpNotice} />
       <div className="match-game-header">
         <div>
           <p className="eyebrow">
@@ -485,6 +513,7 @@ export default function MatchGame({
                 handleTileClick(tile)
               }
             >
+              {(() => { const keyNumber = tiles.filter((item) => !matchedIds.includes(item.id)).findIndex((item) => item.id === tile.id) + 1; return keyNumber <= 9 ? <kbd className="match-key">{keyNumber}</kbd> : null; })()}
               <span className="match-tile-type">
                 {tile.type === "term"
                   ? "Term"

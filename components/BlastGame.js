@@ -338,6 +338,20 @@ export default function BlastGame({
     }, betweenQuestions);
   }
 
+  useEffect(() => {
+    if (!gameStarted || gameOver) return;
+    function handleKeyDown(event) {
+      if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
+      const answerIndex = Number(event.key) - 1;
+      if (answerIndex >= 0 && answerIndex < 4) {
+        event.preventDefault();
+        document.querySelectorAll(".blast-target")[answerIndex]?.click();
+      }
+    }
+    window.addEventListener("keydown", handleKeyDown);
+    return () => window.removeEventListener("keydown", handleKeyDown);
+  }, [gameStarted, gameOver]);
+
   if (!mounted) {
     return (
       <section className="study-shell">
@@ -459,6 +473,8 @@ export default function BlastGame({
 
           <h1>{score} points</h1>
 
+          <p>{accuracy >= 90 ? "Incredible accuracy under pressure." : accuracy >= 70 ? "Strong run — your recall is getting faster." : "Good practice. Try a steadier timer and build your combo."}</p>
+
           <div className="metrics-strip small">
             <div>
               <span>{correctCount}</span>
@@ -547,6 +563,11 @@ export default function BlastGame({
       <div className="blast-time-track">
         <div
           className="blast-time-fill"
+          role="progressbar"
+          aria-label="Time remaining"
+          aria-valuemin="0"
+          aria-valuemax="100"
+          aria-valuenow={Math.round(progress)}
           style={{
             width: `${progress}%`,
           }}
@@ -562,8 +583,12 @@ export default function BlastGame({
 
         {feedbackType === "timeout" ? (
           <div className="blast-feedback timeout">
-            Too slow!
+            Time&apos;s up — {correctAnswer}
           </div>
+        ) : feedbackType === "correct" ? (
+          <div className="blast-feedback correct">Great hit! Combo {combo}x</div>
+        ) : feedbackType === "wrong" ? (
+          <div className="blast-feedback wrong">Correct answer: {correctAnswer}</div>
         ) : null}
       </section>
 
@@ -585,6 +610,10 @@ export default function BlastGame({
             className += " blast-target-wrong";
           }
 
+          if (feedbackType && normalize(option) === normalize(correctAnswer)) {
+            className += " blast-target-correct";
+          }
+
           return (
             <button
               key={`${option}-${index}`}
@@ -595,6 +624,7 @@ export default function BlastGame({
                 handleAnswer(option, index)
               }
             >
+              <kbd className="blast-key">{index + 1}</kbd>
               <span>
                 {option}
               </span>
