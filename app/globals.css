@@ -3874,6 +3874,14 @@ div > span {
   position: relative;
 }
 
+/* Keep the full card-creation workspace above study modes on desktop and mobile. */
+.deck-page-v2 > .deck-page-header { order: 1; }
+.deck-page-v2 > .deck-overview-card { order: 2; }
+.deck-page-v2 > .deck-settings-editor { order: 3; }
+.deck-page-v2 > .deck-manage-section { order: 4; }
+.deck-page-v2 > .deck-section:not(.deck-manage-section) { order: 5; }
+.deck-page-v2 > .deck-danger-zone { order: 6; }
+
 .deck-page-v2::before {
   content: "";
   position: fixed;
@@ -4509,6 +4517,29 @@ div > span {
 
 .deck-manage-section {
   padding-top: 5px;
+}
+
+.pending-form-fields {
+  min-width: 0;
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
+.pending-form-fields[disabled] {
+  opacity: .72;
+}
+
+.pending-form-fields[disabled] :is(input, textarea, select, button) {
+  cursor: wait;
+}
+
+.pending-form-status {
+  margin: 0;
+  color: var(--text-soft);
+  font-size: .82rem;
+  font-weight: 700;
+  text-align: center;
 }
 
 .deck-manage-grid {

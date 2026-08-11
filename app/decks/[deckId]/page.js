@@ -12,6 +12,7 @@ import TextField from "@/components/TextField";
 import DeckCardList from "@/components/DeckCardList";
 import ImageUploadField from "@/components/ImageUploadField";
 import CardCreationGuide from "@/components/CardCreationGuide";
+import PendingForm from "@/components/PendingForm";
 
 import { requireUser } from "@/lib/auth";
 import { getCards, getDeck } from "@/lib/db";
@@ -153,34 +154,6 @@ export default async function DeckPage({ params }) {
           <button className="button primary" type="submit">Save deck details</button>
         </form>
       </details>
-
-
-      {/* QUICK ADD — kept near the top so adding cards never requires a long scroll */}
-
-      <section className="quick-add-card" aria-labelledby="quick-add-heading">
-        <div className="quick-add-copy">
-          <p className="eyebrow">Build your deck</p>
-          <h2 id="quick-add-heading">Add a new card</h2>
-          <p>Capture the next idea now. You can add images and import full sets further down.</p>
-        </div>
-
-        <form action={addCardAction} className="quick-add-form">
-          <input name="deckId" type="hidden" value={deck.id} />
-          <label>
-            <span>Term or question</span>
-            <TextField name="term" placeholder="e.g. What does the mitochondrion do?" required />
-          </label>
-          <label>
-            <span>Answer</span>
-            <TextField name="definition" placeholder="e.g. Releases energy through cellular respiration" required />
-          </label>
-          <label>
-            <span>Hint (optional)</span>
-            <TextField name="hint" placeholder="e.g. Think about the powerhouse" />
-          </label>
-          <button className="button primary quick-add-button" type="submit">＋ Add card</button>
-        </form>
-      </section>
 
 
       {/* ====================================================
@@ -535,9 +508,11 @@ export default async function DeckPage({ params }) {
             </div>
 
 
-            <form
+            <PendingForm
               action={addCardAction}
               className="form-stack"
+              submitLabel="Add card"
+              pendingLabel="Saving card…"
             >
 
               <input
@@ -578,14 +553,7 @@ export default async function DeckPage({ params }) {
               </label>
 
 
-              <button
-                className="button primary"
-                type="submit"
-              >
-                Add card
-              </button>
-
-            </form>
+            </PendingForm>
 
           </article>
 
@@ -613,9 +581,11 @@ export default async function DeckPage({ params }) {
             </div>
 
 
-            <form
+            <PendingForm
               action={importCardsAction}
               className="form-stack"
+              submitLabel="Import cards"
+              pendingLabel="Importing cards…"
             >
 
               <input
@@ -674,14 +644,7 @@ export default async function DeckPage({ params }) {
               </label>
 
 
-              <button
-                className="button primary"
-                type="submit"
-              >
-                Import cards
-              </button>
-
-            </form>
+            </PendingForm>
 
           </article>
 
