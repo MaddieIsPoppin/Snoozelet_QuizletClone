@@ -24,6 +24,17 @@ TURSO_DATABASE_URL=libsql://your-database.turso.io
 TURSO_AUTH_TOKEN=your-token
 ```
 
+To copy an existing local Snoozelet database into a new, empty Turso database,
+put those values in the ignored `.env.local` file and run:
+
+```bash
+npm run db:cloud-import
+```
+
+The importer initializes the current Snoozelet schema, preserves account and
+study data, deliberately excludes expired local login sessions, verifies
+foreign keys, and refuses to change a cloud database that already has users.
+
 If card image uploads are required, also configure the three Cloudinary values
 documented in `README.md`. Never commit tokens to Git.
 

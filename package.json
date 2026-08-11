@@ -12,7 +12,8 @@
     "lint": "eslint .",
     "check": "npm run lint && npm test",
     "db:seed": "node scripts/seed.js",
-    "db:reset": "node scripts/seed.js --reset"
+    "db:reset": "node scripts/seed.js --reset",
+    "db:cloud-import": "node scripts/import-local-to-cloud.js"
   },
   "dependencies": {
     "@libsql/client": "^0.17.2",
