@@ -11,12 +11,15 @@ import TextField from "@/components/TextField";
 import CardImage from "@/components/CardImage";
 import ImageUploadField from "@/components/ImageUploadField";
 
+const CARDS_PER_PAGE = 40;
+
 export default function DeckCardList({
   cards = [],
   deckId,
 }) {
   const [search, setSearch] = useState("");
   const [filter, setFilter] = useState("all");
+  const [page, setPage] = useState(1);
 
   const filteredCards = useMemo(() => {
     const query = search
@@ -71,7 +74,15 @@ export default function DeckCardList({
   function clearFilters() {
     setSearch("");
     setFilter("all");
+    setPage(1);
   }
+
+  const pageCount = Math.max(1, Math.ceil(filteredCards.length / CARDS_PER_PAGE));
+  const currentPage = Math.min(page, pageCount);
+  const visibleCards = filteredCards.slice(
+    (currentPage - 1) * CARDS_PER_PAGE,
+    currentPage * CARDS_PER_PAGE
+  );
 
   return (
     <div className="deck-card-browser">
@@ -91,7 +102,7 @@ export default function DeckCardList({
             value={search}
             placeholder="Search terms or definitions..."
             onChange={(event) =>
-              setSearch(event.target.value)
+              { setSearch(event.target.value); setPage(1); }
             }
           />
 
@@ -100,7 +111,7 @@ export default function DeckCardList({
               type="button"
               className="deck-search-clear"
               onClick={() =>
-                setSearch("")
+                { setSearch(""); setPage(1); }
               }
               aria-label="Clear search"
             >
@@ -124,7 +135,7 @@ export default function DeckCardList({
                 : "deck-filter"
             }
             onClick={() =>
-              setFilter("all")
+              { setFilter("all"); setPage(1); }
             }
           >
             All
@@ -139,7 +150,7 @@ export default function DeckCardList({
                 : "deck-filter"
             }
             onClick={() =>
-              setFilter("weak")
+              { setFilter("weak"); setPage(1); }
             }
           >
             Weak
@@ -154,7 +165,7 @@ export default function DeckCardList({
                 : "deck-filter"
             }
             onClick={() =>
-              setFilter("studied")
+              { setFilter("studied"); setPage(1); }
             }
           >
             Studied
@@ -169,7 +180,7 @@ export default function DeckCardList({
                 : "deck-filter"
             }
             onClick={() =>
-              setFilter("unstudied")
+              { setFilter("unstudied"); setPage(1); }
             }
           >
             Unstudied
@@ -238,7 +249,7 @@ export default function DeckCardList({
 
         <div className="deck-card-list">
 
-          {filteredCards.map(
+          {visibleCards.map(
             (card, index) => {
 
               const attempts =
@@ -263,7 +274,7 @@ export default function DeckCardList({
                 >
 
                   <div className="deck-term-number">
-                    {index + 1}
+                    {(currentPage - 1) * CARDS_PER_PAGE + index + 1}
                   </div>
 
 
@@ -446,6 +457,14 @@ export default function DeckCardList({
         </div>
 
       )}
+
+      {pageCount > 1 ? (
+        <nav className="deck-pagination" aria-label="Card pages">
+          <button className="button" type="button" disabled={currentPage === 1} onClick={() => setPage((value) => Math.max(1, value - 1))}>Previous</button>
+          <span>Page {currentPage} of {pageCount}</span>
+          <button className="button" type="button" disabled={currentPage === pageCount} onClick={() => setPage((value) => Math.min(pageCount, value + 1))}>Next</button>
+        </nav>
+      ) : null}
 
     </div>
   );

@@ -8,11 +8,10 @@ import {
 } from "react";
 
 import { useRouter } from "next/navigation";
+import dynamic from "next/dynamic";
 import useReviewSaver from "@/hooks/useReviewSaver";
 
 import XpNotice from "@/components/XpNotice";
-import TestResults from "@/components/TestResults";
-import LearnQuestion from "@/components/LearnQuestion";
 import {
   advanceStudyQueue,
   answerForDirection,
@@ -27,11 +26,15 @@ import {
 } from "@/lib/study";
 import { isTypedCorrect } from "@/lib/grading";
 
-import FlashcardQuestion from "@/components/FlashcardQuestion";
-import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
-import TypedQuestion from "@/components/TypedQuestion";
-import TrueFalseQuestion from "@/components/TrueFalseQuestion";
 import MascotCoach from "@/components/MascotCoach";
+
+const questionLoader = () => <div className="study-question-loader" aria-label="Loading question" />;
+const FlashcardQuestion = dynamic(() => import("@/components/FlashcardQuestion"), { loading: questionLoader });
+const MultipleChoiceQuestion = dynamic(() => import("@/components/MultipleChoiceQuestion"), { loading: questionLoader });
+const TypedQuestion = dynamic(() => import("@/components/TypedQuestion"), { loading: questionLoader });
+const TrueFalseQuestion = dynamic(() => import("@/components/TrueFalseQuestion"), { loading: questionLoader });
+const LearnQuestion = dynamic(() => import("@/components/LearnQuestion"), { loading: questionLoader });
+const TestResults = dynamic(() => import("@/components/TestResults"), { loading: questionLoader });
 
 
 /* =========================================================
