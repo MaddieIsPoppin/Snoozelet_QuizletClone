@@ -82,6 +82,11 @@ export async function logoutAction() {
   redirect("/login");
 }
 
+export async function recoverLoginAction() {
+  await clearSession();
+  redirect("/login");
+}
+
 export async function createDeckAction(formData) {
   const user = await requireUser();
   const title = String(formData.get("title") || "").trim();

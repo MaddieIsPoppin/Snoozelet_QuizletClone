@@ -1,5 +1,5 @@
-import Link from "next/link";
 import BrandMark from "@/components/BrandMark";
+import { recoverLoginAction } from "@/app/actions";
 import { isHostedWithoutDatabase } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
@@ -28,9 +28,11 @@ export default function SetupPage() {
         ) : (
           <p>The hosted database variables are present. You can go back and sign in.</p>
         )}
-        <Link className="button primary" href="/login">
-          Go to login
-        </Link>
+        <form action={recoverLoginAction}>
+          <button className="button primary" type="submit">
+            Clear session and go to login
+          </button>
+        </form>
       </section>
     </main>
   );
