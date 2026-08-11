@@ -5378,6 +5378,10 @@ div > span {
 .topbar-actions { display: flex; align-items: center; gap: 10px; }
 .comfort-settings { position: relative; }
 .comfort-trigger { padding: 9px 13px; border: 1px solid var(--line); border-radius: 10px; background: var(--surface-2); color: var(--text); cursor: pointer; font-weight: 750; }
+.sidebar-comfort { margin-top: 10px; }
+.sidebar-comfort .comfort-trigger { width: 100%; padding: 11px 14px; text-align: left; }
+.sidebar-comfort .comfort-trigger::before { content: "Aa"; display: inline-grid; place-items: center; width: 25px; height: 25px; margin-right: 9px; border-radius: 7px; background: rgba(131,120,255,.16); color: #c8c2ff; font-size: .68rem; }
+.sidebar-comfort .comfort-panel { right: auto; left: 0; }
 .comfort-panel { position: absolute; z-index: 50; top: calc(100% + 10px); right: 0; width: min(330px,calc(100vw - 28px)); padding: 18px; border: 1px solid var(--line-strong); border-radius: 16px; background: var(--night-925); box-shadow: var(--shadow-lg); }
 .comfort-heading { display: flex; justify-content: space-between; gap: 16px; margin-bottom: 14px; }
 .comfort-heading strong,.comfort-heading small { display: block; }
