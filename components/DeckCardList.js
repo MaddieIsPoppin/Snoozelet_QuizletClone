@@ -38,7 +38,8 @@ export default function DeckCardList({
           .includes(query) ||
         card.definition
           .toLowerCase()
-          .includes(query);
+          .includes(query) ||
+        (card.hint || "").toLowerCase().includes(query);
 
       if (!matchesSearch) {
         return false;
@@ -289,6 +290,7 @@ export default function DeckCardList({
                         <p>
                           {card.definition}
                         </p>
+                        {card.hint ? <small className="deck-card-hint">Hint: {card.hint}</small> : null}
                       </div>
 
                     </div>
@@ -389,6 +391,11 @@ export default function DeckCardList({
                           initialPublicId={card.imagePublicId}
                           initialAlt={card.imageAlt}
                         />
+
+                        <label>
+                          Hint (optional)
+                          <TextField name="hint" defaultValue={card.hint || ""} placeholder="A small clue" />
+                        </label>
 
 
                         <button

@@ -10,6 +10,7 @@ export default function TypedQuestion({
   feedback,
   onSubmit,
   onContinue,
+  hint,
 }) {
   return (
     <>
@@ -20,6 +21,8 @@ export default function TypedQuestion({
       </p>
 
       <h2>{prompt}</h2>
+
+      {hint && !feedback ? <details className="study-hint"><summary>Need a hint?</summary><p>{hint}</p></details> : null}
 
       <form
         className="typed-answer-form"

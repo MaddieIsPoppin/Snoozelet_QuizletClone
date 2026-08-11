@@ -5,6 +5,7 @@ import {
   addCardAction,
   deleteDeckAction,
   importCardsAction,
+  updateDeckAction,
 } from "@/app/actions";
 
 import TextField from "@/components/TextField";
@@ -143,6 +144,16 @@ export default async function DeckPage({ params }) {
 
       </section>
 
+      <details className="deck-settings-editor">
+        <summary>Edit deck name and description</summary>
+        <form action={updateDeckAction} className="deck-settings-form">
+          <input name="deckId" type="hidden" value={deck.id} />
+          <label>Deck name<TextField name="title" defaultValue={deck.title} maxLength="120" required /></label>
+          <label>Description<TextField textarea name="description" defaultValue={deck.description || ""} rows="2" /></label>
+          <button className="button primary" type="submit">Save deck details</button>
+        </form>
+      </details>
+
 
       {/* QUICK ADD — kept near the top so adding cards never requires a long scroll */}
 
@@ -162,6 +173,10 @@ export default async function DeckPage({ params }) {
           <label>
             <span>Answer</span>
             <TextField name="definition" placeholder="e.g. Releases energy through cellular respiration" required />
+          </label>
+          <label>
+            <span>Hint (optional)</span>
+            <TextField name="hint" placeholder="e.g. Think about the powerhouse" />
           </label>
           <button className="button primary quick-add-button" type="submit">＋ Add card</button>
         </form>
@@ -577,6 +592,11 @@ export default async function DeckPage({ params }) {
               </label>
 
               <ImageUploadField />
+
+              <label>
+                Hint (optional)
+                <TextField name="hint" placeholder="A small clue without giving away the answer" />
+              </label>
 
 
               <button

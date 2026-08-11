@@ -11,6 +11,7 @@ import {
   deleteDeck,
   deleteDeckFolder,
   updateCard,
+  updateDeck,
 } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
@@ -107,7 +108,8 @@ export async function addCardAction(formData) {
   const term = String(formData.get("term") || "").trim();
   const definition = String(formData.get("definition") || "").trim();
 
-  await addCards(deckId, [{ term, definition, ...cardImageFromForm(formData) }], user.id);
+  const hint = String(formData.get("hint") || "").trim();
+  await addCards(deckId, [{ term, definition, hint, ...cardImageFromForm(formData) }], user.id);
   revalidatePath(`/decks/${deckId}`);
 }
 
@@ -133,16 +135,31 @@ export async function updateCardAction(formData) {
   const cardId = String(formData.get("cardId"));
   const term = String(formData.get("term") || "").trim();
   const definition = String(formData.get("definition") || "").trim();
+  const hint = String(formData.get("hint") || "").trim();
 
   await updateCard({
     cardId,
     deckId,
     term,
     definition,
+    hint,
     ...cardImageFromForm(formData),
     userId: user.id,
   });
   revalidatePath(`/decks/${deckId}`);
+}
+
+export async function updateDeckAction(formData) {
+  const user = await requireUser();
+  const deckId = String(formData.get("deckId"));
+  await updateDeck({
+    deckId,
+    title: formData.get("title"),
+    description: formData.get("description"),
+    userId: user.id,
+  });
+  revalidatePath(`/decks/${deckId}`);
+  revalidatePath("/library");
 }
 
 export async function deleteCardAction(formData) {

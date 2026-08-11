@@ -12,6 +12,7 @@ export default function FlashcardQuestion({
   answer,
   imageUrl,
   imageAlt,
+  hint,
   onResult,
   onPrevious,
   onNext,
@@ -193,6 +194,8 @@ export default function FlashcardQuestion({
       <h2>
         {prompt}
       </h2>
+
+      {hint && !revealed ? <details className="study-hint"><summary>Show hint</summary><p>{hint}</p></details> : null}
 
 
       {!revealed ? (

@@ -1368,6 +1368,8 @@ function goToNextFlashcard() {
 
   answer={expectedAnswer}
 
+  hint={currentCard.hint}
+
   imageUrl={currentCard.imageUrl}
 
   imageAlt={currentCard.imageAlt}
@@ -1425,6 +1427,7 @@ function goToNextFlashcard() {
             onContinue={
               mode === "test" ? continueTestQuestion : continueAfterTyped
             }
+            hint={currentCard.hint}
           />
 
 
@@ -1462,6 +1465,7 @@ function goToNextFlashcard() {
             onContinue={
               mode === "test" ? continueTestQuestion : continueAfterChoice
             }
+            hint={currentCard.hint}
           />
 
 

@@ -9,6 +9,7 @@ export default function MultipleChoiceQuestion({
   normalizeFlexible,
   onChoose,
   onContinue,
+  hint,
 }) {
   return (
     <>
@@ -17,6 +18,8 @@ export default function MultipleChoiceQuestion({
       </p>
 
       <h2>{prompt}</h2>
+
+      {hint && !feedback ? <details className="study-hint"><summary>Need a hint?</summary><p>{hint}</p></details> : null}
 
       <div className="choice-grid">
         {options.map((choice, index) => {

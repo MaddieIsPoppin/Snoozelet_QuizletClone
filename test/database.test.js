@@ -68,12 +68,21 @@ test("database integration", async (suite) => {
     assert.deepEqual(await db.getCards(deckId, otherUserId), []);
   });
 
+  await suite.test("updates deck details only for the owner", async () => {
+    await db.updateDeck({ deckId, title: "Renamed deck", description: "Updated", userId: ownerId });
+    assert.equal((await db.getDeck(deckId, ownerId)).title, "Renamed deck");
+    await assert.rejects(
+      db.updateDeck({ deckId, title: "Stolen", userId: otherUserId }),
+      /Deck not found/
+    );
+  });
+
   await suite.test("creates cards with matching study-stat relationships", async () => {
     assert.equal(
       await db.addCards(
         deckId,
         [
-          { term: "Mitochondria", definition: "Produces ATP" },
+          { term: "Mitochondria", definition: "Produces ATP", hint: "Powerhouse" },
           {
             term: "Nucleus",
             definition: "Stores DNA",
@@ -93,6 +102,7 @@ test("database integration", async (suite) => {
     assert.equal(illustrated.imagePublicId, "snoozelet/cards/nucleus");
     assert.equal(illustrated.imageAlt, "A cell nucleus");
     assert.equal(cards.find((card) => card.term === "Mitochondria").imageUrl, null);
+    assert.equal(cards.find((card) => card.term === "Mitochondria").hint, "Powerhouse");
 
     for (const card of cards) {
       const stat = await db.queryOne(

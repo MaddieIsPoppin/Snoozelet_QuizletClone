@@ -5537,6 +5537,14 @@ div > span {
 .game-choice-grid .game-dungeon { background: linear-gradient(145deg,rgba(75,48,132,.25),rgba(255,255,255,.025)); }
 
 .adventure-game { display: grid; gap: 18px; }
+.deck-settings-editor { margin: -10px 0 24px; padding: 14px 18px; border: 1px solid rgba(175,190,235,.16); border-radius: 14px; background: rgba(255,255,255,.025); }
+.deck-settings-editor summary { cursor: pointer; color: var(--muted); font-weight: 750; }
+.deck-settings-form { display: grid; grid-template-columns: minmax(180px,1fr) minmax(240px,2fr) auto; gap: 12px; align-items: end; margin-top: 16px; }
+.deck-settings-form label { display: grid; gap: 7px; }
+.deck-card-hint { display: block; margin-top: 8px; color: var(--muted); }
+.study-hint { width: min(100%,520px); margin: 12px auto 18px; padding: 10px 14px; border: 1px solid rgba(175,190,235,.18); border-radius: 12px; background: rgba(255,255,255,.035); text-align: left; }
+.study-hint summary { cursor: pointer; color: #bcb4ff; font-weight: 800; }
+.study-hint p { margin: 10px 0 2px; color: var(--cream); }
 .adventure-intro { display: grid; grid-template-columns: 1fr 280px; align-items: center; min-height: 430px; padding: clamp(28px,5vw,60px); overflow: hidden; border: 1px solid rgba(175,190,235,.2); border-radius: 28px; background: radial-gradient(circle at 80% 25%,rgba(230,112,65,.2),transparent 15rem),linear-gradient(135deg,rgba(41,35,91,.92),rgba(12,27,58,.9)); }
 .adventure-intro h1 { margin: 6px 0 12px; font-size: clamp(2.8rem,7vw,6rem); }
 .adventure-intro p:not(.eyebrow) { max-width: 660px; color: var(--muted); font-size: 1.05rem; line-height: 1.65; }
@@ -5545,8 +5553,14 @@ div > span {
 .adventure-hud strong { font-size: 1.2rem; }
 .potato-stage,.dungeon-stage { min-height: 290px; display: grid; place-items: center; align-content: center; padding: 30px; border: 1px solid rgba(175,190,235,.18); border-radius: 24px; text-align: center; background: radial-gradient(circle,rgba(216,82,57,.16),transparent 14rem),rgba(14,25,59,.7); }
 .dungeon-stage { background: radial-gradient(circle,rgba(126,88,219,.22),transparent 15rem),rgba(14,25,59,.7); }
+.realm-grid { display: grid; grid-template-columns: repeat(4,minmax(42px,1fr)); gap: 8px; max-width: 460px; width: 100%; margin: auto; padding: 14px; border: 1px solid rgba(175,190,235,.16); border-radius: 18px; background: rgba(8,18,44,.7); }
+.realm-grid span { display: grid; place-items: center; aspect-ratio: 1; border: 1px solid rgba(175,190,235,.13); border-radius: 10px; background: rgba(27,44,89,.56); color: var(--muted); font-weight: 900; }
+.realm-grid span.cleared { border-color: rgba(105,216,174,.35); background: rgba(33,112,87,.25); color: #91e8c6; }
+.realm-grid span.current { border-color: #a99cff; background: rgba(126,88,219,.5); box-shadow: 0 0 20px rgba(126,88,219,.35); color: white; }
+.realm-grid span.portal { border-color: rgba(230,112,65,.5); }
 .potato-stage h1,.dungeon-stage h1 { margin: 8px 0 0; font-size: clamp(1.8rem,4vw,3.2rem); }
 .study-bomb,.study-monster { font-size: 5rem; filter: drop-shadow(0 12px 20px rgba(0,0,0,.3)); animation: arcade-float 1.5s ease-in-out infinite alternate; }
+.dungeon-stage .study-monster { min-width: 76px; padding: 14px; border: 2px solid rgba(169,156,255,.65); border-radius: 14px 14px 22px 22px; background: rgba(70,48,130,.75); font-size: .75rem; font-weight: 950; letter-spacing: .08em; }
 @keyframes arcade-float { to { transform: translateY(-8px) rotate(3deg); } }
 .adventure-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
 .adventure-options button { min-height: 76px; padding: 15px; border: 1px solid rgba(175,190,235,.2); border-radius: 15px; background: rgba(27,44,89,.82); color: var(--cream); font-weight: 750; cursor: pointer; }
@@ -5560,6 +5574,7 @@ div > span {
 @media (max-width: 760px) {
   .blast-customize-grid,.adventure-options { grid-template-columns: 1fr; }
   .study-pet-habitat,.adventure-intro { grid-template-columns: 1fr; }
+  .deck-settings-form { grid-template-columns: 1fr; }
   .pet-stage { margin-top: 10px; }
   .adventure-intro .snoo-hero { min-height: 300px; }
 }
