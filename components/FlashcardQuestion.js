@@ -3,9 +3,11 @@
 import {
   useCallback,
   useEffect,
+  useRef,
   useState,
 } from "react";
 import CardImage from "@/components/CardImage";
+import { horizontalSwipe } from "@/lib/gestures";
 
 export default function FlashcardQuestion({
   prompt,
@@ -21,6 +23,8 @@ export default function FlashcardQuestion({
 }) {
   const [revealed, setRevealed] =
     useState(false);
+  const gestureStart = useRef(null);
+  const [gesture, setGesture] = useState("");
 
   function flipCard() {
     setRevealed(
@@ -50,6 +54,7 @@ export default function FlashcardQuestion({
    * Keyboard controls
    */
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
     function handleKeyDown(event) {
       const target =
         event.target;
@@ -186,8 +191,30 @@ export default function FlashcardQuestion({
     markMissed,
   ]);
 
+  function beginGesture(event) {
+    if (event.pointerType === "mouse") return;
+    gestureStart.current = { x: event.clientX, y: event.clientY };
+    setGesture("");
+  }
+
+  function finishGesture(event) {
+    const start = gestureStart.current;
+    gestureStart.current = null;
+    if (!start) return;
+    const direction = horizontalSwipe({ startX: start.x, startY: start.y, endX: event.clientX, endY: event.clientY });
+    if (!direction) return;
+
+    if (revealed) {
+      if (direction === "right") { setGesture("got-it"); markCorrect(); }
+      else { setGesture("missed"); markMissed(); }
+      return;
+    }
+    if (direction === "left" && hasNext && onNext) { setGesture("next"); setRevealed(false); onNext(); }
+    if (direction === "right" && hasPrevious && onPrevious) { setGesture("previous"); setRevealed(false); onPrevious(); }
+  }
+
   return (
-    <div className="flashcard-session">
+    <div className={`flashcard-session gesture-${gesture}`} onPointerDown={beginGesture} onPointerUp={finishGesture} onPointerCancel={() => { gestureStart.current = null; }}>
 
       <p className="prompt-label">
         Flashcard
@@ -306,6 +333,8 @@ export default function FlashcardQuestion({
         ) : null}
 
       </div>
+
+      <p className="flashcard-swipe-help">{revealed ? "Swipe left: Missed · Swipe right: Got it" : "Swipe to move between cards"}</p>
 
     </div>
   );

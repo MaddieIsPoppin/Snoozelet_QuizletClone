@@ -74,6 +74,7 @@ export default function StudySession({
   const [raceProgress, setRaceProgress] = useState(4);
   const [latestProgress, setLatestProgress] = useState(null);
   const [audioCue, setAudioCue] = useState(null);
+  const [mobileOptionsOpen, setMobileOptionsOpen] = useState(false);
 
 
   /* ---------------------------------------------------------
@@ -1261,7 +1262,9 @@ function goToNextFlashcard() {
 
 
         {mode !== "test" ? (
-          <div className="study-controls">
+          <div className="study-options-wrap">
+            <button className="study-options-trigger" type="button" aria-expanded={mobileOptionsOpen} onClick={() => setMobileOptionsOpen((value) => !value)}>Session settings</button>
+          <div className={`study-controls${mobileOptionsOpen ? " mobile-open" : ""}`}>
 
             <div className="direction-toggle">
 
@@ -1356,6 +1359,7 @@ function goToNextFlashcard() {
               Shuffle remaining
             </button>
 
+          </div>
           </div>
         ) : null}
 

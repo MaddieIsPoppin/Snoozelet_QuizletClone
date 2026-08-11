@@ -14,6 +14,7 @@ export default function MultipleChoiceQuestion({
   hint,
 }) {
   useEffect(() => {
+    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
     function handleKeyDown(event) {
       if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
       if (feedback && event.key === "Enter") { event.preventDefault(); onContinue(); return; }

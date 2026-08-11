@@ -8,7 +8,7 @@ function applyPreferences(value) {
   for (const [key, setting] of Object.entries(value)) root.dataset[key] = String(setting);
 }
 
-export default function ComfortSettings({ placement = "topbar" }) {
+export default function ComfortSettings({ placement = "topbar", label = "Comfort" }) {
   const panelId = useId();
   const [open, setOpen] = useState(false);
   const [mounted, setMounted] = useState(false);
@@ -30,7 +30,7 @@ export default function ComfortSettings({ placement = "topbar" }) {
       <button className="button" type="button" onClick={() => { setPreferences(DEFAULTS); applyPreferences(DEFAULTS); localStorage.removeItem("snoozelet-comfort"); }}>Reset settings</button>
     </section></>;
   return <div className="comfort-settings">
-    <button className="comfort-trigger" type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls={panelId}>Comfort</button>
+    <button className="comfort-trigger" type="button" onClick={() => setOpen((value) => !value)} aria-expanded={open} aria-controls={panelId}>{label}</button>
     {open && mounted ? createPortal(panel, document.body) : null}
   </div>;
 }
