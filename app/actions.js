@@ -12,6 +12,8 @@ import {
   deleteDeckFolder,
   updateCard,
   updateDeck,
+  createLearningGoal,
+  deleteLearningGoal,
 } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
@@ -199,4 +201,16 @@ export async function deleteDeckFolderAction(formData) {
   const user = await requireUser();
   await deleteDeckFolder({ folderId: formData.get("folderId"), userId: user.id });
   revalidatePath("/library");
+}
+
+export async function createLearningGoalAction(formData) {
+  const user = await requireUser();
+  await createLearningGoal({ userId: user.id, deckId: formData.get("deckId"), title: formData.get("title"), examDate: formData.get("examDate"), dailyMinutes: formData.get("dailyMinutes") });
+  revalidatePath("/"); revalidatePath("/goals");
+}
+
+export async function deleteLearningGoalAction(formData) {
+  const user = await requireUser();
+  await deleteLearningGoal({ userId: user.id, goalId: formData.get("goalId") });
+  revalidatePath("/"); revalidatePath("/goals");
 }

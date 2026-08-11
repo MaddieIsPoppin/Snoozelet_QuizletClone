@@ -5,8 +5,8 @@ import { useState } from "react";
 
 const games = [
   { id: "dungeon", icon: "⚔", name: "Dungeon Crawler", description: "Battle card monsters and protect your health.", note: "Adventure" },
-  { id: "match", icon: "◇", name: "Match", description: "Pair terms and definitions as quickly as you can.", note: "Quick warm-up" },
-  { id: "blast", icon: "✦", name: "Blast", description: "Answer rapidly and build a high-scoring streak.", note: "Fast paced" },
+  { id: "match", icon: "◇", name: "Match", description: "Reconnect term stars to repair a constellation.", note: "Constellation repair" },
+  { id: "blast", icon: "✦", name: "Blast", description: "Answer rapidly to charge the Observatory telescope.", note: "Telescope charge" },
 ];
 
 export default function GameLauncher({ decks }) {

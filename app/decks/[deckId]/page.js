@@ -323,6 +323,15 @@ export default async function DeckPage({ params }) {
       </section>
 
 
+      <section className="deck-section focus-entry-section">
+        <div>
+          <p className="eyebrow">Snoo&apos;s guided route</p>
+          <h2>Stay in one learning loop</h2>
+          <p>Recall, check your confidence, then cool down with a short constellation repair.</p>
+        </div>
+        <Link className="button primary" href={`/decks/${deck.id}/focus`}>Begin Focus Journey</Link>
+      </section>
+
       {/* ====================================================
           GAMES
           ==================================================== */}

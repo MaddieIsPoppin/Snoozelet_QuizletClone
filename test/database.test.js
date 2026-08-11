@@ -77,6 +77,24 @@ test("database integration", async (suite) => {
     );
   });
 
+  await suite.test("creates private exam expeditions and a readiness world", async () => {
+    await db.createLearningGoal({
+      userId: ownerId,
+      deckId,
+      title: "Cell biology exam",
+      examDate: "2027-06-12",
+      dailyMinutes: 20,
+    });
+    const world = await db.getLearningWorld(ownerId);
+    assert.equal(world.goals[0].title, "Cell biology exam");
+    assert.equal(world.goals[0].readiness, 0);
+    assert.equal(world.goals[0].recommendedMinutes >= 5, true);
+    assert.equal(world.recommended.title, "Renamed deck");
+    assert.equal((await db.getLearningGoals(otherUserId)).length, 0);
+    await db.deleteLearningGoal({ userId: ownerId, goalId: world.goals[0].id });
+    assert.equal((await db.getLearningGoals(ownerId)).length, 0);
+  });
+
   await suite.test("creates cards with matching study-stat relationships", async () => {
     assert.equal(
       await db.addCards(

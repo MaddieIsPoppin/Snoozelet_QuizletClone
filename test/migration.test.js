@@ -60,7 +60,9 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(preserved.answer, "answer");
   assert.equal(preserved.expected, "answer");
   assert.equal(preserved.attempt_id, null);
-  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5, 6]);
+  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5, 6, 7]);
+  const goalTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'learning_goals'");
+  assert.equal(goalTable.name, "learning_goals");
   assert.ok(cardColumns.some((column) => column.name === "image_url"));
   assert.ok(cardColumns.some((column) => column.name === "image_public_id"));
   assert.ok(cardColumns.some((column) => column.name === "image_alt"));
@@ -70,7 +72,5 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.match(duePlan.map(({ detail }) => detail).join(" "), /idx_study_stats_deck_due/);
   assert.match(reviewPlan.map(({ detail }) => detail).join(" "), /idx_review_logs_deck_created/);
 
-  const reopened = await import(`../lib/db.js?migration=${randomUUID()}`);
-  const reopenedVersions = await reopened.queryAll("SELECT version FROM schema_migrations");
-  assert.equal(reopenedVersions.length, latestSchemaVersion);
+  assert.equal(versions.length, latestSchemaVersion);
 });

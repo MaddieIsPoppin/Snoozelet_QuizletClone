@@ -7,11 +7,12 @@ import ComfortSettings from "@/components/ComfortSettings";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 
 const navigation = [
-  { href: "/", label: "Dashboard", icon: "⌂", exact: true },
+  { href: "/", label: "Observatory", icon: "⌂", exact: true },
   { href: "/library", label: "My decks", icon: "▤" },
   { href: "/study", label: "Study", icon: "◫" },
   { href: "/games", label: "Games", icon: "✦" },
   { href: "/progress", label: "Progress", icon: "↗" },
+  { href: "/goals", label: "Exam plans", icon: "◎" },
 ];
 
 export default function AppShell({ children }) {
