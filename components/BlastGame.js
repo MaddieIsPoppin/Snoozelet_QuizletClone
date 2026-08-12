@@ -341,6 +341,7 @@ export default function BlastGame({
 
   useEffect(() => {
     if (!gameStarted || gameOver) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
     function handleKeyDown(event) {
       if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
       const answerIndex = Number(event.key) - 1;
@@ -380,7 +381,7 @@ export default function BlastGame({
 
   if (!gameStarted) {
     return (
-      <section className="study-shell blast-game">
+      <section className="study-shell blast-game blast-setup-screen">
         <div className="study-header">
           <div>
             <p className="eyebrow">
@@ -466,7 +467,7 @@ export default function BlastGame({
         : 0;
 
     return (
-      <section className="study-shell blast-game">
+      <section className="study-shell blast-game blast-results-screen">
         <div className="empty-state blast-results">
           <p className="eyebrow">
             Game over
@@ -530,7 +531,7 @@ export default function BlastGame({
       : 0;
 
   return (
-    <section className={`study-shell blast-game${progress <= 30 ? " blast-danger" : ""}${feedbackType === "wrong" || feedbackType === "timeout" ? " blast-life-lost" : ""}`}>
+    <section className={`study-shell blast-game blast-playing${progress <= 30 ? " blast-danger" : ""}${feedbackType === "wrong" || feedbackType === "timeout" ? " blast-life-lost" : ""}${locked ? " blast-locked" : ""}`}>
       <XpNotice notice={xpNotice} />
       <div className="blast-hud">
         <div>
@@ -554,9 +555,9 @@ export default function BlastGame({
             Lives
           </span>
 
-          <strong>
-            {"♥".repeat(lives)}
-            {"♡".repeat(startingLives - lives)}
+          <strong className="blast-lives">
+            <span className="blast-hearts">{"♥".repeat(lives)}{"♡".repeat(startingLives - lives)}</span>
+            <span className="blast-life-count">♥ {lives}</span>
           </strong>
         </div>
       </div>

@@ -22,6 +22,7 @@ export default function AppShell({ children }) {
   const pathname = usePathname();
   const authPage = ["/login", "/signup", "/setup"].some((path) => pathname.startsWith(path));
   const focusedStudy = /^\/decks\/[^/]+\/(learn|flashcards|multiple-choice|typed|test)$/.test(pathname);
+  const focusedGame = /^\/decks\/[^/]+\/blast$/.test(pathname);
   if (authPage) return children;
 
   const active = (item) => {
@@ -31,7 +32,7 @@ export default function AppShell({ children }) {
   };
 
   return (
-    <div className={`snooze-app shell-v3${focusedStudy ? " is-study-route" : ""}`}>
+    <div className={`snooze-app shell-v3${focusedStudy ? " is-study-route" : ""}${focusedGame ? " is-game-route" : ""}`}>
       <ServiceWorkerRegistration />
       <PwaControls />
       <div className="night-sky" aria-hidden="true" />
