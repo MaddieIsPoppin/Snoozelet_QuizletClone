@@ -5334,6 +5334,52 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
   .comfort-panel,.comfort-panel-sidebar { inset: auto 14px 82px; width: auto; max-height: calc(100vh - 110px); }
 }
 
+/* Mobile flashcards use one explicit, high-specificity full-width layout so
+   general responsive rules cannot squeeze the card or restore overflow. */
+@media (max-width: 760px) {
+  .is-study-route .study-card.flashcard-study-card {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr);
+    align-items: stretch;
+    align-content: stretch;
+    width: 100%;
+    min-width: 0;
+    min-height: 0;
+    padding: 6px;
+    overflow: hidden;
+  }
+
+  .is-study-route .flashcard-study-card > .flashcard-session {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: minmax(0, 1fr) auto;
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    gap: 4px;
+  }
+
+  .is-study-route .flashcard-study-card .flashcard-flip-scene,
+  .is-study-route .flashcard-study-card .flashcard-flip-card {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+  }
+
+  .is-study-route .flashcard-study-card .flashcard-face {
+    width: 100%;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+}
+
 /* Mobile flashcards must remain the primary, full-size surface. */
 @media (max-width: 760px) {
   .is-study-route .study-card:has(.flashcard-session) {

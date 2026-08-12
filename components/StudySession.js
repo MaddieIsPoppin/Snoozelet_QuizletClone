@@ -1443,10 +1443,10 @@ function goToNextFlashcard() {
           QUESTION AREA
           ----------------------------------------------------- */}
 
-      <section className={`study-card${feedback ? (feedback.correct ? " feedback-flash-correct" : " feedback-flash-wrong") : ""}`}>
+      <section className={`study-card${isFlashcardMode ? " flashcard-study-card" : ""}${feedback ? (feedback.correct ? " feedback-flash-correct" : " feedback-flash-wrong") : ""}`}>
 
-        {!feedback && isRevengeCard ? <div className="challenge-banner revenge"><strong>⚡ REVENGE CARD</strong><span>You&apos;ve seen this one before. Take it back.</span></div> : null}
-        {!feedback && isClutchCard ? <div className="challenge-banner clutch"><strong>⚠️ CLUTCH CARD</strong><span>Get this right to Master it.</span></div> : null}
+        {!feedback && !isFlashcardMode && isRevengeCard ? <div className="challenge-banner revenge"><strong>⚡ REVENGE CARD</strong><span>You&apos;ve seen this one before. Take it back.</span></div> : null}
+        {!feedback && !isFlashcardMode && isClutchCard ? <div className="challenge-banner clutch"><strong>⚠️ CLUTCH CARD</strong><span>Get this right to Master it.</span></div> : null}
         {feedback && moment?.type === "revenge-added" ? <div className="story-moment broken"><strong>COMBO BROKEN 💔</strong><span>You answered: {moment.answer}</span><span>Correct answer: {moment.expected}</span><b>⚡ REVENGE CARD ADDED</b></div> : null}
         {feedback && moment?.type === "revenge-complete" ? <div className="story-moment complete"><strong>⚡ REVENGE COMPLETE</strong><span>You fixed a previous mistake.</span><b>+{moment.xp} XP</b></div> : null}
         {feedback && moment?.type === "mastered" ? <div className="story-moment complete"><strong>💥 MASTERED</strong><span>{currentCard.term}</span><b>+{moment.xp} XP · Difficult victory.</b></div> : null}
