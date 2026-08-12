@@ -49,6 +49,9 @@ export default function MatchGame({
 
   useEffect(() => {
     setMounted(true);
+    if (window.matchMedia("(max-width: 760px), (pointer: coarse)").matches) {
+      setRoundSize(Math.min(cards.length, 4));
+    }
 
     return () => {
       if (timerRef.current) {
@@ -63,7 +66,7 @@ export default function MatchGame({
         window.clearTimeout(correctTimerRef.current);
       }
     };
-  }, []);
+  }, [cards.length]);
 
   const availableRoundSizes = useMemo(() => {
     const sizes = [4, 6, 8].filter(
@@ -271,6 +274,7 @@ export default function MatchGame({
 
   useEffect(() => {
     if (!gameStarted || gameFinished) return;
+    if (window.matchMedia("(pointer: coarse)").matches) return undefined;
     function handleKeyDown(event) {
       if (event.target?.matches?.("input, textarea, select, [contenteditable=true]")) return;
       if (event.key === "Escape") { setSelectedTile(null); return; }
@@ -311,7 +315,7 @@ export default function MatchGame({
    */
   if (!gameStarted) {
     return (
-      <section className="study-shell match-game">
+      <section className="study-shell match-game match-setup-screen">
         <div className="study-header">
           <div>
             <p className="eyebrow">
@@ -340,6 +344,7 @@ export default function MatchGame({
               <button
                 key={size}
                 type="button"
+                data-round-size={size}
                 className={
                   roundSize === size
                     ? "button primary"
@@ -374,7 +379,7 @@ export default function MatchGame({
       matchedIds.length / 2;
 
     return (
-      <section className="study-shell match-game">
+      <section className="study-shell match-game match-results-screen">
         <div className="empty-state match-results">
           <p className="eyebrow">
             Round complete
@@ -435,7 +440,7 @@ export default function MatchGame({
    * ACTIVE GAME
    */
   return (
-    <section className="study-shell match-game">
+    <section className="study-shell match-game match-playing">
       <XpNotice notice={xpNotice} />
       <div className="match-game-header">
         <div>
@@ -481,7 +486,7 @@ export default function MatchGame({
             correctTileIds.includes(tile.id);
 
           let className =
-            "match-tile";
+            `match-tile match-tile-${tile.type}`;
 
           if (matched) {
             className +=

@@ -21,8 +21,8 @@ const mobileNavigation = [navigation[0], navigation[2], navigation[3], navigatio
 export default function AppShell({ children }) {
   const pathname = usePathname();
   const authPage = ["/login", "/signup", "/setup"].some((path) => pathname.startsWith(path));
-  const focusedStudy = /^\/decks\/[^/]+\/(learn|flashcards|multiple-choice|typed|test)$/.test(pathname);
-  const focusedGame = /^\/decks\/[^/]+\/blast$/.test(pathname);
+  const focusedStudy = /^\/decks\/[^/]+\/(learn|flashcards|multiple-choice|typed)$/.test(pathname);
+  const focusedGame = /^\/decks\/[^/]+\/(blast|match)$/.test(pathname);
   if (authPage) return children;
 
   const active = (item) => {

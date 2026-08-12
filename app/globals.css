@@ -5473,6 +5473,130 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
   .blast-key { display: none !important; }
 }
 
+/* Final mobile study/game safeguards validated against compact Android screens. */
+@media (max-width: 760px) {
+  /* Flashcards: challenge copy must never compete horizontally with the card. */
+  .is-study-route .study-card:has(.flashcard-session) {
+    flex-direction: column;
+  }
+
+  .is-study-route .study-card:has(.flashcard-session) > .challenge-banner {
+    display: none;
+  }
+
+  .is-study-route .study-card:has(.flashcard-session) > .flashcard-session {
+    min-width: 0;
+    min-height: 100%;
+  }
+
+  .is-study-route .flashcard-flip-scene {
+    min-height: min(58svh,560px);
+  }
+
+  /* Test creation remains a normal scrollable page; active tests can also scroll safely. */
+  .test-builder {
+    width: 100%;
+    margin: 8px auto 20px;
+    padding: 18px 14px;
+    border-radius: 18px;
+  }
+
+  .test-builder > h1 { font-size: 2rem; }
+  .test-builder > p:not(.eyebrow) { font-size: .86rem; line-height: 1.5; }
+  .test-builder-benefits { margin: 12px 0 16px; gap: 5px; }
+  .test-builder-benefits span { padding: 5px 7px; font-size: .64rem; }
+  .test-builder .test-options { gap: 7px; }
+  .test-builder .test-checkbox { min-height: 0; padding: 11px; }
+  .test-builder form > .button.primary { position: sticky; bottom: calc(74px + env(safe-area-inset-bottom)); z-index: 5; width: 100%; box-shadow: 0 10px 28px rgba(3,8,25,.4); }
+
+  /* Match becomes a bounded two-column board: terms left, definitions right. */
+  .is-game-route .match-game {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+  }
+
+  .is-game-route .match-setup-screen,
+  .is-game-route .match-results-screen {
+    display: grid;
+    align-content: start;
+    gap: 10px;
+    overflow-y: auto;
+    padding: 4px 2px 14px;
+  }
+
+  .match-setup-screen .study-header h1 { margin: 2px 0; font-size: 1.8rem; }
+  .match-setup-screen .study-header p:not(.eyebrow) { font-size: .78rem; }
+  .match-setup-screen .match-setup { gap: 12px; padding: 15px; border-radius: 17px; }
+  .match-setup-screen .direction-toggle { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); }
+  .match-setup-screen [data-round-size="6"],
+  .match-setup-screen [data-round-size="8"] { display: none; }
+  .match-setup-screen .match-setup > .button { width: 100%; min-height: 48px; }
+
+  .is-game-route .match-playing {
+    display: grid;
+    grid-template-rows: auto auto minmax(0,1fr);
+    gap: 7px;
+    overflow: hidden;
+  }
+
+  .match-playing .xp-earned-popup { position: fixed; }
+  .match-playing .match-game-header { display: flex; flex-direction: row; align-items: center; gap: 8px; }
+  .match-playing .match-game-header > div:first-child { min-width: 0; }
+  .match-playing .match-game-header .eyebrow { margin: 0; font-size: .55rem; }
+  .match-playing .match-game-header h1 { overflow: hidden; margin: 1px 0 0; font-size: 1rem; text-overflow: ellipsis; white-space: nowrap; }
+  .match-playing .match-timer { margin-left: auto; text-align: right; }
+  .match-playing .match-timer strong { font-size: 1.25rem; }
+  .match-playing .match-timer span { font-size: .55rem; }
+  .match-playing .study-summary { gap: 5px; font-size: .64rem; }
+  .match-playing .study-summary span { padding: 4px 7px; }
+  .match-playing .match-grid {
+    display: grid;
+    grid-template-columns: repeat(2,minmax(0,1fr));
+    grid-auto-rows: minmax(0,1fr);
+    gap: 6px;
+    min-height: 0;
+    margin: 0;
+    overflow: hidden;
+  }
+
+  .match-playing .match-tile-term { grid-column: 1; }
+  .match-playing .match-tile-definition { grid-column: 2; }
+  .match-playing .match-tile {
+    min-width: 0;
+    min-height: 0;
+    padding: 8px;
+    overflow: hidden;
+    border-radius: 12px;
+    touch-action: manipulation;
+  }
+
+  .match-playing .match-tile-type { margin-bottom: 3px; font-size: .5rem; }
+  .match-playing .match-tile-text {
+    display: -webkit-box;
+    max-height: 5em;
+    overflow: hidden;
+    font-size: clamp(.64rem,3.1vw,.8rem);
+    line-height: 1.22;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: 4;
+    overflow-wrap: anywhere;
+  }
+
+  .match-playing .match-key { display: none; }
+  .match-results-screen .match-results { min-height: 0; padding: 18px 12px; }
+}
+
+@media (max-width: 350px), (max-height: 620px) and (max-width: 760px) {
+  .is-study-route .flashcard-flip-scene { min-height: 330px; }
+  .match-playing .match-tile { padding: 6px; }
+  .match-playing .match-tile-text { font-size: .62rem; -webkit-line-clamp: 3; }
+}
+
+@media (max-width: 760px), (pointer: coarse) {
+  .match-key { display: none !important; }
+}
+
 /* Momentum study loop */
 .flow-mode { position: relative; }
 .flow-mode .study-controls,.flow-mode .mascot-coach { opacity: .18; transition: opacity 300ms ease; }
