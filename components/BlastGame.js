@@ -40,7 +40,6 @@ export default function BlastGame({
   deck,
   cards = [],
 }) {
-  const { saveReview, xpNotice } = useReviewSaver({ mode: "multiple", answerDirection: "definition", grading: "lenient" });
   const [mounted, setMounted] = useState(false);
 
   const [gameStarted, setGameStarted] = useState(false);
@@ -48,6 +47,7 @@ export default function BlastGame({
 
   const [answerDirection, setAnswerDirection] =
     useState("definition");
+  const { beginAttemptGeneration, saveReview, xpNotice } = useReviewSaver({ mode: "multiple", answerDirection, grading: "lenient" });
 
   const [queue, setQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -60,6 +60,8 @@ export default function BlastGame({
 
   const [correctCount, setCorrectCount] = useState(0);
   const [wrongCount, setWrongCount] = useState(0);
+  const [round, setRound] = useState(1);
+  const [lastPoints, setLastPoints] = useState(0);
 
   const [feedbackId, setFeedbackId] = useState(null);
   const [feedbackType, setFeedbackType] = useState(null);
@@ -68,12 +70,16 @@ export default function BlastGame({
 
   const [timeLeft, setTimeLeft] = useState(6000);
   const [baseTime, setBaseTime] = useState(8);
-  const [betweenQuestions, setBetweenQuestions] = useState(900);
+  const [betweenQuestions, setBetweenQuestions] = useState(550);
   const [startingLives, setStartingLives] = useState(3);
   const [speedUp, setSpeedUp] = useState(true);
 
   const timerRef = useRef(null);
+  const transitionRef = useRef(null);
   const roundStartedRef = useRef(null);
+  const lockedRef = useRef(false);
+  const gameOverRef = useRef(false);
+  const livesRef = useRef(3);
 
   useEffect(() => {
     setMounted(true);
@@ -82,6 +88,7 @@ export default function BlastGame({
       if (timerRef.current) {
         window.clearInterval(timerRef.current);
       }
+      if (transitionRef.current) window.clearTimeout(transitionRef.current);
     };
   }, []);
 
@@ -117,8 +124,8 @@ export default function BlastGame({
     answerDirection,
   ]);
 
-  const durationForRound = (index) => Math.max(2500, baseTime * 1000 - (speedUp ? index * 120 : 0));
-  const roundDuration = durationForRound(currentIndex);
+  const durationForRound = (roundNumber) => Math.max(2500, baseTime * 1000 - (speedUp ? (roundNumber - 1) * 140 : 0));
+  const roundDuration = durationForRound(round);
 
   function stopRoundTimer() {
     if (timerRef.current) {
@@ -148,7 +155,7 @@ export default function BlastGame({
         stopRoundTimer();
         handleTimeout();
       }
-    }, 50);
+    }, 100);
   }
 
   function startGame() {
@@ -157,6 +164,8 @@ export default function BlastGame({
     }
 
     const newQueue = shuffle(cards);
+    beginAttemptGeneration();
+    if (transitionRef.current) window.clearTimeout(transitionRef.current);
 
     setQueue(newQueue);
     setCurrentIndex(0);
@@ -169,22 +178,30 @@ export default function BlastGame({
 
     setCorrectCount(0);
     setWrongCount(0);
+    setRound(1);
+    setLastPoints(0);
 
     setFeedbackId(null);
     setFeedbackType(null);
 
     setLocked(false);
+    lockedRef.current = false;
+    livesRef.current = startingLives;
 
     setGameOver(false);
+    gameOverRef.current = false;
     setGameStarted(true);
 
     window.setTimeout(() => {
-      startRoundTimer(durationForRound(0));
-    }, 100);
+      startRoundTimer(durationForRound(1));
+    }, 50);
   }
 
   function nextQuestion() {
+    if (gameOverRef.current) return;
     const nextIndex = currentIndex + 1;
+    const nextRound = round + 1;
+    setRound(nextRound);
 
     if (nextIndex >= queue.length) {
       const reshuffled = shuffle(cards);
@@ -192,87 +209,84 @@ export default function BlastGame({
       setQueue(reshuffled);
       setCurrentIndex(0);
 
-      window.setTimeout(() => {
-        startRoundTimer(
-          durationForRound(nextIndex)
-        );
-      }, betweenQuestions);
+      startRoundTimer(durationForRound(nextRound));
 
       return;
     }
 
     setCurrentIndex(nextIndex);
 
-    window.setTimeout(() => {
-      startRoundTimer(
-        durationForRound(nextIndex)
-      );
-    }, betweenQuestions);
+    startRoundTimer(durationForRound(nextRound));
   }
 
   function endGame() {
     stopRoundTimer();
+    if (transitionRef.current) window.clearTimeout(transitionRef.current);
+    gameOverRef.current = true;
+    lockedRef.current = true;
     setGameOver(true);
     setLocked(true);
   }
 
   function loseLife() {
-    setLives((currentLives) => {
-      const nextLives = currentLives - 1;
+    const nextLives = Math.max(0, livesRef.current - 1);
+    livesRef.current = nextLives;
+    setLives(nextLives);
+    return nextLives;
+  }
 
-      if (nextLives <= 0) {
-        window.setTimeout(() => {
-          endGame();
-        }, 450);
-      }
-
-      return Math.max(0, nextLives);
-    });
+  function scheduleNext(delay = betweenQuestions) {
+    if (transitionRef.current) window.clearTimeout(transitionRef.current);
+    transitionRef.current = window.setTimeout(() => {
+      if (gameOverRef.current) return;
+      setFeedbackId(null);
+      setFeedbackType(null);
+      setLastPoints(0);
+      setLocked(false);
+      lockedRef.current = false;
+      nextQuestion();
+    }, delay);
   }
 
   function handleTimeout() {
-    if (locked || gameOver) {
+    if (lockedRef.current || gameOverRef.current) {
       return;
     }
 
+    lockedRef.current = true;
     setLocked(true);
     setFeedbackType("timeout");
     setCombo(0);
     setWrongCount((value) => value + 1);
 
-    loseLife();
-
-    window.setTimeout(() => {
-      if (!gameOver) {
-        setFeedbackType(null);
-        setLocked(false);
-
-        nextQuestion();
-      }
-    }, betweenQuestions);
+    const remainingLives = loseLife();
+    if (remainingLives === 0) transitionRef.current = window.setTimeout(endGame, 600);
+    else scheduleNext();
   }
 
-  async function handleAnswer(option, index) {
+  function handleAnswer(option, index) {
     if (
-      locked ||
-      gameOver ||
+      lockedRef.current ||
+      gameOverRef.current ||
       !currentCard
     ) {
       return;
     }
 
     stopRoundTimer();
+    lockedRef.current = true;
     setLocked(true);
 
     const isCorrect =
       normalize(option) ===
       normalize(correctAnswer);
 
-    const saved = await saveReview(currentCard, isCorrect, "multiple", option, { questionKey: `blast-${currentIndex}-${roundStartedRef.current}` });
-    if (!saved) {
-      setLocked(false);
-      return;
-    }
+    // Saving must never sit in the critical gameplay path. The review hook
+    // queues offline attempts and reports errors independently.
+    void saveReview(currentCard, isCorrect, "multiple", option, {
+      questionKey: `blast-${round}-${roundStartedRef.current}`,
+      offlineExpected: correctAnswer,
+    });
 
     setFeedbackId(index);
 
@@ -297,6 +311,7 @@ export default function BlastGame({
         Math.round(
           (100 + speedBonus) * multiplier
         );
+      setLastPoints(points);
 
       setScore(
         (value) => value + points
@@ -306,13 +321,7 @@ export default function BlastGame({
         (value) => value + 1
       );
 
-      window.setTimeout(() => {
-        setFeedbackId(null);
-        setFeedbackType(null);
-        setLocked(false);
-
-        nextQuestion();
-      }, betweenQuestions);
+      scheduleNext();
 
       return;
     }
@@ -325,17 +334,9 @@ export default function BlastGame({
       (value) => value + 1
     );
 
-    loseLife();
-
-    window.setTimeout(() => {
-      if (!gameOver) {
-        setFeedbackId(null);
-        setFeedbackType(null);
-        setLocked(false);
-
-        nextQuestion();
-      }
-    }, betweenQuestions);
+    const remainingLives = loseLife();
+    if (remainingLives === 0) transitionRef.current = window.setTimeout(endGame, 600);
+    else scheduleNext();
   }
 
   useEffect(() => {
@@ -436,7 +437,7 @@ export default function BlastGame({
 
           <div className="blast-customize-grid">
             <label>Seconds per question<select value={baseTime} onChange={(event) => setBaseTime(Number(event.target.value))}><option value="6">6 seconds</option><option value="8">8 seconds</option><option value="10">10 seconds</option><option value="15">15 seconds</option><option value="20">20 seconds</option></select></label>
-            <label>Pause after each answer<select value={betweenQuestions} onChange={(event) => setBetweenQuestions(Number(event.target.value))}><option value="400">Quick — 0.4s</option><option value="900">Normal — 0.9s</option><option value="1500">Relaxed — 1.5s</option><option value="2500">Study pace — 2.5s</option></select></label>
+            <label>Feedback pace<select value={betweenQuestions} onChange={(event) => setBetweenQuestions(Number(event.target.value))}><option value="300">Rapid — 0.3s</option><option value="550">Arcade — 0.55s</option><option value="900">Clear — 0.9s</option><option value="1500">Study — 1.5s</option></select></label>
             <label>Lives<select value={startingLives} onChange={(event) => setStartingLives(Number(event.target.value))}><option value="1">1 life</option><option value="3">3 lives</option><option value="5">5 lives</option><option value="10">10 lives</option></select></label>
             <label className="blast-toggle"><input type="checkbox" checked={speedUp} onChange={(event) => setSpeedUp(event.target.checked)} /> Speed up each round</label>
           </div>
@@ -529,7 +530,7 @@ export default function BlastGame({
       : 0;
 
   return (
-    <section className="study-shell blast-game">
+    <section className={`study-shell blast-game${progress <= 30 ? " blast-danger" : ""}${feedbackType === "wrong" || feedbackType === "timeout" ? " blast-life-lost" : ""}`}>
       <XpNotice notice={xpNotice} />
       <div className="blast-hud">
         <div>
@@ -560,6 +561,10 @@ export default function BlastGame({
         </div>
       </div>
 
+      <div className="blast-time-row">
+        <span>Time</span>
+        <strong>{(timeLeft / 1000).toFixed(1)}s</strong>
+      </div>
       <div className="blast-time-track">
         <div
           className="blast-time-fill"
@@ -586,7 +591,7 @@ export default function BlastGame({
             Time&apos;s up — {correctAnswer}
           </div>
         ) : feedbackType === "correct" ? (
-          <div className="blast-feedback correct">Great hit! Combo {combo}x</div>
+          <div className="blast-feedback correct">+{lastPoints} · Combo {combo}x</div>
         ) : feedbackType === "wrong" ? (
           <div className="blast-feedback wrong">Correct answer: {correctAnswer}</div>
         ) : null}
@@ -639,7 +644,7 @@ export default function BlastGame({
         </span>
 
         <span>
-          Round {currentIndex + 1}
+          Round {round}
         </span>
 
         <span>

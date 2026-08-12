@@ -2505,6 +2505,7 @@ select option {
 
 .blast-game {
   width: 100%;
+  position: relative;
 }
 
 .blast-setup {
@@ -2540,6 +2541,7 @@ select option {
   border: 1px solid var(--line);
   border-radius: 14px;
   background: rgba(23, 42, 83, 0.88);
+  transition: transform 180ms ease, border-color 180ms ease, background 180ms ease;
 }
 
 .blast-hud-label {
@@ -2561,12 +2563,46 @@ select option {
   overflow: hidden;
   border-radius: 999px;
   background: rgba(132,151,205,0.16);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,.28);
 }
 
 .blast-time-fill {
   height: 100%;
   background: linear-gradient(90deg, #7a61ef, #f3bd66);
-  transition: width 50ms linear;
+  border-radius: inherit;
+  box-shadow: 0 0 14px rgba(243,189,102,.35);
+  transition: width 100ms linear, background 180ms ease;
+}
+
+.blast-time-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin: 0 2px 7px;
+  color: var(--muted);
+  font-size: .72rem;
+  font-weight: 820;
+  text-transform: uppercase;
+  letter-spacing: .08em;
+}
+
+.blast-time-row strong {
+  color: var(--cream);
+  font-size: .9rem;
+  font-variant-numeric: tabular-nums;
+}
+
+.blast-danger .blast-time-fill {
+  background: linear-gradient(90deg, #ff5265, #ff9a5c);
+  box-shadow: 0 0 18px rgba(255,82,101,.72);
+}
+
+.blast-danger .blast-time-track {
+  animation: blast-pulse 700ms ease-in-out infinite;
+}
+
+.blast-danger .blast-time-row strong {
+  color: #ff8c98;
 }
 
 .blast-question-card {
@@ -2576,6 +2612,12 @@ select option {
   border-radius: 20px;
   background: linear-gradient(145deg, rgba(28, 46, 91, 0.90), rgba(14, 28, 61, 0.96));
   text-align: center;
+  transition: border-color 180ms ease, box-shadow 180ms ease;
+}
+
+.blast-danger .blast-question-card {
+  border-color: rgba(255,82,101,.32);
+  box-shadow: 0 0 40px rgba(255,82,101,.08);
 }
 
 .blast-question-card h1 {
@@ -2613,6 +2655,11 @@ select option {
 
 .blast-target:disabled {
   cursor: default;
+}
+
+.blast-target:focus-visible {
+  outline: 3px solid rgba(243,189,102,.8);
+  outline-offset: 3px;
 }
 
 .blast-target-correct {
@@ -2667,6 +2714,28 @@ select option {
   50% { transform: translateX(8px); }
   75% { transform: translateX(-5px); }
   100% { transform: translateX(0); }
+}
+
+@keyframes blast-pulse {
+  50% { transform: scaleY(1.35); filter: brightness(1.25); }
+}
+
+.blast-life-lost .blast-hud > div:last-child {
+  border-color: rgba(255,82,101,.62);
+  background: rgba(129,49,66,.38);
+  animation: blast-life-hit 450ms ease;
+}
+
+@keyframes blast-life-hit {
+  35% { transform: scale(1.07); }
+  65% { transform: scale(.97); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .blast-danger .blast-time-track,
+  .blast-life-lost .blast-hud > div:last-child,
+  .blast-target-correct,
+  .blast-target-wrong { animation: none; }
 }
 
 
