@@ -636,7 +636,7 @@ function goToNextFlashcard() {
     wasCorrect
   ) {
     if (!currentCard) {
-      return;
+      return false;
     }
 
     const saved = await saveReview(
@@ -650,7 +650,7 @@ function goToNextFlashcard() {
     );
 
     if (!saved) {
-      return;
+      return false;
     }
 
     registerResult(currentCard, saved, wasCorrect ? "Got it" : "Missed");
@@ -658,6 +658,8 @@ function goToNextFlashcard() {
     moveToNextNormalCard(
       saved.correct
     );
+
+    return true;
   }
 
 
