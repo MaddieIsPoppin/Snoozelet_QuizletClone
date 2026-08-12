@@ -623,32 +623,32 @@ function goToNextFlashcard() {
   resetAnswerState();
 }
 
-  async function handleFlashcardResult(
+  function handleFlashcardResult(
     wasCorrect
   ) {
     if (!currentCard) {
       return false;
     }
 
-    const saved = await saveReview(
-      currentCard,
+    const reviewedCard = currentCard;
+    const reviewedAnswer = expectedAnswer;
+    const reviewedIndex = currentIndex;
+
+    // Flashcards are self-assessed, so the next card can appear immediately.
+    // Persistence, XP, and offline queuing continue outside the gesture path.
+    moveToNextNormalCard(wasCorrect);
+
+    void saveReview(
+      reviewedCard,
       wasCorrect,
       "flashcard",
       wasCorrect
         ? "Got it"
         : "Missed",
-      { questionKey: currentIndex, offlineExpected: expectedAnswer }
-    );
-
-    if (!saved) {
-      return false;
-    }
-
-    registerResult(currentCard, saved, wasCorrect ? "Got it" : "Missed");
-
-    moveToNextNormalCard(
-      saved.correct
-    );
+      { questionKey: reviewedIndex, offlineExpected: reviewedAnswer }
+    ).then((saved) => {
+      if (saved) registerResult(reviewedCard, saved, wasCorrect ? "Got it" : "Missed");
+    });
 
     return true;
   }

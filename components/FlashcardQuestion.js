@@ -250,7 +250,7 @@ export default function FlashcardQuestion({
 
       <div className="flashcard-flip-scene">
         <div className="flashcard-flip-card">
-          <section className="flashcard-face flashcard-front">
+          <section className={`flashcard-face flashcard-front${prompt.length > 180 ? " has-long-copy" : prompt.length > 90 ? " has-medium-copy" : ""}`}>
 
             <p className="prompt-label">Flashcard</p>
 
@@ -263,7 +263,7 @@ export default function FlashcardQuestion({
             </button>
           </section>
 
-          <section className="flashcard-face flashcard-back" aria-hidden={!revealed}>
+          <section className={`flashcard-face flashcard-back${answer.length > 300 ? " has-long-copy" : answer.length > 150 ? " has-medium-copy" : ""}`} aria-hidden={!revealed}>
             <p className="prompt-label">Answer</p>
             <div className="flashcard-answer">{answer}</div>
 

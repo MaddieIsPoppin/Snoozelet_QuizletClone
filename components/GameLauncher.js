@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useState } from "react";
 
 const games = [
-  { id: "dungeon", icon: "⚔", name: "Dungeon Crawler", description: "Battle card monsters and protect your health.", note: "Adventure" },
   { id: "match", icon: "◇", name: "Match", description: "Reconnect term stars to repair a constellation.", note: "Constellation repair" },
   { id: "blast", icon: "✦", name: "Blast", description: "Answer rapidly to charge the Observatory telescope.", note: "Telescope charge" },
 ];

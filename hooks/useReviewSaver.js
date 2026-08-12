@@ -83,20 +83,29 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
       presentedAnswer,
     };
 
+    let timeoutId;
     try {
+      const controller = new AbortController();
+      timeoutId = window.setTimeout(() => controller.abort(), 10000);
       const response = await fetch("/api/review", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify(payload),
+        signal: controller.signal,
       });
+      window.clearTimeout(timeoutId);
       const data = await response.json();
-      if (!response.ok) throw new Error(data.error || "Could not save review");
+      if (!response.ok) {
+        const requestError = new Error(data.error || "Could not save review");
+        requestError.transient = response.status === 408 || response.status === 429 || response.status >= 500;
+        throw requestError;
+      }
 
       showXpNotice(data);
       setReviewStatus("success");
       return data;
     } catch (error) {
-      if (!navigator.onLine || error instanceof TypeError) {
+      if (!navigator.onLine || error instanceof TypeError || error?.name === "AbortError" || error?.transient) {
         try {
           await queueReview(payload);
           setReviewStatus("queued");
@@ -116,6 +125,7 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
       setReviewError(error.message || "Could not save review");
       return null;
     } finally {
+      if (timeoutId) window.clearTimeout(timeoutId);
       if (savingAttemptRef.current === attemptId) savingAttemptRef.current = null;
     }
   }

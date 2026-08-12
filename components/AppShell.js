@@ -51,7 +51,7 @@ export default function AppShell({ children }) {
       </aside>
       <div className="snooze-main">
         <header className="snooze-topbar"><Link href="/" className="mobile-brand"><span>☾</span><strong>Snoozelet</strong><small>On the go</small></Link><div className="topbar-actions"><ComfortSettings label="Settings" /><Link href="/decks/new" className="topbar-new-deck">＋ New deck</Link></div></header>
-        <div className="snooze-content">{children}</div>
+        <div className="snooze-content"><div className="route-stage" key={pathname}>{children}</div></div>
         <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
           {mobileNavigation.map((item) => <Link href={item.href} className={active(item) ? "active" : ""} key={item.href}><span>{item.icon}</span>{item.label}</Link>)}
         </nav>

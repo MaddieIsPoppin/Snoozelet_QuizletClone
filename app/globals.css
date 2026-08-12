@@ -73,6 +73,14 @@
   --sidebar-width: 255px;
   --content-max: 1280px;
 
+  /* Shared motion system: quick feedback without delaying interaction. */
+  --motion-fast: 140ms;
+  --motion-standard: 220ms;
+  --motion-slow: 320ms;
+  --ease-standard: cubic-bezier(.2, .7, .2, 1);
+  --ease-enter: cubic-bezier(.16, 1, .3, 1);
+  --ease-exit: cubic-bezier(.4, 0, 1, 1);
+
   /* Compatibility aliases used by older components */
   --bg: var(--night-1000);
   --ink: var(--text);
@@ -5324,8 +5332,8 @@ html[data-theme="light"] :is(.metric-strip article,.progress-summary article,.da
 html[data-theme="light"] :is(.dashboard-shortcuts a:hover,.metric-strip article:hover) { border-color: #b9c6e1; background: #f8faff; }
 html[data-theme="light"] :is(.folder-panel,.library-decks,.library-deck-card,.mode-deck-list article,.game-deck-grid article,.launcher-card,.study-shell,.study-card,.recent-panel,.progress-section,.motivation-grid article,.deck-overview-card,.quick-add-card,.deck-tool-card,.deck-term-card,.deck-settings-editor) { border-color: #dbe2ef; background: #fff; box-shadow: 0 10px 30px rgba(45,58,88,.07); }
 html[data-theme="light"] :is(input,textarea,select) { border-color: #cdd6e7; background: #fff; color: #17213a; }
-html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button,.adventure-options button) { border-color: #cdd6e7; background: #f7f9fd; color: #25324d; }
-html[data-theme="light"] :is(.study-pet-habitat,.adventure-intro,.potato-stage,.dungeon-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
+html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button) { border-color: #cdd6e7; background: #f7f9fd; color: #25324d; }
+html[data-theme="light"] :is(.study-pet-habitat,.potato-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
 html[data-theme="light"] .pet-growth-track { background: #dfe6f2; }
 html[data-theme="light"] .pet-copy small { color: #397966; }
 html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.test-builder,.test-results .test-score-card) { border-color: #dbe2ef; background: #fff; color: #17213a; box-shadow: 0 10px 28px rgba(45,58,88,.08); }
@@ -5334,98 +5342,98 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
   .comfort-panel,.comfort-panel-sidebar { inset: auto 14px 82px; width: auto; max-height: calc(100vh - 110px); }
 }
 
-/* Mobile flashcards use one explicit, high-specificity full-width layout so
-   general responsive rules cannot squeeze the card or restore overflow. */
+/* Shared interaction, loading, and route motion. */
+.route-stage {
+  min-width: 0;
+  animation: route-enter var(--motion-standard) var(--ease-enter) both;
+}
+
+@keyframes route-enter {
+  from { opacity: 0; transform: translateY(7px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+:is(.button, button, a, input, textarea, select, summary) {
+  -webkit-tap-highlight-color: transparent;
+}
+
+:is(.button, button):not(:disabled) {
+  transition: transform var(--motion-fast) var(--ease-standard), border-color var(--motion-fast) ease, background-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease, opacity var(--motion-fast) ease;
+}
+
+:is(.button, button):not(:disabled):active { transform: scale(.975); }
+:is(.button, button):disabled { cursor: wait; opacity: .62; }
+
+:is(.study-progress > div, .progress-track span, .xp-progress-fill, .pet-growth-track > span) {
+  transition: width var(--motion-slow) var(--ease-enter), transform var(--motion-standard) var(--ease-enter);
+}
+
+:is(.deck-term-card, .library-deck-card, .choice-button, .match-tile, .blast-target) {
+  transition: transform var(--motion-fast) var(--ease-standard), opacity var(--motion-standard) ease, border-color var(--motion-fast) ease, background-color var(--motion-fast) ease, box-shadow var(--motion-fast) ease;
+}
+
+details[open] > :not(summary) { animation: disclosure-enter var(--motion-standard) var(--ease-enter) both; }
+@keyframes disclosure-enter { from { opacity: 0; transform: translateY(-4px); } }
+
+.page-loading { display: grid; gap: 18px; }
+.loading-heading { width: min(420px,70%); height: 54px; }
+.loading-hero { width: 100%; height: clamp(210px,32vh,360px); }
+.loading-grid { display: grid; grid-template-columns: repeat(3,minmax(0,1fr)); gap: 14px; }
+.loading-card { min-height: 150px; }
+.skeleton-block { overflow: hidden; position: relative; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.skeleton-block::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent); animation: skeleton-shimmer 1.25s ease-in-out infinite; }
+@keyframes skeleton-shimmer { to { transform: translateX(100%); } }
+.sr-only { position: absolute; width: 1px; height: 1px; padding: 0; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+
 @media (max-width: 760px) {
+  .loading-grid { grid-template-columns: 1fr; }
+  .loading-card { min-height: 110px; }
+  .is-study-route .route-stage { height: 100%; min-height: 0; }
+
+  /* One viewport-driven flashcard layout, independent of desktop dimensions. */
   .is-study-route .study-card.flashcard-study-card {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr);
+    grid-template: minmax(0,1fr) / minmax(0,1fr);
     align-items: stretch;
-    align-content: stretch;
     width: 100%;
     min-width: 0;
     min-height: 0;
-    padding: 6px;
+    padding: clamp(5px,1.5vw,8px);
     overflow: hidden;
   }
-
   .is-study-route .flashcard-study-card > .flashcard-session {
     display: grid;
-    grid-template-columns: minmax(0, 1fr);
-    grid-template-rows: minmax(0, 1fr) auto;
+    grid-template: minmax(0,1fr) auto / minmax(0,1fr);
     width: 100%;
     height: 100%;
     min-width: 0;
     min-height: 0;
     gap: 4px;
   }
-
-  .is-study-route .flashcard-study-card .flashcard-flip-scene,
-  .is-study-route .flashcard-study-card .flashcard-flip-card {
+  .is-study-route .flashcard-study-card :is(.flashcard-flip-scene,.flashcard-flip-card) {
     width: 100%;
     height: 100%;
     min-width: 0;
     min-height: 0;
     margin: 0;
   }
-
   .is-study-route .flashcard-study-card .flashcard-face {
     width: 100%;
     height: 100%;
     min-width: 0;
     min-height: 0;
-    overflow-x: hidden;
-    overflow-y: auto;
+    padding: clamp(14px,4.5vw,24px);
+    overflow: hidden auto;
   }
+  .is-study-route .flashcard-study-card .flashcard-face h2 { font-size: clamp(1.55rem,7.2vw,2.35rem); }
+  .is-study-route .flashcard-study-card .flashcard-face.has-medium-copy h2 { font-size: clamp(1.3rem,6vw,1.9rem); }
+  .is-study-route .flashcard-study-card .flashcard-face.has-long-copy h2 { font-size: clamp(1.08rem,5vw,1.55rem); }
+  .is-study-route .flashcard-study-card .flashcard-back.has-medium-copy .flashcard-answer { font-size: clamp(1.05rem,4.6vw,1.45rem); }
+  .is-study-route .flashcard-study-card .flashcard-back.has-long-copy .flashcard-answer { font-size: clamp(.95rem,4.1vw,1.2rem); }
 }
 
-/* Mobile flashcards must remain the primary, full-size surface. */
-@media (max-width: 760px) {
-  .is-study-route .study-card:has(.flashcard-session) {
-    display: flex;
-    align-items: stretch;
-    padding: 5px;
-    overflow: hidden;
-  }
-
-  .is-study-route .flashcard-session {
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    width: 100%;
-    height: auto;
-    min-height: 0;
-  }
-
-  .is-study-route .flashcard-flip-scene {
-    width: 100%;
-    height: auto;
-    min-height: clamp(350px,58svh,620px);
-    flex: 1 1 auto;
-  }
-
-  .is-study-route .flashcard-face {
-    width: 100%;
-    min-height: 100%;
-    padding: clamp(16px,5vw,26px);
-  }
-
-  .is-study-route .flashcard-face h2 {
-    font-size: clamp(1.7rem,8.5vw,2.7rem);
-    line-height: 1.08;
-  }
-
-  .is-study-route .flashcard-front > .button {
-    width: min(100%,280px);
-    min-height: 50px;
-  }
-
-  .is-study-route .flashcard-swipe-help {
-    flex: 0 0 auto;
-    padding: 3px 0 1px;
-    text-align: center;
-  }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: 1ms !important; animation-iteration-count: 1 !important; transition-duration: 1ms !important; }
 }
 
 /* Blast stays immersive and fully reachable on compact Android screens. */
@@ -5521,24 +5529,6 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
 
 /* Final mobile study/game safeguards validated against compact Android screens. */
 @media (max-width: 760px) {
-  /* Flashcards: challenge copy must never compete horizontally with the card. */
-  .is-study-route .study-card:has(.flashcard-session) {
-    flex-direction: column;
-  }
-
-  .is-study-route .study-card:has(.flashcard-session) > .challenge-banner {
-    display: none;
-  }
-
-  .is-study-route .study-card:has(.flashcard-session) > .flashcard-session {
-    min-width: 0;
-    min-height: 100%;
-  }
-
-  .is-study-route .flashcard-flip-scene {
-    min-height: min(58svh,560px);
-  }
-
   /* Test creation remains a normal scrollable page; active tests can also scroll safely. */
   .test-builder {
     width: 100%;
@@ -6364,9 +6354,7 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
 .pet-stage-5 .snoo-hero { transform: scale(1.05); filter: drop-shadow(0 0 20px rgba(105,216,174,.35)); }
 
 .game-choice-grid { grid-template-columns: repeat(auto-fit, minmax(210px, 1fr)); }
-.game-choice-grid .game-dungeon { background: linear-gradient(145deg,rgba(75,48,132,.25),rgba(255,255,255,.025)); }
 
-.adventure-game { display: grid; gap: 18px; }
 .deck-settings-editor { margin: -10px 0 24px; padding: 14px 18px; border: 1px solid rgba(175,190,235,.16); border-radius: 14px; background: rgba(255,255,255,.025); }
 .deck-settings-editor summary { cursor: pointer; color: var(--muted); font-weight: 750; }
 .deck-settings-form { display: grid; grid-template-columns: minmax(180px,1fr) minmax(240px,2fr) auto; gap: 12px; align-items: end; margin-top: 16px; }
@@ -6375,41 +6363,19 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
 .study-hint { width: min(100%,520px); margin: 12px auto 18px; padding: 10px 14px; border: 1px solid rgba(175,190,235,.18); border-radius: 12px; background: rgba(255,255,255,.035); text-align: left; }
 .study-hint summary { cursor: pointer; color: #bcb4ff; font-weight: 800; }
 .study-hint p { margin: 10px 0 2px; color: var(--cream); }
-.adventure-intro { display: grid; grid-template-columns: 1fr 280px; align-items: center; min-height: 430px; padding: clamp(28px,5vw,60px); overflow: hidden; border: 1px solid rgba(175,190,235,.2); border-radius: 28px; background: radial-gradient(circle at 80% 25%,rgba(230,112,65,.2),transparent 15rem),linear-gradient(135deg,rgba(41,35,91,.92),rgba(12,27,58,.9)); }
-.adventure-intro h1 { margin: 6px 0 12px; font-size: clamp(2.8rem,7vw,6rem); }
-.adventure-intro p:not(.eyebrow) { max-width: 660px; color: var(--muted); font-size: 1.05rem; line-height: 1.65; }
-.adventure-intro .snoo-hero { min-height: 390px; }
-.adventure-hud { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 15px 20px; border: 1px solid rgba(175,190,235,.2); border-radius: 16px; background: rgba(9,20,49,.76); }
-.adventure-hud strong { font-size: 1.2rem; }
-.potato-stage,.dungeon-stage { min-height: 290px; display: grid; place-items: center; align-content: center; padding: 30px; border: 1px solid rgba(175,190,235,.18); border-radius: 24px; text-align: center; background: radial-gradient(circle,rgba(216,82,57,.16),transparent 14rem),rgba(14,25,59,.7); }
-.dungeon-stage { background: radial-gradient(circle,rgba(126,88,219,.22),transparent 15rem),rgba(14,25,59,.7); }
-.realm-grid { display: grid; grid-template-columns: repeat(4,minmax(42px,1fr)); gap: 8px; max-width: 460px; width: 100%; margin: auto; padding: 14px; border: 1px solid rgba(175,190,235,.16); border-radius: 18px; background: rgba(8,18,44,.7); }
-.realm-grid span { display: grid; place-items: center; aspect-ratio: 1; border: 1px solid rgba(175,190,235,.13); border-radius: 10px; background: rgba(27,44,89,.56); color: var(--muted); font-weight: 900; }
-.realm-grid span.cleared { border-color: rgba(105,216,174,.35); background: rgba(33,112,87,.25); color: #91e8c6; }
-.realm-grid span.current { border-color: #a99cff; background: rgba(126,88,219,.5); box-shadow: 0 0 20px rgba(126,88,219,.35); color: white; }
-.realm-grid span.portal { border-color: rgba(230,112,65,.5); }
-.potato-stage h1,.dungeon-stage h1 { margin: 8px 0 0; font-size: clamp(1.8rem,4vw,3.2rem); }
-.study-bomb,.study-monster { font-size: 5rem; filter: drop-shadow(0 12px 20px rgba(0,0,0,.3)); animation: arcade-float 1.5s ease-in-out infinite alternate; }
-.dungeon-stage .study-monster { min-width: 76px; padding: 14px; border: 2px solid rgba(169,156,255,.65); border-radius: 14px 14px 22px 22px; background: rgba(70,48,130,.75); font-size: .75rem; font-weight: 950; letter-spacing: .08em; }
+.potato-stage { min-height: 290px; display: grid; place-items: center; align-content: center; padding: 30px; border: 1px solid rgba(175,190,235,.18); border-radius: 24px; text-align: center; background: radial-gradient(circle,rgba(216,82,57,.16),transparent 14rem),rgba(14,25,59,.7); }
+.potato-stage h1 { margin: 8px 0 0; font-size: clamp(1.8rem,4vw,3.2rem); }
+.study-bomb { font-size: 5rem; filter: drop-shadow(0 12px 20px rgba(0,0,0,.3)); animation: arcade-float 1.5s ease-in-out infinite alternate; }
 @keyframes arcade-float { to { transform: translateY(-8px) rotate(3deg); } }
-.adventure-options { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: 12px; }
-.adventure-options button { min-height: 76px; padding: 15px; border: 1px solid rgba(175,190,235,.2); border-radius: 15px; background: rgba(27,44,89,.82); color: var(--cream); font-weight: 750; cursor: pointer; }
-.adventure-options button:hover:not(:disabled) { transform: translateY(-2px); border-color: rgba(105,216,174,.5); }
-.adventure-options button.correct { border-color: #69d8ae; background: rgba(33,112,87,.4); }
-.adventure-feedback { margin: 0; padding: 12px; border-radius: 12px; text-align: center; font-weight: 850; }
-.adventure-feedback.correct { color: #91e8c6; background: rgba(34,115,88,.24); }
-.adventure-feedback.wrong { color: #ff9da7; background: rgba(143,46,63,.22); }
-.adventure-results .snoo-giraffe-wrap { width: 100px; margin: auto; }
 
 @media (max-width: 760px) {
-  .blast-customize-grid,.adventure-options { grid-template-columns: 1fr; }
-  .study-pet-habitat,.adventure-intro { grid-template-columns: 1fr; }
+  .blast-customize-grid { grid-template-columns: 1fr; }
+  .study-pet-habitat { grid-template-columns: 1fr; }
   .deck-settings-form { grid-template-columns: 1fr; }
   .motivation-grid,.achievement-grid { grid-template-columns: 1fr; }
   .mastery-list article { grid-template-columns: 1fr 44px; }
   .mastery-list article > div:first-child { grid-column: 1 / -1; }
   .pet-stage { margin-top: 10px; }
-  .adventure-intro .snoo-hero { min-height: 300px; }
 }
 
 .shortcut-key {
@@ -6447,8 +6413,8 @@ html[data-theme="light"] :is(.metric-strip article,.progress-summary article,.da
 html[data-theme="light"] :is(.dashboard-shortcuts a:hover,.metric-strip article:hover) { border-color: #b9c6e1; background: #f8faff; }
 html[data-theme="light"] :is(.folder-panel,.library-decks,.library-deck-card,.mode-deck-list article,.game-deck-grid article,.launcher-card,.study-shell,.study-card,.recent-panel,.progress-section,.motivation-grid article,.deck-overview-card,.quick-add-card,.deck-tool-card,.deck-term-card,.deck-settings-editor) { border-color: #dbe2ef; background: #fff; box-shadow: 0 10px 30px rgba(45,58,88,.07); }
 html[data-theme="light"] :is(input,textarea,select) { border-color: #cdd6e7; background: #fff; color: #17213a; }
-html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button,.adventure-options button) { border-color: #cdd6e7; background: #f7f9fd; color: #25324d; }
-html[data-theme="light"] :is(.study-pet-habitat,.adventure-intro,.potato-stage,.dungeon-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
+html[data-theme="light"] :is(.button:not(.primary):not(.danger),.choice-button) { border-color: #cdd6e7; background: #f7f9fd; color: #25324d; }
+html[data-theme="light"] :is(.study-pet-habitat,.potato-stage) { border-color: #d6deec; background: linear-gradient(135deg,#fff,#eef2fb); box-shadow: 0 15px 38px rgba(45,58,88,.1); }
 html[data-theme="light"] .pet-growth-track { background: #dfe6f2; }
 html[data-theme="light"] .pet-copy small { color: #397966; }
 

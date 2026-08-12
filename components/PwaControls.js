@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { flushReviewQueue, queuedReviewCount } from "@/lib/offline-reviews";
 
 export default function PwaControls() {
@@ -9,6 +9,7 @@ export default function PwaControls() {
   const [queued, setQueued] = useState(0);
   const [installed, setInstalled] = useState(false);
   const [syncing, setSyncing] = useState(false);
+  const syncPromiseRef = useRef(null);
 
   useEffect(() => {
     const standalone = window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone;
@@ -17,23 +18,30 @@ export default function PwaControls() {
     queuedReviewCount().then(setQueued).catch(() => {});
 
     const captureInstall = (event) => { event.preventDefault(); setInstallPrompt(event); };
+    const markInstalled = () => { setInstalled(true); setInstallPrompt(null); };
     const updateQueue = (event) => setQueued(Number(event.detail?.count || 0));
     const goOffline = () => setOnline(false);
     const goOnline = async () => {
       setOnline(true);
+      if (syncPromiseRef.current) return;
       setSyncing(true);
-      try { const result = await flushReviewQueue(); setQueued(result.remaining); }
+      try {
+        syncPromiseRef.current = flushReviewQueue();
+        const result = await syncPromiseRef.current;
+        setQueued(result.remaining);
+      }
       catch { /* The next online event or manual retry will continue the queue. */ }
-      finally { setSyncing(false); }
+      finally { syncPromiseRef.current = null; setSyncing(false); }
     };
     window.addEventListener("beforeinstallprompt", captureInstall);
-    window.addEventListener("appinstalled", () => { setInstalled(true); setInstallPrompt(null); });
+    window.addEventListener("appinstalled", markInstalled);
     window.addEventListener("offline", goOffline);
     window.addEventListener("online", goOnline);
     window.addEventListener("snoozelet:offline-queue", updateQueue);
     if (navigator.onLine) goOnline();
     return () => {
       window.removeEventListener("beforeinstallprompt", captureInstall);
+      window.removeEventListener("appinstalled", markInstalled);
       window.removeEventListener("offline", goOffline);
       window.removeEventListener("online", goOnline);
       window.removeEventListener("snoozelet:offline-queue", updateQueue);
@@ -48,9 +56,14 @@ export default function PwaControls() {
   }
 
   async function retrySync() {
+    if (syncPromiseRef.current) return;
     setSyncing(true);
-    try { const result = await flushReviewQueue(); setQueued(result.remaining); }
-    finally { setSyncing(false); }
+    try {
+      syncPromiseRef.current = flushReviewQueue();
+      const result = await syncPromiseRef.current;
+      setQueued(result.remaining);
+    }
+    finally { syncPromiseRef.current = null; setSyncing(false); }
   }
 
   if (installed && online && queued === 0) return null;
