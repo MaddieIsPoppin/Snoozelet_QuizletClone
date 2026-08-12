@@ -71,7 +71,6 @@ export default function StudySession({
   const [masteredCards, setMasteredCards] = useState(() => new Set());
   const [revengeCards, setRevengeCards] = useState(() => new Map());
   const [moment, setMoment] = useState(null);
-  const [raceProgress, setRaceProgress] = useState(4);
   const [latestProgress, setLatestProgress] = useState(null);
   const [audioCue, setAudioCue] = useState(null);
   const [mobileOptionsOpen, setMobileOptionsOpen] = useState(false);
@@ -334,13 +333,6 @@ export default function StudySession({
     setSessionXp((value) => value + Number(saved.xpGained || 0));
     if (saved.progress) setLatestProgress(saved.progress);
     setAudioCue({ correct: saved.correct, type: saved.moment, multiplier: saved.flowMultiplier, nonce: Date.now() });
-    setRaceProgress((value) => {
-      const cardCount = Math.max(5, mode === "test" ? testQuestions.length : queue.length);
-      const step = 92 / cardCount;
-      return saved.correct
-        ? Math.min(96, value + step * (nextStreak >= 3 ? 1.35 : 1))
-        : Math.max(2, value - step * .55);
-    });
 
     if (saved.moment === "revenge-added" || !saved.correct) {
       setRevengeCards((current) => new Map(current).set(card.id, {
@@ -392,7 +384,6 @@ export default function StudySession({
     setSessionXp(0);
     setMasteredCards(new Set());
     setRevengeCards(new Map());
-    setRaceProgress(4);
     setLatestProgress(null);
     setCompleted(false);
     resetAnswerState();
@@ -1370,12 +1361,6 @@ function goToNextFlashcard() {
         ) : null}
 
       </div>
-
-      <div className="flashcard-race" aria-label={`Study race: ${correct} correct answers`}>
-        <div className="race-label"><strong>🏎️ Flashcard race</strong><span>{answerStreak >= 3 ? "BOOST ACTIVE 💨" : "Build a 3-card combo to boost"}</span></div>
-        <div className="race-track"><span className={answerStreak >= 3 ? "boosting" : ""} style={{ left: `calc(${raceProgress}% - 18px)` }}>🏎️</span><b>🏁</b></div>
-      </div>
-
 
       {/* -----------------------------------------------------
           SESSION SUMMARY

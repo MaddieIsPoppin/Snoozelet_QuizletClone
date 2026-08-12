@@ -5334,6 +5334,54 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
   .comfort-panel,.comfort-panel-sidebar { inset: auto 14px 82px; width: auto; max-height: calc(100vh - 110px); }
 }
 
+/* Mobile flashcards must remain the primary, full-size surface. */
+@media (max-width: 760px) {
+  .is-study-route .study-card:has(.flashcard-session) {
+    display: flex;
+    align-items: stretch;
+    padding: 5px;
+    overflow: hidden;
+  }
+
+  .is-study-route .flashcard-session {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    width: 100%;
+    height: auto;
+    min-height: 0;
+  }
+
+  .is-study-route .flashcard-flip-scene {
+    width: 100%;
+    height: auto;
+    min-height: clamp(350px,58svh,620px);
+    flex: 1 1 auto;
+  }
+
+  .is-study-route .flashcard-face {
+    width: 100%;
+    min-height: 100%;
+    padding: clamp(16px,5vw,26px);
+  }
+
+  .is-study-route .flashcard-face h2 {
+    font-size: clamp(1.7rem,8.5vw,2.7rem);
+    line-height: 1.08;
+  }
+
+  .is-study-route .flashcard-front > .button {
+    width: min(100%,280px);
+    min-height: 50px;
+  }
+
+  .is-study-route .flashcard-swipe-help {
+    flex: 0 0 auto;
+    padding: 3px 0 1px;
+    text-align: center;
+  }
+}
+
 /* Blast stays immersive and fully reachable on compact Android screens. */
 .blast-life-count { display: none; }
 
@@ -5444,13 +5492,6 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
 .story-moment.complete { border: 1px solid rgba(105,216,174,.45); background: radial-gradient(circle at 90% 20%,rgba(105,216,174,.18),transparent 9rem),rgba(28,94,76,.2); animation: mastery-pop 480ms ease-out; }
 .story-moment b { margin-top: 5px; color: #bdaeff; }
 @keyframes mastery-pop { from { opacity: 0; transform: scale(.94); } 60% { transform: scale(1.025); } }
-.flashcard-race { display: grid; gap: 8px; margin: 12px 0 18px; padding: 12px 15px; border: 1px solid rgba(175,190,235,.15); border-radius: 14px; background: rgba(8,18,44,.5); }
-.race-label { display: flex; justify-content: space-between; gap: 12px; font-size: .73rem; }
-.race-label span { color: var(--muted); }
-.race-track { position: relative; height: 26px; border-bottom: 3px dashed rgba(255,255,255,.18); }
-.race-track span { position: absolute; bottom: 0; font-size: 1.45rem; transition: left 520ms cubic-bezier(.2,.8,.2,1); }
-.race-track span.boosting { filter: drop-shadow(-8px 0 6px rgba(80,210,255,.65)); }
-.race-track b { position: absolute; right: 0; bottom: 0; }
 .session-complete-card { width: min(760px,100%); margin: 5vh auto; padding: clamp(28px,5vw,58px); border: 1px solid rgba(105,216,174,.3); border-radius: 28px; text-align: center; background: radial-gradient(circle at 50% 0,rgba(105,216,174,.18),transparent 20rem),linear-gradient(145deg,rgba(28,51,91,.9),rgba(38,28,82,.88)); box-shadow: 0 28px 80px rgba(2,8,30,.35); }
 .session-complete-card h1 { margin: 8px 0 28px; font-size: clamp(2rem,5vw,3.6rem); }
 .session-stat-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; }
@@ -5466,10 +5507,10 @@ html[data-theme="light"] :is(.blast-question-card,.blast-target,.match-tile,.tes
 .session-level-track { height: 11px; overflow: hidden; border-radius: 999px; background: rgba(4,13,34,.65); }
 .session-level-track span { display: block; height: 100%; border-radius: inherit; background: linear-gradient(90deg,#69d8ae,#8f7cff); box-shadow: 0 0 18px rgba(105,216,174,.4); }
 .session-complete-card > .button { margin: 5px; }
-html[data-theme="light"] :is(.flashcard-race,.session-stat-grid div) { border-color: #d8e0ef; background: #f7f9fd; }
+html[data-theme="light"] .session-stat-grid div { border-color: #d8e0ef; background: #f7f9fd; }
 html[data-theme="light"] .session-complete-card { border-color: #cddfd8; background: linear-gradient(145deg,#fff,#f0f4ff); box-shadow: 0 22px 58px rgba(45,58,88,.12); }
 @media (max-width: 620px) { .session-stat-grid { grid-template-columns: repeat(2,1fr); } .flow-banner small { display: none; } }
-html[data-reduced-motion="true"] :is(.story-moment.complete,.race-track span) { animation: none; transition: none; }
+html[data-reduced-motion="true"] .story-moment.complete { animation: none; transition: none; }
 
 /* Android PWA and offline states */
 .pwa-controls { position: fixed; z-index: 100; top: max(10px, env(safe-area-inset-top)); left: 50%; display: flex; align-items: center; gap: 8px; transform: translateX(-50%); padding: 7px 10px; border: 1px solid rgba(105,216,174,.28); border-radius: 999px; background: rgba(7,20,45,.9); box-shadow: 0 10px 30px rgba(2,8,27,.25); backdrop-filter: blur(16px); }
@@ -5547,11 +5588,6 @@ html[data-theme="light"] .pwa-controls { border-color: #cfd9e8; background: rgba
   .is-study-route .study-controls.mobile-open { display: grid; }
   .is-study-route .study-controls :is(.direction-toggle,label,select,.button) { width: 100%; }
 
-  .is-study-route .flashcard-race { flex: 0 0 auto; gap: 3px; margin: 0; padding: 5px 9px; border-radius: 10px; }
-  .is-study-route .race-label { font-size: .62rem; }
-  .is-study-route .race-label span { display: none; }
-  .is-study-route .race-track { height: 16px; }
-  .is-study-route .race-track span { font-size: 1rem; }
   .is-study-route .study-summary { flex: 0 0 auto; flex-wrap: nowrap; gap: 4px; overflow: hidden; font-size: .64rem; }
   .is-study-route .study-summary span { min-width: 0; padding: 3px 7px; white-space: nowrap; }
   .is-study-route .study-progress { flex: 0 0 5px; height: 5px; }
