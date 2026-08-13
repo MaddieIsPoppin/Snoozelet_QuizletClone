@@ -5,10 +5,12 @@ import { useMemo, useState, useTransition } from "react";
 import {
   assignDeckFolderAction,
   createDeckFolderAction,
+  createSubjectAction,
+  assignFolderSubjectAction,
   deleteDeckFolderAction,
 } from "@/app/actions";
 
-export default function DeckLibrary({ decks, folders }) {
+export default function DeckLibrary({ decks, folders, subjects = [] }) {
   const [folder, setFolder] = useState("all");
   const [query, setQuery] = useState("");
   const [draggedDeckId, setDraggedDeckId] = useState(null);
@@ -44,7 +46,15 @@ export default function DeckLibrary({ decks, folders }) {
   }, [decks, folder, query]);
 
   return (
-    <div className="library-workspace">
+    <div className="library-home">
+      <section className="subject-shelf">
+        <div className="subject-shelf-heading"><div><p className="eyebrow">Subjects</p><h2>Your courses</h2></div><span>{subjects.length}</span></div>
+        <div className="subject-grid">
+          {subjects.map((subject) => <Link className="subject-card" href={`/subjects/${subject.id}`} key={subject.id}><span className="subject-icon">◎</span><div><h3>{subject.name}</h3><p>{subject.description || `${subject.unit_count} study units`}</p><small>{subject.card_count} cards · {subject.due_count} due · {subject.accuracy}% accuracy</small></div><b>→</b></Link>)}
+          <form action={createSubjectAction} className="subject-create-card"><strong>＋ New subject</strong><input name="name" placeholder="e.g. CMPG321" maxLength="100" required /><input name="description" placeholder="Optional description" maxLength="500" /><button type="submit">Create subject</button></form>
+        </div>
+      </section>
+      <div className="library-workspace">
       <aside className="folder-panel">
         <div className="folder-panel-heading">
           <strong>Folders</strong>
@@ -68,9 +78,10 @@ export default function DeckLibrary({ decks, folders }) {
           </div>
         ))}
         <form action={createDeckFolderAction} className="new-folder-form">
-          <strong>Create a folder</strong>
-          <input name="name" maxLength="80" placeholder="New folder name" required />
-          <button type="submit">Create folder</button>
+          <strong>Create a study unit</strong>
+          <input name="name" maxLength="80" placeholder="Study Unit 1" required />
+          <select name="subjectId" defaultValue=""><option value="">No subject yet</option>{subjects.map((subject) => <option value={subject.id} key={subject.id}>{subject.name}</option>)}</select>
+          <button type="submit">Create study unit</button>
         </form>
       </aside>
 
@@ -92,13 +103,14 @@ export default function DeckLibrary({ decks, folders }) {
                   <span>{deck.card_count} cards</span><span>{deck.due_count} due</span><span>{deck.accuracy}%</span>
                 </div>
                 <div className="library-card-actions"><Link className="button" href={`/decks/${deck.id}`}>Open & edit</Link><Link className="button primary" href={`/decks/${deck.id}/learn`}>Study now</Link></div>
-                <details className="library-organize"><summary>Move to a folder</summary><form action={assignDeckFolderAction}><input name="deckId" type="hidden" value={deck.id} /><label>Folder<select name="folderId" defaultValue={deck.folder_id || ""} onChange={(event) => event.currentTarget.form.requestSubmit()} aria-label={`Folder for ${deck.title}`}><option value="">No folder</option>{folders.map((item) => <option value={item.id} key={item.id}>{item.name}</option>)}</select></label></form></details>
+                <details className="library-organize"><summary>Organize set</summary><form action={assignDeckFolderAction}><input name="deckId" type="hidden" value={deck.id} /><label>Study unit<select name="folderId" defaultValue={deck.folder_id || ""} onChange={(event) => event.currentTarget.form.requestSubmit()} aria-label={`Study unit for ${deck.title}`}><option value="">No study unit</option>{folders.map((item) => <option value={item.id} key={item.id}>{item.subject_name ? `${item.subject_name} · ` : ""}{item.name}</option>)}</select></label></form>{deck.folder_id ? <form action={assignFolderSubjectAction}><input name="folderId" type="hidden" value={deck.folder_id} /><label>Subject<select name="subjectId" defaultValue={folders.find((item) => Number(item.id) === Number(deck.folder_id))?.subject_id || ""} onChange={(event) => event.currentTarget.form.requestSubmit()}><option value="">No subject</option>{subjects.map((subject) => <option value={subject.id} key={subject.id}>{subject.name}</option>)}</select></label></form> : null}</details>
               </article>
             ))}
           </div>
         ) : <div className="workspace-empty"><strong>No decks found</strong><p>Create a deck or choose another folder.</p></div>}
         {isMoving ? <p className="library-move-status" role="status">Moving deck…</p> : null}
       </section>
+      </div>
     </div>
   );
 }

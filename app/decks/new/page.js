@@ -4,9 +4,11 @@ import { requireUser } from "@/lib/auth";
 import TextField from "@/components/TextField";
 import BrandMark from "@/components/BrandMark";
 import CardCreationGuide from "@/components/CardCreationGuide";
+import { getDeckFolders } from "@/lib/db";
 
 export default async function NewDeckPage() {
-  await requireUser();
+  const user = await requireUser();
+  const folders = await getDeckFolders(user.id);
 
   return (
     <main className="page narrow">
@@ -37,6 +39,7 @@ export default async function NewDeckPage() {
             Description
             <input name="description" placeholder="Optional context" />
           </label>
+          <label>Study unit<select name="folderId" defaultValue=""><option value="">Organize later</option>{folders.map((folder) => <option value={folder.id} key={folder.id}>{folder.subject_name ? `${folder.subject_name} · ` : ""}{folder.name}</option>)}</select></label>
           <label>
             Add cards now
             <TextField

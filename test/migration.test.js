@@ -60,9 +60,13 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(preserved.answer, "answer");
   assert.equal(preserved.expected, "answer");
   assert.equal(preserved.attempt_id, null);
-  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5, 6, 7, 8]);
+  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5, 6, 7, 8, 9]);
   const goalTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'learning_goals'");
   assert.equal(goalTable.name, "learning_goals");
+  const subjectTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'subjects'");
+  const resourceTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'resource_links'");
+  assert.equal(subjectTable.name, "subjects");
+  assert.equal(resourceTable.name, "resource_links");
   assert.ok(cardColumns.some((column) => column.name === "image_url"));
   assert.ok(cardColumns.some((column) => column.name === "image_public_id"));
   assert.ok(cardColumns.some((column) => column.name === "image_alt"));

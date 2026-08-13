@@ -14,6 +14,10 @@ import {
   updateDeck,
   createLearningGoal,
   deleteLearningGoal,
+  createSubject,
+  assignFolderSubject,
+  createResourceLink,
+  deleteResourceLink,
 } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
@@ -103,7 +107,7 @@ export async function createDeckAction(formData) {
     ...(pasted ? parseCards(pasted) : []),
     ...(await parseUploadedCards(csvFile))
   ]);
-  const deckId = await createDeckWithCards({ title, description, cards, userId: user.id });
+  const deckId = await createDeckWithCards({ title, description, cards, folderId: formData.get("folderId"), userId: user.id });
 
   revalidatePath("/");
   redirect(`/decks/${deckId}`);
@@ -188,8 +192,36 @@ export async function deleteDeckAction(formData) {
 
 export async function createDeckFolderAction(formData) {
   const user = await requireUser();
-  await createDeckFolder({ name: formData.get("name"), userId: user.id });
+  await createDeckFolder({ name: formData.get("name"), subjectId: formData.get("subjectId"), userId: user.id });
   revalidatePath("/library");
+}
+
+export async function createSubjectAction(formData) {
+  const user = await requireUser();
+  await createSubject({ name: formData.get("name"), description: formData.get("description"), userId: user.id });
+  revalidatePath("/library");
+}
+
+export async function assignFolderSubjectAction(formData) {
+  const user = await requireUser();
+  await assignFolderSubject({ folderId: formData.get("folderId"), subjectId: formData.get("subjectId"), userId: user.id });
+  revalidatePath("/library");
+  revalidatePath(`/subjects/${formData.get("subjectId")}`);
+}
+
+export async function createResourceLinkAction(formData) {
+  const user = await requireUser();
+  await createResourceLink({ userId: user.id, subjectId: formData.get("subjectId"), folderId: formData.get("folderId"), title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
+  if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
+  if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+}
+
+export async function deleteResourceLinkAction(formData) {
+  const user = await requireUser();
+  await deleteResourceLink({ resourceId: formData.get("resourceId"), userId: user.id });
+  revalidatePath("/library");
+  if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
+  if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
 }
 
 export async function assignDeckFolderAction(formData) {

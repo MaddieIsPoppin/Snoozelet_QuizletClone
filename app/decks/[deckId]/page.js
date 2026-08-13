@@ -4,7 +4,6 @@ import { notFound } from "next/navigation";
 import {
   addCardAction,
   deleteDeckAction,
-  importCardsAction,
   updateDeckAction,
 } from "@/app/actions";
 
@@ -13,6 +12,8 @@ import DeckCardList from "@/components/DeckCardList";
 import ImageUploadField from "@/components/ImageUploadField";
 import CardCreationGuide from "@/components/CardCreationGuide";
 import PendingForm from "@/components/PendingForm";
+import SmartPasteImporter from "@/components/SmartPasteImporter";
+import StudyContextTools from "@/components/StudyContextTools";
 
 import { requireUser } from "@/lib/auth";
 import { getCards, getDeck } from "@/lib/db";
@@ -586,76 +587,15 @@ export default async function DeckPage({ params }) {
             </div>
 
 
-            <PendingForm
-              action={importCardsAction}
-              className="form-stack"
-              submitLabel="Import cards"
-              pendingLabel="Importing cards…"
-            >
-
-              <input
-                name="deckId"
-                type="hidden"
-                value={deck.id}
-              />
-
-
-              <label>
-                Format
-
-                <select
-                  name="format"
-                  defaultValue="auto"
-                >
-
-                  <option value="auto">
-                    Auto-detect
-                  </option>
-
-                  <option value="csv">
-                    CSV
-                  </option>
-
-                  <option value="text">
-                    Pasted text
-                  </option>
-
-                </select>
-              </label>
-
-
-              <label>
-                Paste cards
-
-                <TextField
-                  textarea
-                  name="cards"
-                  rows="8"
-                  placeholder={
-                    "term,definition\nterm - definition\nterm\tdefinition"
-                  }
-                />
-              </label>
-
-
-              <label>
-                CSV file
-
-                <input
-                  accept=".csv,text/csv"
-                  name="csvFile"
-                  type="file"
-                />
-              </label>
-
-
-            </PendingForm>
+            <SmartPasteImporter deckId={deck.id} existingCards={cards} />
 
           </article>
 
         </div>
 
       </section>
+
+      <StudyContextTools subject={deck.title} decks={[deck]} cards={cards.map((card) => ({ ...card, attempts: card.correct_count + card.incorrect_count, accuracy: card.correct_count + card.incorrect_count ? Math.round(card.correct_count / (card.correct_count + card.incorrect_count) * 100) : 0, due: card.due_at <= new Date().toISOString() }))} />
 
 
       {/* ====================================================
