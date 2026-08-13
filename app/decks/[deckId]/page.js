@@ -273,30 +273,16 @@ export default async function DeckPage({ params }) {
             <span className="deck-mode-arrow">→</span>
           </Link>
 
-          <Link
-            className="deck-mode-card"
-            href={`/decks/${deck.id}/typed`}
-          >
+          <Link className="deck-mode-card" href={`/decks/${deck.id}/match`}>
+            <div className="deck-mode-icon">◈</div>
+            <div><h3>Match</h3><p>Pair terms and definitions in a quick visual round.</p></div>
+            <span className="deck-mode-arrow">→</span>
+          </Link>
 
-            <div className="deck-mode-icon">
-              ✎
-            </div>
-
-            <div>
-              <h3>
-                Typed
-              </h3>
-
-              <p>
-                Type the answer yourself for
-                stronger recall.
-              </p>
-            </div>
-
-            <span className="deck-mode-arrow">
-              →
-            </span>
-
+          <Link className="deck-mode-card" href={`/decks/${deck.id}/blast`}>
+            <div className="deck-mode-icon">✦</div>
+            <div><h3>Blast</h3><p>Fast, focused rounds when you want study to feel like play.</p></div>
+            <span className="deck-mode-arrow">→</span>
           </Link>
 
         </div>
@@ -312,96 +298,6 @@ export default async function DeckPage({ params }) {
         </div>
         <Link className="button primary" href={`/decks/${deck.id}/focus`}>Begin Focus Journey</Link>
       </section>
-
-      {/* ====================================================
-          GAMES
-          ==================================================== */}
-
-      <section className="deck-section">
-
-        <div className="deck-section-heading">
-
-          <div>
-            <p className="eyebrow">
-              Games
-            </p>
-
-            <h2>
-              Practice without it feeling like a test
-            </h2>
-          </div>
-
-        </div>
-
-
-        <div className="deck-game-grid">
-
-          <Link
-            className="deck-game-card deck-game-match"
-            href={`/decks/${deck.id}/match`}
-          >
-
-            <div className="deck-game-icon">
-              ◈
-            </div>
-
-            <div>
-              <p className="eyebrow">
-                Speed
-              </p>
-
-              <h3>
-                Match
-              </h3>
-
-              <p>
-                Pair terms with their definitions
-                as fast as you can.
-              </p>
-            </div>
-
-            <span className="deck-game-arrow">
-              →
-            </span>
-
-          </Link>
-
-
-          <Link
-            className="deck-game-card deck-game-blast"
-            href={`/decks/${deck.id}/blast`}
-          >
-
-            <div className="deck-game-icon">
-              ✦
-            </div>
-
-            <div>
-              <p className="eyebrow">
-                Arcade
-              </p>
-
-              <h3>
-                Blast
-              </h3>
-
-              <p>
-                Build combos and answer before
-                the timer runs out.
-              </p>
-            </div>
-
-            <span className="deck-game-arrow">
-              →
-            </span>
-
-          </Link>
-
-
-        </div>
-
-      </section>
-
 
       {/* ====================================================
           CARDS

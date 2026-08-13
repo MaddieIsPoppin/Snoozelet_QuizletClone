@@ -6,9 +6,11 @@ import BrandMark from "@/components/BrandMark";
 import CardCreationGuide from "@/components/CardCreationGuide";
 import { getDeckFolders } from "@/lib/db";
 
-export default async function NewDeckPage() {
+export default async function NewDeckPage({ searchParams }) {
   const user = await requireUser();
   const folders = await getDeckFolders(user.id);
+  const query = await searchParams;
+  const selectedFolder = folders.some((folder) => String(folder.id) === String(query?.studyUnit || "")) ? String(query.studyUnit) : "";
 
   return (
     <main className="page narrow">
@@ -39,7 +41,7 @@ export default async function NewDeckPage() {
             Description
             <input name="description" placeholder="Optional context" />
           </label>
-          <label>Study unit<select name="folderId" defaultValue=""><option value="">Organize later</option>{folders.map((folder) => <option value={folder.id} key={folder.id}>{folder.subject_name ? `${folder.subject_name} · ` : ""}{folder.name}</option>)}</select></label>
+          <label>Study Unit<select name="folderId" defaultValue={selectedFolder}><option value="">Organise later</option>{folders.map((folder) => <option value={folder.id} key={folder.id}>{folder.subject_name ? `${folder.subject_name} › ` : ""}{folder.name}</option>)}</select></label>
           <label>
             Add cards now
             <TextField

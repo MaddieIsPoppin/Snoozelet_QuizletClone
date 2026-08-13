@@ -49,7 +49,7 @@ export default function StudySession({
   mode = "learn",
   studyScope = "targeted",
   testCount = cards.length,
-  testTypes = ["multiple", "typed", "truefalse"],
+  testTypes = ["multiple", "truefalse"],
   initialAnswerDirection = "definition",
 }) {
   const router =
@@ -1309,10 +1309,7 @@ function goToNextFlashcard() {
             </div>
 
 
-            {(
-              mode === "typed" ||
-              mode === "learn"
-            ) ? (
+            {mode === "typed" ? (
               <label>
                 Grading
 

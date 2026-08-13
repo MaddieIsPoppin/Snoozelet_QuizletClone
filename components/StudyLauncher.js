@@ -7,8 +7,9 @@ const modes = [
   { id: "multiple-choice", icon: "A", name: "Multiple choice", description: "Choose between related answers from your deck." },
   { id: "learn", icon: "◎", name: "Learn", description: "A guided mix that adapts as you answer.", recommended: true },
   { id: "flashcards", icon: "▱", name: "Flashcards", description: "Flip through cards and rate your recall." },
-  { id: "typed", icon: "⌨", name: "Written answers", description: "Type answers for stronger active recall." },
   { id: "test", icon: "✓", name: "Practice test", description: "Build a mixed test and see your score." },
+  { id: "match", icon: "◇", name: "Match", description: "Pair terms and definitions in a quick visual challenge." },
+  { id: "blast", icon: "✦", name: "Blast", description: "Answer rapidly, build a combo, and charge the telescope." },
 ];
 
 export default function StudyLauncher({ decks }) {

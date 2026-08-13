@@ -127,17 +127,6 @@ export default async function TestPage({
                   defaultChecked
                   name="types"
                   type="checkbox"
-                  value="typed"
-                />
-
-                <span><strong>Written answers</strong><small>Strong active recall with flexible grading.</small></span>
-              </label>
-
-              <label className="test-checkbox">
-                <input
-                  defaultChecked
-                  name="types"
-                  type="checkbox"
                   value="true-false"
                 />
 

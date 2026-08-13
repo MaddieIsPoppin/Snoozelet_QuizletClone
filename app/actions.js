@@ -195,6 +195,7 @@ export async function createDeckFolderAction(formData) {
   const user = await requireUser();
   await createDeckFolder({ name: formData.get("name"), subjectId: formData.get("subjectId"), userId: user.id });
   revalidatePath("/library");
+  if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
 }
 
 export async function createSubjectAction(formData) {
@@ -246,6 +247,7 @@ export async function deleteDeckFolderAction(formData) {
   const user = await requireUser();
   await deleteDeckFolder({ folderId: formData.get("folderId"), userId: user.id });
   revalidatePath("/library");
+  if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
 }
 
 export async function createLearningGoalAction(formData) {

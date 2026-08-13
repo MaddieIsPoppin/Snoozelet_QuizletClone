@@ -2,39 +2,19 @@
 
 import { useMemo, useState } from "react";
 import MultipleChoiceQuestion from "@/components/MultipleChoiceQuestion";
-import TypedQuestion from "@/components/TypedQuestion";
 import {
   answerForDirection,
   makeMultipleChoiceOptions,
   normalizeFlexibleAnswer,
   promptForDirection,
 } from "@/lib/study";
-import { isTypedCorrect } from "@/lib/grading";
 
 export default function LearnQuestion({
   card,
   cards,
   answerDirection,
-  grading,
   onResult,
 }) {
-
-  const [
-    questionType,
-    setQuestionType,
-  ] = useState(
-    () =>
-      Math.random() >= 0.5
-        ? "multiple"
-        : "typed"
-  );
-
-
-  const [
-    answer,
-    setAnswer,
-  ] = useState("");
-
 
   const [
     feedback,
@@ -71,19 +51,12 @@ export default function LearnQuestion({
 
 
   function resetLearnQuestion() {
-    setAnswer("");
-
     setFeedback(null);
 
     setSelectedChoice(
       null
     );
 
-    setQuestionType(
-      Math.random() >= 0.5
-        ? "multiple"
-        : "typed"
-    );
   }
 
 
@@ -109,17 +82,10 @@ export default function LearnQuestion({
      LEARN MULTIPLE CHOICE
      --------------------------------------------------------- */
 
-  if (
-    questionType ===
-    "multiple"
-  ) {
-
-    function chooseLearnAnswer(
-      choice
-    ) {
-      if (feedback) {
-        return;
-      }
+  function chooseLearnAnswer(choice) {
+    if (feedback) {
+      return;
+    }
 
       const wasCorrect =
         normalizeFlexibleAnswer(
@@ -129,20 +95,13 @@ export default function LearnQuestion({
           expected
         );
 
-      setSelectedChoice(
-        choice
-      );
+    setSelectedChoice(choice);
 
-      setFeedback({
-        correct:
-          wasCorrect,
-
-        expected,
-      });
-    }
+    setFeedback({ correct: wasCorrect, expected });
+  }
 
 
-    return (
+  return (
       <MultipleChoiceQuestion
         prompt={
           prompt
@@ -180,73 +139,5 @@ export default function LearnQuestion({
           )
         }
       />
-    );
-  }
-
-
-  /* ---------------------------------------------------------
-     LEARN TYPED
-     --------------------------------------------------------- */
-
-
-  function submitLearnTyped(
-    event
-  ) {
-    event.preventDefault();
-
-    if (feedback) {
-      return;
-    }
-
-    const wasCorrect =
-      isTypedCorrect(
-        answer,
-        expected,
-        grading
-      );
-
-    setFeedback({
-      correct:
-        wasCorrect,
-
-      expected,
-    });
-  }
-
-
-  return (
-    <TypedQuestion
-      prompt={
-        prompt
-      }
-
-      answerDirection={
-        answerDirection
-      }
-
-      typedAnswer={
-        answer
-      }
-
-      setTypedAnswer={
-        setAnswer
-      }
-
-      feedback={
-        feedback
-      }
-
-      onSubmit={
-        submitLearnTyped
-      }
-
-      onContinue={() =>
-        finishLearnQuestion(
-          feedback.correct,
-          "typed",
-          answer
-        )
-      }
-    />
   );
 }
