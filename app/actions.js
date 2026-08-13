@@ -18,6 +18,7 @@ import {
   assignFolderSubject,
   createResourceLink,
   deleteResourceLink,
+  updateResourceLink,
 } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
@@ -220,6 +221,13 @@ export async function deleteResourceLinkAction(formData) {
   const user = await requireUser();
   await deleteResourceLink({ resourceId: formData.get("resourceId"), userId: user.id });
   revalidatePath("/library");
+  if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
+  if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+}
+
+export async function updateResourceLinkAction(formData) {
+  const user = await requireUser();
+  await updateResourceLink({ resourceId: formData.get("resourceId"), userId: user.id, title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
   if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
 }

@@ -8,15 +8,13 @@ import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import PwaControls from "@/components/PwaControls";
 
 const navigation = [
-  { href: "/", label: "Observatory", icon: "⌂", exact: true },
-  { href: "/library", label: "My decks", icon: "▤" },
+  { href: "/", label: "Home", icon: "⌂", exact: true },
+  { href: "/library", label: "Modules", icon: "▤" },
   { href: "/study", label: "Study", icon: "◫" },
-  { href: "/games", label: "Games", icon: "✦" },
   { href: "/progress", label: "Progress", icon: "↗" },
-  { href: "/goals", label: "Exam plans", icon: "◎" },
 ];
 
-const mobileNavigation = [navigation[0], navigation[2], navigation[3], navigation[4]];
+const mobileNavigation = navigation;
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
@@ -27,7 +25,7 @@ export default function AppShell({ children }) {
 
   const active = (item) => {
     if (item.exact) return pathname === item.href;
-    if (item.href === "/library" && pathname.startsWith("/decks")) return true;
+    if (item.href === "/library" && (/^\/(decks|subjects|study-units)/.test(pathname))) return true;
     return pathname.startsWith(item.href);
   };
 

@@ -48,23 +48,23 @@ export default function DeckLibrary({ decks, folders, subjects = [] }) {
   return (
     <div className="library-home">
       <section className="subject-shelf">
-        <div className="subject-shelf-heading"><div><p className="eyebrow">Subjects</p><h2>Your courses</h2></div><span>{subjects.length}</span></div>
+        <div className="subject-shelf-heading"><div><p className="eyebrow">Modules</p><h2>Your courses</h2></div><span>{subjects.length}</span></div>
         <div className="subject-grid">
           {subjects.map((subject) => <Link className="subject-card" href={`/subjects/${subject.id}`} key={subject.id}><span className="subject-icon">◎</span><div><h3>{subject.name}</h3><p>{subject.description || `${subject.unit_count} study units`}</p><small>{subject.card_count} cards · {subject.due_count} due · {subject.accuracy}% accuracy</small></div><b>→</b></Link>)}
-          <form action={createSubjectAction} className="subject-create-card"><strong>＋ New subject</strong><input name="name" placeholder="e.g. CMPG321" maxLength="100" required /><input name="description" placeholder="Optional description" maxLength="500" /><button type="submit">Create subject</button></form>
+          <form action={createSubjectAction} className="subject-create-card"><strong>＋ New Module</strong><input name="name" placeholder="e.g. CMPG321" maxLength="100" required /><input name="description" placeholder="e.g. Database Systems" maxLength="500" /><button type="submit">Create Module</button></form>
         </div>
       </section>
       <div className="library-workspace">
       <aside className="folder-panel">
         <div className="folder-panel-heading">
-          <strong>Folders</strong>
+          <strong>Study Units</strong>
           <span>{folders.length}</span>
         </div>
         <button className={folder === "all" ? "active" : ""} onClick={() => setFolder("all")} type="button">
           <span>All decks</span><small>{decks.length}</small>
         </button>
         <button {...folderDropProps("")} className={`${folder === "unfiled" ? "active " : ""}${dropTarget === "" ? "drop-target" : ""}`} onClick={() => setFolder("unfiled")} type="button">
-          <span>No folder</span><small>{decks.filter((deck) => !deck.folder_id).length}</small>
+          <span>Unorganised decks</span><small>{decks.filter((deck) => !deck.folder_id).length}</small>
         </button>
         {folders.map((item) => (
           <div className="folder-row" key={item.id}>
@@ -80,7 +80,7 @@ export default function DeckLibrary({ decks, folders, subjects = [] }) {
         <form action={createDeckFolderAction} className="new-folder-form">
           <strong>Create a study unit</strong>
           <input name="name" maxLength="80" placeholder="Study Unit 1" required />
-          <select name="subjectId" defaultValue=""><option value="">No subject yet</option>{subjects.map((subject) => <option value={subject.id} key={subject.id}>{subject.name}</option>)}</select>
+          <select name="subjectId" defaultValue=""><option value="">No Module yet</option>{subjects.map((subject) => <option value={subject.id} key={subject.id}>{subject.name}</option>)}</select>
           <button type="submit">Create study unit</button>
         </form>
       </aside>

@@ -14,6 +14,7 @@ import CardCreationGuide from "@/components/CardCreationGuide";
 import PendingForm from "@/components/PendingForm";
 import SmartPasteImporter from "@/components/SmartPasteImporter";
 import StudyContextTools from "@/components/StudyContextTools";
+import Breadcrumbs from "@/components/Breadcrumbs";
 
 import { requireUser } from "@/lib/auth";
 import { getCards, getDeck } from "@/lib/db";
@@ -42,6 +43,7 @@ export default async function DeckPage({ params }) {
 
   return (
     <main className="deck-page-v2">
+      <Breadcrumbs module={deck.subject_name} moduleId={deck.subject_id} unit={deck.folder_name} unitId={deck.folder_id} deck={deck.title} />
 
       {/* ====================================================
           HEADER

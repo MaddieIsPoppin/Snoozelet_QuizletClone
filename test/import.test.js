@@ -66,3 +66,9 @@ test("Smart Paste reports incomplete Q/A blocks", () => {
   assert.equal(parsed.cards.length, 0);
   assert.equal(parsed.invalid.length, 1);
 });
+
+test("Smart Paste recognizes Module, Study Unit, and Deck metadata", () => {
+  const parsed = parseSmartPaste("# SNOOZELET\nModule: CMPG324\nStudy Unit: Processes\nDeck: Scheduling\n\nQ: What is a process?\nA: A program in execution.");
+  assert.deepEqual(parsed.metadata, { subject: "CMPG324", folder: "Processes", set: "Scheduling" });
+  assert.equal(parsed.cards.length, 1);
+});

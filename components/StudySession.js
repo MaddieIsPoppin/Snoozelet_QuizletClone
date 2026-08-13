@@ -12,6 +12,7 @@ import dynamic from "next/dynamic";
 import useReviewSaver from "@/hooks/useReviewSaver";
 
 import XpNotice from "@/components/XpNotice";
+import Breadcrumbs from "@/components/Breadcrumbs";
 import {
   advanceStudyQueue,
   answerForDirection,
@@ -1228,6 +1229,7 @@ function goToNextFlashcard() {
       <div className="study-header">
 
         <div>
+          <Breadcrumbs module={deck.subject_name} moduleId={deck.subject_id} unit={deck.folder_name} unitId={deck.folder_id} deck={deck.title} />
           <p className="eyebrow">
             {mode === "test"
               ? "Test"
