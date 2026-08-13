@@ -13,7 +13,6 @@ import ImageUploadField from "@/components/ImageUploadField";
 import CardCreationGuide from "@/components/CardCreationGuide";
 import PendingForm from "@/components/PendingForm";
 import SmartPasteImporter from "@/components/SmartPasteImporter";
-import StudyContextTools from "@/components/StudyContextTools";
 import Breadcrumbs from "@/components/Breadcrumbs";
 
 import { requireUser } from "@/lib/auth";
@@ -493,7 +492,6 @@ export default async function DeckPage({ params }) {
 
       </section>
 
-      <StudyContextTools subject={deck.title} decks={[deck]} cards={cards.map((card) => ({ ...card, attempts: card.correct_count + card.incorrect_count, accuracy: card.correct_count + card.incorrect_count ? Math.round(card.correct_count / (card.correct_count + card.incorrect_count) * 100) : 0, due: card.due_at <= new Date().toISOString() }))} />
 
 
       {/* ====================================================

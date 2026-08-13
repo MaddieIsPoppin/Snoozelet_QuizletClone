@@ -13,7 +13,7 @@ export default function DeckLibrary({ decks = [], folders = [], subjects = [] })
   const [localFolders, setLocalFolders] = useState(() => Object.fromEntries(decks.map((deck) => [deck.id, deck.folder_id])));
   const [message, setMessage] = useState("");
   const [isMoving, startTransition] = useTransition();
-  const visibleDecks = useMemo(() => { const term = query.trim().toLowerCase(); return decks.filter((deck) => !term || `${deck.title} ${deck.description || ""}`.toLowerCase().includes(term)); }, [decks, query]);
+  const visibleDecks = useMemo(() => { const term = query.trim().toLowerCase(); return decks.filter((deck) => !localFolders[deck.id] && (!term || `${deck.title} ${deck.description || ""}`.toLowerCase().includes(term))); }, [decks, localFolders, query]);
   const unitsFor = (subjectId) => folders.filter((folder) => String(folder.subject_id) === String(subjectId));
   const decksIn = (folderId) => decks.filter((deck) => String(localFolders[deck.id] || "") === String(folderId));
 
@@ -40,7 +40,7 @@ export default function DeckLibrary({ decks = [], folders = [], subjects = [] })
       <form action={createSubjectAction} className="module-inline-form"><label>Module code<input name="name" placeholder="CMPG321" maxLength="100" required /></label><label>Module name<input name="description" placeholder="Database Systems" maxLength="500" /></label><button className="button primary" type="submit">Add Module</button></form>
     </section>
     <section className="deck-organiser">
-      <header className="organiser-heading"><div><p className="eyebrow">Organise</p><h2>Put every deck where it belongs</h2><p>Drag a deck onto a Study Unit. On a phone, use its Move to menu.</p></div><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search decks" aria-label="Search decks" /></header>
+      <header className="organiser-heading"><div><p className="eyebrow">Organise</p><h2>Put every deck where it belongs</h2><p>Only unorganised decks appear in the tray. Drag one onto a Study Unit, or use Move to on a phone.</p></div><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search unorganised decks" aria-label="Search unorganised decks" /></header>
       {message ? <p className="move-toast" role="status" aria-live="polite">{isMoving ? "◌ " : "✓ "}{message}</p> : null}
       <div className="organiser-layout">
         <aside className="deck-tray"><div className="deck-tray-title"><strong>Decks</strong><span>{visibleDecks.length}</span></div><div className="deck-tray-list">
@@ -48,7 +48,7 @@ export default function DeckLibrary({ decks = [], folders = [], subjects = [] })
             <div className="deck-drag-handle" aria-hidden="true">⠿</div><div className="organiser-deck-copy"><Link href={`/decks/${deck.id}`}>{deck.title}</Link><small>{unit ? `${unit.subject_name} › ${unit.name}` : "Unorganised"} · {deck.card_count} cards</small></div>
             <label className="mobile-move"><span>Move to</span><select value={localFolders[deck.id] || ""} onChange={(event) => moveDeck(deck.id, event.target.value)} disabled={isMoving || !folders.length}><option value="" disabled>Choose Study Unit</option>{folders.map((folder) => <option value={folder.id} key={folder.id}>{folder.subject_name} › {folder.name}</option>)}</select></label>
           </article>; })}
-          {!visibleDecks.length ? <p className="organiser-empty">No decks match this search.</p> : null}
+          {!visibleDecks.length ? <p className="organiser-empty">Every deck is organised.</p> : null}
         </div><Link className="button primary new-deck-shortcut" href="/decks/new">+ Create deck</Link></aside>
         <div className="module-board">
           {subjects.map((subject) => { const units = unitsFor(subject.id); return <section className="board-module" key={subject.id}><header><div><span className="module-symbol">◎</span><div><h3>{subject.name}</h3><p>{subject.description || "Module"}</p></div></div><Link href={`/subjects/${subject.id}`}>Manage Module →</Link></header>

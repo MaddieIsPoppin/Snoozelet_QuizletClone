@@ -11,6 +11,7 @@ const navigation = [
   { href: "/", label: "Home", icon: "⌂", exact: true },
   { href: "/library", label: "Modules", icon: "▤" },
   { href: "/study", label: "Study", icon: "◫" },
+  { href: "/ai", label: "AI Help", icon: "✦" },
   { href: "/progress", label: "Progress", icon: "↗" },
 ];
 

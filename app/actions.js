@@ -198,6 +198,21 @@ export async function createDeckFolderAction(formData) {
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
 }
 
+export async function createStudyUnitAction(_previousState, formData) {
+  try {
+    const user = await requireUser();
+    const subjectId = formData.get("subjectId");
+    await createDeckFolder({ name: formData.get("name"), subjectId, userId: user.id });
+    revalidatePath("/library");
+    revalidatePath(`/subjects/${subjectId}`);
+    return { ok: true, error: "" };
+  } catch (error) {
+    const message = String(error?.message || "");
+    const duplicate = message.toLowerCase().includes("already exists") || message.toLowerCase().includes("unique");
+    return { ok: false, error: duplicate ? message : "Snoozelet could not add that Study Unit. Please try again." };
+  }
+}
+
 export async function createSubjectAction(formData) {
   const user = await requireUser();
   await createSubject({ name: formData.get("name"), description: formData.get("description"), userId: user.id });
