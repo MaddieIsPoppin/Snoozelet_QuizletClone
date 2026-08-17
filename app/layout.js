@@ -1,4 +1,5 @@
 import "./globals.css";
+import "./design-system.css";
 
 import AppShell from "@/components/AppShell";
 
@@ -15,7 +16,10 @@ export const viewport = {
   width: "device-width",
   initialScale: 1,
   viewportFit: "cover",
-  themeColor: "#09122b",
+  themeColor: [
+    { media: "(prefers-color-scheme: dark)", color: "#1b1d1f" },
+    { media: "(prefers-color-scheme: light)", color: "#f1f1ef" },
+  ],
 };
 
 export default function RootLayout({

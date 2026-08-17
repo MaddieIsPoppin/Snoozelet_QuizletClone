@@ -1,0 +1,266 @@
+/* Snoozelet monochrome design system. Loaded after legacy styles intentionally. */
+:root {
+  color-scheme: dark;
+  --mono-bg: #1b1d1f;
+  --mono-bg-raised: #202326;
+  --mono-surface: #272a2d;
+  --mono-surface-2: #303337;
+  --mono-surface-3: #383c40;
+  --mono-text: #f4f4f2;
+  --mono-text-soft: #d2d3d1;
+  --mono-muted: #9b9e9f;
+  --mono-line: #3b3e42;
+  --mono-line-strong: #55595d;
+  --mono-action: #ededeb;
+  --mono-action-text: #181a1c;
+  --mono-focus: #ffffff;
+
+  --bg: var(--mono-bg);
+  --night-1000: var(--mono-bg);
+  --night-975: var(--mono-bg);
+  --night-950: var(--mono-bg-raised);
+  --night-925: var(--mono-surface);
+  --night-900: var(--mono-surface);
+  --night-875: var(--mono-surface-2);
+  --cream: var(--mono-text);
+  --text: var(--mono-text);
+  --text-soft: var(--mono-text-soft);
+  --muted: var(--mono-muted);
+  --muted-2: var(--mono-muted);
+  --surface: var(--mono-surface);
+  --surface-2: var(--mono-surface-2);
+  --surface-3: var(--mono-surface-3);
+  --surface-hover: var(--mono-surface-3);
+  --surface-input: var(--mono-bg-raised);
+  --line: var(--mono-line);
+  --line-strong: var(--mono-line-strong);
+  --accent: var(--mono-action);
+  --accent-strong: #fff;
+  --accent-soft: rgba(255, 255, 255, .08);
+  --primary: var(--mono-action);
+  --success: var(--mono-text-soft);
+  --success-soft: rgba(255, 255, 255, .07);
+  --warning: var(--mono-text-soft);
+  --warning-soft: rgba(255, 255, 255, .07);
+  --danger: #d7d7d5;
+  --danger-soft: rgba(255, 255, 255, .07);
+  --moon: var(--mono-text);
+  --star: var(--mono-muted);
+  --work-bg: var(--mono-bg);
+  --work-surface: var(--mono-surface);
+  --work-surface-2: var(--mono-surface-2);
+  --work-text: var(--mono-text);
+  --work-muted: var(--mono-muted);
+  --work-line: var(--mono-line);
+  --work-accent: var(--mono-action);
+  --work-accent-hover: #fff;
+  --shadow-sm: none;
+  --shadow: none;
+  --shadow-lg: none;
+}
+
+html[data-theme="light"] {
+  color-scheme: light;
+  --mono-bg: #f1f1ef;
+  --mono-bg-raised: #f7f7f5;
+  --mono-surface: #ffffff;
+  --mono-surface-2: #e8e8e5;
+  --mono-surface-3: #dededb;
+  --mono-text: #181a1c;
+  --mono-text-soft: #34373a;
+  --mono-muted: #686c70;
+  --mono-line: #d2d2cf;
+  --mono-line-strong: #aaaead;
+  --mono-action: #202326;
+  --mono-action-text: #ffffff;
+  --mono-focus: #111315;
+}
+
+html,
+body,
+.workstation-shell,
+.workstation-main,
+.shell-v3,
+.snooze-content {
+  background: var(--mono-bg) !important;
+  background-image: none !important;
+  color: var(--mono-text);
+}
+
+body {
+  font-family: Inter, "Segoe UI", system-ui, -apple-system, sans-serif;
+}
+
+.night-sky,
+.night-sky::before,
+.night-sky::after,
+.background-moon,
+.sky-star,
+.star,
+.shooting-star,
+.dashboard-snoo-stage,
+.study-pet-habitat,
+.sidebar-companion,
+.mascot-coach {
+  display: none !important;
+}
+
+h1, h2, h3, h4, strong { color: var(--mono-text) !important; }
+p, small, .helper, .study-summary { color: var(--mono-muted); }
+.eyebrow, .focus-kicker { color: var(--mono-text-soft) !important; }
+::selection { background: var(--mono-text); color: var(--mono-bg); }
+:focus-visible { outline: 2px solid var(--mono-focus) !important; outline-offset: 3px; }
+
+.workstation-nav {
+  min-height: 64px;
+  border-color: var(--mono-line) !important;
+  background: rgba(27, 29, 31, .96) !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+html[data-theme="light"] .workstation-nav { background: rgba(255, 255, 255, .96) !important; }
+.workstation-brand strong { letter-spacing: -.02em; }
+.workstation-brand span, .nav-menu > button { color: var(--mono-muted); }
+.nav-menu > button:hover, .nav-menu > button.active {
+  border-bottom-color: var(--mono-text) !important;
+  color: var(--mono-text) !important;
+}
+.nav-dropdown, .comfort-panel {
+  border: 1px solid var(--mono-line) !important;
+  border-radius: 10px !important;
+  background: var(--mono-surface) !important;
+  box-shadow: 0 14px 40px rgba(0, 0, 0, .22) !important;
+  backdrop-filter: none !important;
+}
+.nav-dropdown a:hover { background: var(--mono-surface-2) !important; }
+.comfort-backdrop { background: rgba(0, 0, 0, .58) !important; }
+
+.workspace-page, .page, .study-page, .deck-page-v2, .study-shell {
+  width: min(1180px, calc(100% - 40px));
+  margin-inline: auto;
+}
+.workspace-page, .page, .deck-page-v2 { padding-block: clamp(28px, 5vw, 64px); }
+.workspace-header, .library-hero { margin-bottom: 26px; }
+.workspace-header h1, .library-hero h1 {
+  background: none !important;
+  color: var(--mono-text) !important;
+  -webkit-text-fill-color: currentColor !important;
+  letter-spacing: -.035em;
+}
+
+:is(
+  .dashboard-focus-card, .work-priority, .launcher-card, .study-browser,
+  .deck-organiser, .module-create-flow, .module-list-section, .unorganised-section,
+  .module-unit-manager, .board-module, .deck-tray, .path-column, .progress-section,
+  .recent-panel, .subject-card, .unit-card, .library-hero, .library-workspace,
+  .folder-panel, .library-decks, .library-deck-card, .mode-deck-list article,
+  .game-deck-grid article, .context-tools, .study-shell, .study-card, .editor-panel,
+  .deck-overview-card, .quick-add-card, .deck-tool-card, .deck-term-card,
+  .deck-settings-editor, .motivation-grid article, .metrics-strip > div,
+  .metric-strip article, .progress-summary article, .dashboard-shortcuts a,
+  .activity-choice-grid button, .choice-button, .test-option-card, .flashcard,
+  .match-card, .blast-question-card, .empty-state, .session-complete-card,
+  .card-creation-guide, .study-hint, .potato-stage
+) {
+  border-color: var(--mono-line) !important;
+  border-radius: 12px !important;
+  background: var(--mono-surface) !important;
+  background-image: none !important;
+  box-shadow: none !important;
+  backdrop-filter: none !important;
+}
+
+:is(.library-deck-card, .dashboard-shortcuts a, .activity-choice-grid button, .choice-button, .mode-pills a, .game-links a) {
+  transition: border-color 140ms ease, background-color 140ms ease !important;
+}
+:is(.library-deck-card, .dashboard-shortcuts a, .activity-choice-grid button, .choice-button, .mode-pills a, .game-links a):hover {
+  transform: none !important;
+  border-color: var(--mono-line-strong) !important;
+  background: var(--mono-surface-2) !important;
+}
+.library-deck-card::before { background: var(--mono-line-strong) !important; }
+
+.button, button.button, .comfort-trigger, .mode-pills a, .game-links a {
+  min-height: 42px;
+  border: 1px solid var(--mono-line-strong) !important;
+  border-radius: 9px !important;
+  background: transparent !important;
+  color: var(--mono-text) !important;
+  box-shadow: none !important;
+  font-weight: 650 !important;
+}
+.button.primary, button.button.primary, .mode-pills a.primary {
+  border-color: var(--mono-action) !important;
+  background: var(--mono-action) !important;
+  color: var(--mono-action-text) !important;
+}
+.button:hover, .comfort-trigger:hover { transform: none !important; background: var(--mono-surface-3) !important; }
+.button.primary:hover { background: var(--mono-text-soft) !important; border-color: var(--mono-text-soft) !important; }
+
+:is(input, textarea, select) {
+  border: 1px solid var(--mono-line) !important;
+  border-radius: 9px !important;
+  background: var(--mono-bg-raised) !important;
+  color: var(--mono-text) !important;
+  box-shadow: none !important;
+}
+:is(input, textarea)::placeholder { color: var(--mono-muted) !important; opacity: .72; }
+
+:is(.ai-help-mark, .flow-step, .module-symbol, .subject-icon, .nav-symbol, .library-deck-icon, .activity-choice-icon, .step-number) {
+  border: 1px solid var(--mono-line) !important;
+  border-radius: 9px !important;
+  background: var(--mono-surface-2) !important;
+  color: var(--mono-text-soft) !important;
+  box-shadow: none !important;
+}
+
+.metric-strip, .progress-summary, .learning-metrics { gap: 10px !important; }
+.metric-strip article strong, .progress-summary article strong, .learning-metrics strong { color: var(--mono-text) !important; }
+.goal-track, .study-progress, .session-progress, .mastery-track, .blast-time-track {
+  background: var(--mono-surface-3) !important;
+}
+:is(.goal-track, .study-progress, .session-progress, .mastery-track, .blast-time-track) > * {
+  background: var(--mono-text-soft) !important;
+  box-shadow: none !important;
+}
+
+.selected, .activity-choice-grid button.selected, .choice-button.selected,
+.path-column button.selected, .folder-panel button.active {
+  border-color: var(--mono-line-strong) !important;
+  background: var(--mono-surface-2) !important;
+  color: var(--mono-text) !important;
+  box-shadow: inset 3px 0 0 var(--mono-text-soft) !important;
+}
+
+.correct, .wrong, .timeout, .success, .danger, .warning,
+.review-dot, .review-dot.correct {
+  border-color: var(--mono-line-strong) !important;
+  background-color: var(--mono-surface-2) !important;
+  color: var(--mono-text) !important;
+  box-shadow: none !important;
+}
+
+.workstation-mobile-nav {
+  border-color: var(--mono-line) !important;
+  background: rgba(27, 29, 31, .98) !important;
+  box-shadow: none !important;
+}
+html[data-theme="light"] .workstation-mobile-nav { background: rgba(255, 255, 255, .98) !important; }
+.workstation-mobile-nav a { color: var(--mono-muted) !important; }
+.workstation-mobile-nav a.active { color: var(--mono-text) !important; }
+
+@media (max-width: 760px) {
+  .workspace-page, .page, .study-page, .deck-page-v2, .study-shell {
+    width: min(100% - 24px, 1180px);
+  }
+  .workspace-page, .page, .deck-page-v2 { padding-block: 24px 86px; }
+  .workstation-nav { min-height: 58px; }
+  .workstation-mobile-nav a { padding: 15px 4px; }
+  :is(.dashboard-focus-card, .work-priority, .launcher-card, .study-browser, .progress-section, .recent-panel, .editor-panel) {
+    border-radius: 10px !important;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; }
+}
