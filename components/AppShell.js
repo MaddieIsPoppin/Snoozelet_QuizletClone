@@ -1,60 +1,36 @@
 "use client";
 
 import Link from "next/link";
+import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import SnoozeMascot from "@/components/SnoozeMascot";
 import ComfortSettings from "@/components/ComfortSettings";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import PwaControls from "@/components/PwaControls";
 
-const navigation = [
-  { href: "/", label: "Home", icon: "⌂", exact: true },
-  { href: "/library", label: "Modules", icon: "▤" },
-  { href: "/study", label: "Study", icon: "◫" },
-  { href: "/ai", label: "AI Help", icon: "✦" },
-  { href: "/progress", label: "Progress", icon: "↗" },
+const menus = [
+  { label: "Study", href: "/study", items: [["Study workspace","/study"],["Weak cards","/study?scope=weak"],["AI Help","/ai"]] },
+  { label: "Library", href: "/library", items: [["Modules and Study Units","/library"],["Create or import","/decks/new"]] },
+  { label: "Training", href: "/games", items: [["Recognition training","/games"],["Match","/games?mode=match"],["Speed training","/games?mode=blast"]] },
+  { label: "Progress", href: "/progress", items: [["Study statistics","/progress"],["Review history","/progress#history"],["Backup","/progress#backup"]] },
 ];
-
-const mobileNavigation = navigation;
 
 export default function AppShell({ children }) {
   const pathname = usePathname();
   const authPage = ["/login", "/signup", "/setup"].some((path) => pathname.startsWith(path));
-  const focusedStudy = /^\/decks\/[^/]+\/(learn|flashcards|multiple-choice)$/.test(pathname);
-  const focusedGame = /^\/decks\/[^/]+\/(blast|match)$/.test(pathname);
+  const [open, setOpen] = useState("");
+  const navRef = useRef(null);
+  useEffect(() => setOpen(""), [pathname]);
+  useEffect(() => { const close = (event) => { if (!navRef.current?.contains(event.target)) setOpen(""); }; const escape = (event) => { if (event.key === "Escape") setOpen(""); }; document.addEventListener("pointerdown", close); document.addEventListener("keydown", escape); return () => { document.removeEventListener("pointerdown", close); document.removeEventListener("keydown", escape); }; }, []);
   if (authPage) return children;
-
-  const active = (item) => {
-    if (item.exact) return pathname === item.href;
-    if (item.href === "/library" && (/^\/(decks|subjects|study-units)/.test(pathname))) return true;
-    return pathname.startsWith(item.href);
-  };
-
-  return (
-    <div className={`snooze-app shell-v3${focusedStudy ? " is-study-route" : ""}${focusedGame ? " is-game-route" : ""}`}>
-      <ServiceWorkerRegistration />
-      <PwaControls />
-      <div className="night-sky" aria-hidden="true" />
-      <aside className="snooze-sidebar">
-        <Link href="/" className="sidebar-brand"><span className="sidebar-brand-icon">☾</span><div><strong>Snoozelet</strong><span>Study companion</span></div></Link>
-        <nav className="main-nav" aria-label="Main navigation">
-          {navigation.map((item) => <Link href={item.href} className={active(item) ? "nav-item active" : "nav-item"} key={item.href}><span className="nav-symbol">{item.icon}</span>{item.label}</Link>)}
-        </nav>
-        <Link href="/decks/new" className="sidebar-new-deck"><span>＋</span>Create deck</Link>
-        <div className="sidebar-comfort"><ComfortSettings placement="sidebar" /></div>
-        <div className="sidebar-spacer" />
-        <Link className="sidebar-companion" href="/study">
-          <SnoozeMascot variant="coach" mood="happy" />
-          <span><strong>Snoo is ready</strong><small>Let&apos;s study together</small></span>
-        </Link>
-      </aside>
-      <div className="snooze-main">
-        <header className="snooze-topbar"><Link href="/" className="mobile-brand"><span>☾</span><strong>Snoozelet</strong><small>On the go</small></Link><div className="topbar-actions"><ComfortSettings label="Settings" /><Link href="/decks/new" className="topbar-new-deck">＋ New deck</Link></div></header>
-        <div className="snooze-content"><div className="route-stage" key={pathname}>{children}</div></div>
-        <nav className="mobile-bottom-nav" aria-label="Mobile navigation">
-          {mobileNavigation.map((item) => <Link href={item.href} className={active(item) ? "active" : ""} key={item.href}><span>{item.icon}</span>{item.label}</Link>)}
-        </nav>
-      </div>
-    </div>
-  );
+  const studying = /^\/decks\/[^/]+\/(learn|flashcards|multiple-choice|typed|recall|test)$/.test(pathname);
+  return <div className={`workstation-shell${studying ? " active-session" : ""}`}>
+    <ServiceWorkerRegistration/><PwaControls/>
+    <header className="workstation-nav" ref={navRef}>
+      <Link className="workstation-brand" href="/"><strong>Snoozelet</strong><span>Active recall workstation</span></Link>
+      <nav aria-label="Primary navigation">{menus.map((menu) => <div className="nav-menu" key={menu.label}><button type="button" className={pathname.startsWith(menu.href) ? "active" : ""} onClick={() => setOpen(open === menu.label ? "" : menu.label)} aria-expanded={open === menu.label}>{menu.label}<span>⌄</span></button>{open === menu.label ? <div className="nav-dropdown">{menu.items.map(([label,href]) => <Link href={href} key={label}>{label}</Link>)}</div> : null}</div>)}</nav>
+      <div className="nav-actions"><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
+    </header>
+    <main className="workstation-main">{children}</main>
+    <nav className="workstation-mobile-nav" aria-label="Mobile navigation">{menus.map((menu) => <Link className={pathname.startsWith(menu.href) ? "active" : ""} href={menu.href} key={menu.label}>{menu.label}</Link>)}</nav>
+  </div>;
 }

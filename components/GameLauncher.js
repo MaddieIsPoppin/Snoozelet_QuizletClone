@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useState } from "react";
 
 const games = [
-  { id: "match", icon: "◇", name: "Match", description: "Reconnect term stars to repair a constellation.", note: "Constellation repair" },
-  { id: "blast", icon: "✦", name: "Blast", description: "Answer rapidly to charge the Observatory telescope.", note: "Telescope charge" },
+  { id: "match", icon: "M", name: "Match", description: "Pair terminology with the correct definition.", note: "Recognition training" },
+  { id: "blast", icon: "S", name: "Speed Recall", description: "Answer accurately under a short time limit.", note: "Speed training" },
 ];
 
 export default function GameLauncher({ decks }) {
@@ -18,7 +18,7 @@ export default function GameLauncher({ decks }) {
 
   return (
     <section className="launcher-card game-launcher">
-      <div className="launcher-step"><span className="step-number">1</span><div><h2>Choose a game</h2><p>Each game practises the same cards in a different way.</p></div></div>
+      <div className="launcher-step"><span className="step-number">1</span><div><h2>Choose a training drill</h2><p>Each drill tests the same material with a different constraint.</p></div></div>
       <div className="game-choice-grid">
         {games.map((item) => <button type="button" className={game === item.id ? `selected game-${item.id}` : `game-${item.id}`} onClick={() => setGame(item.id)} key={item.id}><span className="game-choice-icon">{item.icon}</span><span><small>{item.note}</small><strong>{item.name}</strong><p>{item.description}</p></span><b>{game === item.id ? "Selected" : "Choose"}</b></button>)}
       </div>

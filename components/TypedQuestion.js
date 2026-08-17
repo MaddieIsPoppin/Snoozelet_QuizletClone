@@ -11,6 +11,7 @@ export default function TypedQuestion({
   feedback,
   onSubmit,
   onContinue,
+  onAccept,
   hint,
   draftKey,
 }) {
@@ -19,6 +20,18 @@ export default function TypedQuestion({
     const saved = localStorage.getItem(`snoozelet-draft-${draftKey}`);
     if (saved) setTypedAnswer(saved);
   }, [draftKey, setTypedAnswer]);
+
+  useEffect(() => {
+    if (!feedback) return;
+    const continueWithKeyboard = (event) => {
+      if (event.key !== "Enter" && event.key !== " ") return;
+      event.preventDefault();
+      if (draftKey) localStorage.removeItem(`snoozelet-draft-${draftKey}`);
+      onContinue();
+    };
+    window.addEventListener("keydown", continueWithKeyboard);
+    return () => window.removeEventListener("keydown", continueWithKeyboard);
+  }, [draftKey, feedback, onContinue]);
 
   function updateAnswer(value) {
     setTypedAnswer(value);
@@ -85,19 +98,9 @@ export default function TypedQuestion({
           </h3>
 
           {!feedback.correct ? (
-            <p>
-              Correct answer:{" "}
-              <strong>{feedback.expected}</strong>
-            </p>
+            <div className="answer-comparison"><p><span>Your answer</span><strong>{typedAnswer}</strong></p><p><span>Expected answer</span><strong>{feedback.expected}</strong></p></div>
           ) : null}
-
-          <button
-            className="button primary"
-            type="button"
-            onClick={continueAndClear}
-          >
-            Continue
-          </button>
+          <div className="row-actions">{!feedback.correct && onAccept ? <button className="button" type="button" onClick={() => { if (draftKey) localStorage.removeItem(`snoozelet-draft-${draftKey}`); onAccept(); }}>Accept anyway</button> : null}<button className="button primary" type="button" onClick={continueAndClear}>Continue</button></div>
         </div>
       ) : null}
     </>

@@ -23,7 +23,7 @@ export default async function NewDeckPage({ searchParams }) {
 
       <section className="mobile-review-only">
         <span>☾</span>
-        <p className="eyebrow">Snoozelet on the go</p>
+        <p className="eyebrow">Mobile review</p>
         <h1>Create decks on Windows</h1>
         <p>The mobile app is streamlined for reviewing and games. Use the Windows app when you want to create or import study content.</p>
         <Link className="button primary" href="/study">Start reviewing</Link>

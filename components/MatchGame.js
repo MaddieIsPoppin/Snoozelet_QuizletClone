@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { shuffle } from "@/lib/collections";
 import useReviewSaver from "@/hooks/useReviewSaver";
-import XpNotice from "@/components/XpNotice";
 
 function formatTime(milliseconds) {
   return (milliseconds / 1000).toFixed(2);
@@ -13,7 +12,7 @@ export default function MatchGame({
   deck,
   cards = [],
 }) {
-  const { saveReview, xpNotice } = useReviewSaver({ mode: "multiple", answerDirection: "definition", grading: "lenient" });
+  const { saveReview } = useReviewSaver({ mode: "multiple", answerDirection: "definition", grading: "lenient" });
   const [mounted, setMounted] = useState(false);
 
   const [roundSize, setRoundSize] = useState(
@@ -441,7 +440,6 @@ export default function MatchGame({
    */
   return (
     <section className="study-shell match-game match-playing">
-      <XpNotice notice={xpNotice} />
       <div className="match-game-header">
         <div>
           <p className="eyebrow">

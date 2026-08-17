@@ -1,6 +1,5 @@
 "use client";
 
-import MascotCoach from "@/components/MascotCoach";
 
 function questionTypeLabel(type) {
   if (type === "multiple") {
@@ -111,15 +110,6 @@ export default function TestResults({
             .
           </p>
         </div>
-        <MascotCoach
-          compact
-          mood={percentage >= 60 ? "happy" : "normal"}
-          messages={
-            percentage >= 80
-              ? ["That was strong work!", "A quick review now will help it stick."]
-              : ["Every miss points to what to practise next.", "Review the mistakes, then try again."]
-          }
-        />
       </div>
 
       <section className="test-score-card">
@@ -169,14 +159,8 @@ export default function TestResults({
             <p>Score</p>
           </div>
           <div><span>{averageSeconds}s</span><p>Average time</p></div>
-          <div><span>{bestCombo}</span><p>Best combo</p></div>
           <div><span>{masteredCount}</span><p>Mastered</p></div>
-          <div><span>+{sessionXp}</span><p>XP earned</p></div>
         </div>
-        {progress ? <div className="session-level">
-          <div><strong>Level {progress.level}</strong><span>{progress.xpUntilNextLevel} XP until Level {progress.level + 1}</span></div>
-          <div className="session-level-track"><span style={{ width: `${Math.min(100, (progress.currentLevelXp / Math.max(1, progress.xpForNextLevel)) * 100)}%` }} /></div>
-        </div> : null}
       </section>
 
       {slowest ? (

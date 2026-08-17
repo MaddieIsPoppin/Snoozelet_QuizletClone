@@ -2,7 +2,7 @@
 import { useEffect, useId, useState } from "react";
 import { createPortal } from "react-dom";
 
-const DEFAULTS = { theme: "night", fontSize: "normal", dyslexicFont: false, highContrast: false, reducedMotion: false, sounds: true, celebrations: true };
+const DEFAULTS = { theme: "night", fontSize: "normal", dyslexicFont: false, highContrast: false, reducedMotion: false, sounds: true };
 function applyPreferences(value) {
   const root = document.documentElement;
   for (const [key, setting] of Object.entries(value)) root.dataset[key] = String(setting);
@@ -26,7 +26,7 @@ export default function ComfortSettings({ placement = "topbar", label = "Comfort
       <div className="comfort-heading"><div><strong>Comfort settings</strong><small>Saved on this device</small></div><button type="button" onClick={() => setOpen(false)} aria-label="Close comfort settings">×</button></div>
       <label>Theme<select value={preferences.theme} onChange={(event) => update("theme", event.target.value)}><option value="night">Night</option><option value="light">Light</option></select></label>
       <label>Text size<select value={preferences.fontSize} onChange={(event) => update("fontSize", event.target.value)}><option value="normal">Normal</option><option value="large">Comfortable</option><option value="xlarge">Extra comfortable</option></select></label>
-      {[["dyslexicFont", "Readable font"], ["highContrast", "High contrast"], ["reducedMotion", "Reduce motion"], ["sounds", "Sound effects"], ["celebrations", "Celebrations"]].map(([key, label]) => <label className="comfort-switch" key={key}><span>{label}</span><input type="checkbox" checked={preferences[key]} onChange={(event) => update(key, event.target.checked)} /></label>)}
+      {[["dyslexicFont", "Readable font"], ["highContrast", "High contrast"], ["reducedMotion", "Reduce motion"], ["sounds", "Sound effects"]].map(([key, label]) => <label className="comfort-switch" key={key}><span>{label}</span><input type="checkbox" checked={preferences[key]} onChange={(event) => update(key, event.target.checked)} /></label>)}
       <button className="button" type="button" onClick={() => { setPreferences(DEFAULTS); applyPreferences(DEFAULTS); localStorage.removeItem("snoozelet-comfort"); }}>Reset settings</button>
     </section></>;
   return <div className="comfort-settings">

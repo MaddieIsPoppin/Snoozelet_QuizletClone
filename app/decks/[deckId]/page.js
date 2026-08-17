@@ -278,6 +278,18 @@ export default async function DeckPage({ params }) {
             <span className="deck-mode-arrow">→</span>
           </Link>
 
+          <Link className="deck-mode-card" href={`/decks/${deck.id}/typed`}>
+            <div className="deck-mode-icon">T</div>
+            <div><h3>Typed Answer</h3><p>Produce the answer and receive concept-aware feedback.</p></div>
+            <span className="deck-mode-arrow">→</span>
+          </Link>
+
+          <Link className="deck-mode-card deck-mode-primary" href={`/decks/${deck.id}/recall`}>
+            <div className="deck-mode-icon">R</div>
+            <div><h3>Deep Recall</h3><p>Missed cards return until you can retrieve them.</p></div>
+            <span className="deck-mode-arrow">→</span>
+          </Link>
+
           <Link className="deck-mode-card" href={`/decks/${deck.id}/blast`}>
             <div className="deck-mode-icon">✦</div>
             <div><h3>Blast</h3><p>Fast, focused rounds when you want study to feel like play.</p></div>
@@ -291,11 +303,11 @@ export default async function DeckPage({ params }) {
 
       <section className="deck-section focus-entry-section">
         <div>
-          <p className="eyebrow">Snoo&apos;s guided route</p>
+          <p className="eyebrow">Focused route</p>
           <h2>Stay in one learning loop</h2>
-          <p>Recall, check your confidence, then cool down with a short constellation repair.</p>
+          <p>Deep recall, confidence check, then a short recognition drill.</p>
         </div>
-        <Link className="button primary" href={`/decks/${deck.id}/focus`}>Begin Focus Journey</Link>
+        <Link className="button primary" href={`/decks/${deck.id}/focus`}>Begin focused session</Link>
       </section>
 
       {/* ====================================================

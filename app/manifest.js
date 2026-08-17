@@ -1,7 +1,7 @@
 export default function manifest() {
   return {
     id: "/",
-    name: "Snoozelet Study Companion",
+    name: "Snoozelet Active Recall Workstation",
     short_name: "Snoozelet",
     description: "Portable flashcards, study games, and progress that sync across your devices.",
     start_url: "/?source=android-pwa",

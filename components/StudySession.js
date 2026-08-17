@@ -11,7 +11,6 @@ import { useRouter } from "next/navigation";
 import dynamic from "next/dynamic";
 import useReviewSaver from "@/hooks/useReviewSaver";
 
-import XpNotice from "@/components/XpNotice";
 import Breadcrumbs from "@/components/Breadcrumbs";
 import {
   advanceStudyQueue,
@@ -27,7 +26,6 @@ import {
 } from "@/lib/study";
 import { isTypedCorrect } from "@/lib/grading";
 
-import MascotCoach from "@/components/MascotCoach";
 
 const questionLoader = () => <div className="study-question-loader" aria-label="Loading question" />;
 const FlashcardQuestion = dynamic(() => import("@/components/FlashcardQuestion"), { loading: questionLoader });
@@ -146,7 +144,6 @@ export default function StudySession({
     reviewError,
     reviewStatus,
     saveReview,
-    xpNotice,
   } = useReviewSaver({ mode, answerDirection, grading });
 
 
@@ -1083,16 +1080,9 @@ function goToNextFlashcard() {
           <div className="session-stat-grid">
             <div><strong>{correct}</strong><span>Correct</span></div>
             <div><strong>{percentage}%</strong><span>Accuracy</span></div>
-            <div><strong>{bestCombo}</strong><span>Best combo</span></div>
+            <div><strong>{missed}</strong><span>Needs review</span></div>
             <div><strong>{masteredCards.size}</strong><span>Cards mastered</span></div>
           </div>
-
-          <div className="session-xp-total"><span>⭐</span><strong>+{sessionXp} XP</strong><small>earned this session</small></div>
-
-          {latestProgress ? <div className="session-level">
-            <div><strong>Level {latestProgress.level}</strong><span>{latestProgress.xpUntilNextLevel} XP until Level {latestProgress.level + 1}</span></div>
-            <div className="session-level-track"><span style={{ width: `${Math.min(100, (latestProgress.currentLevelXp / Math.max(1, latestProgress.xpForNextLevel)) * 100)}%` }} /></div>
-          </div> : null}
 
           <p>
             {correct} correct
@@ -1139,7 +1129,7 @@ function goToNextFlashcard() {
 
 
   const isTypedMode =
-    mode === "typed" ||
+    mode === "typed" || mode === "recall" ||
     (
       mode === "test" &&
       testQuestion?.type ===
@@ -1245,21 +1235,6 @@ function goToNextFlashcard() {
           </h1>
         </div>
 
-        <MascotCoach
-          compact
-          mood={feedback ? (feedback.correct ? "happy" : "sad") : "normal"}
-          messages={
-            feedback?.correct && answerStreak >= 2
-              ? [`${answerStreak} correct in a row!`, "You are building real momentum."]
-              : feedback && !feedback.correct
-                ? ["That one was tricky. You have the right answer now.", "A mistake is useful when you review it."]
-              : mode === "test"
-              ? ["Read each question twice.", "Unsure? Rule out what cannot be right."]
-              : ["Take your time; recall matters more than speed.", "Say the answer before revealing it."]
-          }
-        />
-
-
         {mode !== "test" ? (
           <div className="study-options-wrap">
             <button className="study-options-trigger" type="button" aria-expanded={mobileOptionsOpen} onClick={() => setMobileOptionsOpen((value) => !value)}>Session settings</button>
@@ -1309,7 +1284,7 @@ function goToNextFlashcard() {
             </div>
 
 
-            {mode === "typed" ? (
+            {(mode === "typed" || mode === "recall") ? (
               <label>
                 Grading
 
@@ -1381,7 +1356,7 @@ function goToNextFlashcard() {
           {missed} missed
         </span>
 
-        <span>🔥 {answerStreak} combo</span>
+        <span>{Math.max(0, queue.length - currentIndex - 1)} remaining</span>
 
       </div>
 
@@ -1389,10 +1364,6 @@ function goToNextFlashcard() {
       {/* -----------------------------------------------------
           XP
           ----------------------------------------------------- */}
-
-      <XpNotice
-        notice={xpNotice}
-      />
 
       {reviewStatus ===
       "saving" ? (
@@ -1414,7 +1385,7 @@ function goToNextFlashcard() {
         </p>
       ) : null}
 
-      {reviewStatus === "queued" ? <p className="offline-save-note" role="status">Saved on this device · XP and progress will sync when you reconnect.</p> : null}
+      {reviewStatus === "queued" ? <p className="offline-save-note" role="status">Saved on this device · progress will sync when you reconnect.</p> : null}
 
 
       {/* -----------------------------------------------------
@@ -1443,13 +1414,6 @@ function goToNextFlashcard() {
           ----------------------------------------------------- */}
 
       <section className={`study-card${isFlashcardMode ? " flashcard-study-card" : ""}${feedback ? (feedback.correct ? " feedback-flash-correct" : " feedback-flash-wrong") : ""}`}>
-
-        {!feedback && !isFlashcardMode && isRevengeCard ? <div className="challenge-banner revenge"><strong>⚡ REVENGE CARD</strong><span>You&apos;ve seen this one before. Take it back.</span></div> : null}
-        {!feedback && !isFlashcardMode && isClutchCard ? <div className="challenge-banner clutch"><strong>⚠️ CLUTCH CARD</strong><span>Get this right to Master it.</span></div> : null}
-        {feedback && moment?.type === "revenge-added" ? <div className="story-moment broken"><strong>COMBO BROKEN 💔</strong><span>You answered: {moment.answer}</span><span>Correct answer: {moment.expected}</span><b>⚡ REVENGE CARD ADDED</b></div> : null}
-        {feedback && moment?.type === "revenge-complete" ? <div className="story-moment complete"><strong>⚡ REVENGE COMPLETE</strong><span>You fixed a previous mistake.</span><b>+{moment.xp} XP</b></div> : null}
-        {feedback && moment?.type === "mastered" ? <div className="story-moment complete"><strong>💥 MASTERED</strong><span>{currentCard.term}</span><b>+{moment.xp} XP · Difficult victory.</b></div> : null}
-
 
         {/* TRUE / FALSE */}
 
@@ -1544,6 +1508,7 @@ function goToNextFlashcard() {
             onContinue={
               mode === "test" ? continueTestQuestion : continueAfterTyped
             }
+            onAccept={mode === "test" ? undefined : () => moveToNextNormalCard(false)}
             hint={currentCard.hint}
             draftKey={`${deck.id}-${mode}-${currentCard.id}-${answerDirection}`}
           />

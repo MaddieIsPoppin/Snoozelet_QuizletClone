@@ -1,21 +1,15 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { queueReview } from "@/lib/offline-reviews";
 
 export default function useReviewSaver({ mode, answerDirection, grading }) {
-  const [xpNotice, setXpNotice] = useState(null);
   const [reviewStatus, setReviewStatus] = useState("idle");
   const [reviewError, setReviewError] = useState("");
-  const xpTimerRef = useRef(null);
   const savingAttemptRef = useRef(null);
   const attemptIdsRef = useRef(new Map());
   const attemptGenerationRef = useRef(0);
   const sessionIdRef = useRef(null);
-
-  useEffect(() => () => {
-    if (xpTimerRef.current) window.clearTimeout(xpTimerRef.current);
-  }, []);
 
   function resetReviewState() {
     setReviewStatus("idle");
@@ -26,21 +20,6 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
     attemptGenerationRef.current += 1;
     sessionIdRef.current = window.crypto.randomUUID();
     attemptIdsRef.current.clear();
-  }
-
-  function showXpNotice(data) {
-    if (!data?.xpGained) return;
-    if (xpTimerRef.current) window.clearTimeout(xpTimerRef.current);
-
-    setXpNotice({
-      amount: data.xpGained,
-      totalXp: data.progress?.totalXp,
-      level: data.progress?.level,
-      baseXp: data.baseXp,
-      bonusXp: data.bonusXp,
-      multiplier: data.flowMultiplier,
-    });
-    xpTimerRef.current = window.setTimeout(() => setXpNotice(null), 2000);
   }
 
   async function saveReview(
@@ -101,7 +80,6 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
         throw requestError;
       }
 
-      showXpNotice(data);
       setReviewStatus("success");
       return data;
     } catch (error) {
@@ -136,6 +114,5 @@ export default function useReviewSaver({ mode, answerDirection, grading }) {
     reviewError,
     reviewStatus,
     saveReview,
-    xpNotice,
   };
 }

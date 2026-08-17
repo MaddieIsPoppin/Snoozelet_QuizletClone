@@ -3,7 +3,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { shuffle } from "@/lib/collections";
 import useReviewSaver from "@/hooks/useReviewSaver";
-import XpNotice from "@/components/XpNotice";
 
 function normalize(value) {
   return String(value || "")
@@ -47,7 +46,7 @@ export default function BlastGame({
 
   const [answerDirection, setAnswerDirection] =
     useState("definition");
-  const { beginAttemptGeneration, saveReview, xpNotice } = useReviewSaver({ mode: "multiple", answerDirection, grading: "lenient" });
+  const { beginAttemptGeneration, saveReview } = useReviewSaver({ mode: "multiple", answerDirection, grading: "lenient" });
 
   const [queue, setQueue] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -391,7 +390,7 @@ export default function BlastGame({
             <h1>Blast</h1>
 
             <p>
-              Answer quickly, build your combo, and survive
+              Answer quickly, maintain accurate recall, and continue
               as the rounds get faster.
             </p>
           </div>
@@ -433,7 +432,7 @@ export default function BlastGame({
           <div className="blast-rules">
             <span>{startingLives} lives</span>
             <span>{speedUp ? "Faster every round" : "Steady timer"}</span>
-            <span>Combo score multiplier</span>
+            <span>Correct-run score multiplier</span>
           </div>
 
           <div className="blast-customize-grid">
@@ -475,7 +474,7 @@ export default function BlastGame({
 
           <h1>{score} points</h1>
 
-          <p>{accuracy >= 90 ? "Incredible accuracy under pressure." : accuracy >= 70 ? "Strong run — your recall is getting faster." : "Good practice. Try a steadier timer and build your combo."}</p>
+          <p>{accuracy >= 90 ? "Excellent accuracy under pressure." : accuracy >= 70 ? "Strong run — your recall is getting faster." : "Try a steadier timer and prioritise accuracy."}</p>
 
           <div className="metrics-strip small">
             <div>
@@ -490,7 +489,7 @@ export default function BlastGame({
 
             <div>
               <span>{bestCombo}x</span>
-              <p>Best combo</p>
+              <p>Best correct run</p>
             </div>
           </div>
 
@@ -532,7 +531,6 @@ export default function BlastGame({
 
   return (
     <section className={`study-shell blast-game blast-playing${progress <= 30 ? " blast-danger" : ""}${feedbackType === "wrong" || feedbackType === "timeout" ? " blast-life-lost" : ""}${locked ? " blast-locked" : ""}`}>
-      <XpNotice notice={xpNotice} />
       <div className="blast-hud">
         <div>
           <span className="blast-hud-label">
@@ -544,7 +542,7 @@ export default function BlastGame({
 
         <div>
           <span className="blast-hud-label">
-            Combo
+            Correct run
           </span>
 
           <strong>{combo}x</strong>
@@ -592,7 +590,7 @@ export default function BlastGame({
             Time&apos;s up — {correctAnswer}
           </div>
         ) : feedbackType === "correct" ? (
-          <div className="blast-feedback correct">+{lastPoints} · Combo {combo}x</div>
+          <div className="blast-feedback correct">+{lastPoints} · {combo} correct</div>
         ) : feedbackType === "wrong" ? (
           <div className="blast-feedback wrong">Correct answer: {correctAnswer}</div>
         ) : null}

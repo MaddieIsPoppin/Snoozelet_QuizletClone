@@ -55,7 +55,7 @@ export default function TrueFalseQuestion({
       {feedback ? (
         <div className={`answer-feedback ${feedback.correct ? "correct" : "incorrect"}`} role="status" aria-live="polite">
           <h3>{feedback.correct ? "Correct!" : "Incorrect"}</h3>
-          <p>{feedback.correct ? "Nice work — keep the streak going." : `The statement is ${feedback.expected}.`}</p>
+          <p>{feedback.correct ? "Correct — continue when ready." : `The statement is ${feedback.expected}.`}</p>
           <button className="button primary" type="button" onClick={onContinue}>Continue</button>
         </div>
       ) : null}
