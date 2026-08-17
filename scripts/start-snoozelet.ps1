@@ -7,11 +7,20 @@ $errorLogFile = Join-Path $runtimeDir "server-error.log"
 $url = "http://localhost:3000"
 New-Item -ItemType Directory -Force -Path $runtimeDir | Out-Null
 
-function Test-SnoozeletReady {
-  try { $response = Invoke-WebRequest -UseBasicParsing -Uri "$url/api/health" -TimeoutSec 2; return $response.StatusCode -eq 200 } catch { return $false }
+function Get-SnoozeletHealth {
+  try { return Invoke-RestMethod -Uri "$url/api/health" -TimeoutSec 2 } catch { return $null }
 }
 
-if (Test-SnoozeletReady) { Start-Process $url; exit 0 }
+$health = Get-SnoozeletHealth
+if ($health -and $health.databaseMode -eq "local") { Start-Process $url; exit 0 }
+if ($health) {
+  $listener = netstat.exe -ano | Select-String "^\s*TCP\s+.*:3000\s+.*LISTENING\s+(\d+)\s*$" | Select-Object -First 1
+  if ($listener -and $listener.Matches.Count) {
+    $portPid = [int]$listener.Matches[0].Groups[1].Value
+    taskkill.exe /PID $portPid /T /F | Out-Null
+    Start-Sleep -Milliseconds 500
+  }
+}
 if (Test-Path $pidFile) {
   $savedPid = [int](Get-Content $pidFile -ErrorAction SilentlyContinue)
   if (Get-Process -Id $savedPid -ErrorAction SilentlyContinue) { exit 0 }
@@ -27,7 +36,8 @@ $process = Start-Process -FilePath $npm -ArgumentList @("start") -WorkingDirecto
 Set-Content -Path $pidFile -Value $process.Id
 for ($attempt = 0; $attempt -lt 40; $attempt++) {
   Start-Sleep -Milliseconds 500
-  if (Test-SnoozeletReady) { Start-Process $url; exit 0 }
+  $health = Get-SnoozeletHealth
+  if ($health -and $health.databaseMode -eq "local") { Start-Process $url; exit 0 }
   if ($process.HasExited) { break }
 }
 Add-Content -Path $logFile -Value "`nLauncher: Snoozelet did not become ready. Run Diagnose Snoozelet.bat."
