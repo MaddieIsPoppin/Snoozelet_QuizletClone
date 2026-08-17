@@ -112,12 +112,18 @@ p, small, .helper, .study-summary { color: var(--mono-muted); }
 :focus-visible { outline: 2px solid var(--mono-focus) !important; outline-offset: 3px; }
 
 .workstation-nav {
-  min-height: 64px;
+  min-height: 76px;
   border-color: var(--mono-line) !important;
   background: rgba(27, 29, 31, .96) !important;
   box-shadow: none !important;
   backdrop-filter: none !important;
 }
+.workstation-nav > nav { height: 76px; }
+.active-session .workstation-nav {
+  min-height: 76px !important;
+  opacity: 1 !important;
+}
+.active-session .workstation-brand span { display: block !important; }
 html[data-theme="light"] .workstation-nav { background: rgba(255, 255, 255, .96) !important; }
 .workstation-brand strong { letter-spacing: -.02em; }
 .workstation-brand span, .nav-menu > button { color: var(--mono-muted); }
@@ -169,6 +175,31 @@ html[data-theme="light"] .workstation-nav { background: rgba(255, 255, 255, .96)
   box-shadow: none !important;
   backdrop-filter: none !important;
 }
+
+:is(
+  .blast-hud > div, .blast-target, .blast-rules > span, .blast-feedback,
+  .match-tile, .match-summary > span, .match-mobile-column,
+  .flashcard-face, .flashcard-stage, .flashcard-controls,
+  .study-mode-toggle, .study-direction-controls, .session-settings-panel
+) {
+  border-color: var(--mono-line) !important;
+  background: var(--mono-surface) !important;
+  background-image: none !important;
+  color: var(--mono-text) !important;
+  box-shadow: none !important;
+}
+.blast-target:hover:not(:disabled), .match-tile:hover:not(:disabled) {
+  border-color: var(--mono-line-strong) !important;
+  background: var(--mono-surface-2) !important;
+  transform: none !important;
+}
+.blast-target.selected, .match-tile.selected {
+  border-color: var(--mono-text-soft) !important;
+  background: var(--mono-surface-2) !important;
+}
+.flashcard-face { border-color: var(--mono-line-strong) !important; }
+.flashcard-face::before, .blast-question-card::before { display: none !important; }
+.cloud-sync-button { white-space: nowrap; }
 
 :is(.library-deck-card, .dashboard-shortcuts a, .activity-choice-grid button, .choice-button, .mode-pills a, .game-links a) {
   transition: border-color 140ms ease, background-color 140ms ease !important;
@@ -255,6 +286,7 @@ html[data-theme="light"] .workstation-mobile-nav { background: rgba(255, 255, 25
   }
   .workspace-page, .page, .deck-page-v2 { padding-block: 24px 86px; }
   .workstation-nav { min-height: 58px; }
+  .active-session .workstation-nav { display: none !important; }
   .workstation-mobile-nav a { padding: 15px 4px; }
   :is(.dashboard-focus-card, .work-priority, .launcher-card, .study-browser, .progress-section, .recent-panel, .editor-panel) {
     border-radius: 10px !important;

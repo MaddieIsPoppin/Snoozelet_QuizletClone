@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isHostedWithoutDatabase, queryOne } from "@/lib/db";
+import { isHostedWithoutDatabase, isLocalDatabase, queryOne } from "@/lib/db";
 
 export const runtime = "nodejs";
 
@@ -18,7 +18,8 @@ export async function GET() {
     const result = await queryOne("SELECT 1 AS ok");
     return NextResponse.json({
       ok: true,
-      database: result?.ok === 1 ? "connected" : "unavailable"
+      database: result?.ok === 1 ? "connected" : "unavailable",
+      databaseMode: isLocalDatabase() ? "local" : "cloud"
     });
   } catch {
     return NextResponse.json(

@@ -19,6 +19,10 @@ if (Test-Path $pidFile) {
 }
 
 $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
+$node = (Get-Command node.exe -ErrorAction Stop).Source
+$bootstrapScript = Join-Path $projectRoot "scripts\bootstrap-local-db.js"
+& $node $bootstrapScript *>> $logFile
+$env:SNOOZELET_DATABASE_MODE = "local"
 $process = Start-Process -FilePath $npm -ArgumentList @("start") -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput $logFile -RedirectStandardError $errorLogFile -PassThru
 Set-Content -Path $pidFile -Value $process.Id
 for ($attempt = 0; $attempt -lt 40; $attempt++) {

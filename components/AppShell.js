@@ -6,6 +6,7 @@ import { usePathname } from "next/navigation";
 import ComfortSettings from "@/components/ComfortSettings";
 import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
 import PwaControls from "@/components/PwaControls";
+import CloudSyncButton from "@/components/CloudSyncButton";
 
 const menus = [
   { label: "Study", href: "/study", items: [["Study workspace","/study"],["Weak cards","/study?scope=weak"],["AI Help","/ai"]] },
@@ -28,7 +29,7 @@ export default function AppShell({ children }) {
     <header className="workstation-nav" ref={navRef}>
       <Link className="workstation-brand" href="/"><strong>Snoozelet</strong><span>Active recall workstation</span></Link>
       <nav aria-label="Primary navigation">{menus.map((menu) => <div className="nav-menu" key={menu.label}><button type="button" className={pathname.startsWith(menu.href) ? "active" : ""} onClick={() => setOpen(open === menu.label ? "" : menu.label)} aria-expanded={open === menu.label}>{menu.label}<span>⌄</span></button>{open === menu.label ? <div className="nav-dropdown">{menu.items.map(([label,href]) => <Link href={href} key={label}>{label}</Link>)}</div> : null}</div>)}</nav>
-      <div className="nav-actions"><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
+      <div className="nav-actions"><CloudSyncButton/><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
     </header>
     <main className="workstation-main">{children}</main>
     <nav className="workstation-mobile-nav" aria-label="Mobile navigation">{menus.map((menu) => <Link className={pathname.startsWith(menu.href) ? "active" : ""} href={menu.href} key={menu.label}>{menu.label}</Link>)}</nav>
