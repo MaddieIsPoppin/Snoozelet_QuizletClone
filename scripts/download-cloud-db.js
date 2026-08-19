@@ -15,7 +15,7 @@ await localModule.queryOne("SELECT 1 AS ready");
 
 const remote = createClient({ url: remoteUrl, authToken: remoteToken });
 const local = createClient({ url: `file:${targetPath}` });
-const tables = ["users", "sessions", "subjects", "deck_folders", "decks", "cards", "study_stats", "review_logs", "user_progress", "learning_goals", "resource_links"];
+const tables = ["users", "sessions", "subjects", "deck_folders", "decks", "cards", "study_stats", "review_logs", "user_progress", "learning_goals", "resource_links", "notes"];
 try {
   for (const table of tables) {
     const exists = await remote.execute({ sql: "SELECT name FROM sqlite_master WHERE type = 'table' AND name = ?", args: [table] });

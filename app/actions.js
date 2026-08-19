@@ -19,6 +19,9 @@ import {
   createResourceLink,
   deleteResourceLink,
   updateResourceLink,
+  createNote,
+  updateNote,
+  deleteNote,
 } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
@@ -246,6 +249,24 @@ export async function updateResourceLinkAction(formData) {
   await updateResourceLink({ resourceId: formData.get("resourceId"), userId: user.id, title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
   if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+}
+
+export async function createNoteAction(formData) {
+  const user = await requireUser();
+  await createNote({ userId: user.id, subjectId: formData.get("subjectId"), folderId: formData.get("folderId"), deckId: formData.get("deckId"), title: formData.get("title"), content: formData.get("content") });
+  revalidatePath("/notes");
+}
+
+export async function updateNoteAction(formData) {
+  const user = await requireUser();
+  await updateNote({ noteId: formData.get("noteId"), userId: user.id, subjectId: formData.get("subjectId"), folderId: formData.get("folderId"), deckId: formData.get("deckId"), title: formData.get("title"), content: formData.get("content") });
+  revalidatePath("/notes");
+}
+
+export async function deleteNoteAction(formData) {
+  const user = await requireUser();
+  await deleteNote({ noteId: formData.get("noteId"), userId: user.id });
+  revalidatePath("/notes");
 }
 
 export async function assignDeckFolderAction(formData) {

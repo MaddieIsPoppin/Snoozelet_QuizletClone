@@ -9,8 +9,10 @@ import PwaControls from "@/components/PwaControls";
 import CloudSyncButton from "@/components/CloudSyncButton";
 
 const menus = [
-  { label: "Study", href: "/study", items: [["Study workspace","/study"],["Weak cards","/study?scope=weak"],["AI Help","/ai"]] },
+  { label: "Study", href: "/study", items: [["Study workspace","/study"],["Weak cards","/study?scope=weak"]] },
   { label: "Library", href: "/library", items: [["Modules and Study Units","/library"],["Create or import","/decks/new"]] },
+  { label: "AI Help", href: "/ai", items: [["AI workspace","/ai"],["Use ChatGPT","/ai?provider=chatgpt"],["Use Gemini","/ai?provider=gemini"]] },
+  { label: "Notes", href: "/notes", items: [["All notes","/notes"],["Write a note","/notes#new-note"]] },
   { label: "Training", href: "/games", items: [["Recognition training","/games"],["Match","/games?mode=match"],["Speed training","/games?mode=blast"]] },
   { label: "Progress", href: "/progress", items: [["Study statistics","/progress"],["Review history","/progress#history"],["Backup","/progress#backup"]] },
 ];
@@ -27,7 +29,7 @@ export default function AppShell({ children }) {
   return <div className={`workstation-shell${studying ? " active-session" : ""}`}>
     <ServiceWorkerRegistration/><PwaControls/>
     <header className="workstation-nav" ref={navRef}>
-      <Link className="workstation-brand" href="/"><strong>Snoozelet</strong><span>Active recall workstation</span></Link>
+      <Link className="workstation-brand" href="/"><span className="brand-crescent" aria-hidden="true">◐</span><span><strong>Snoozelet</strong><small>Active recall workstation</small></span></Link>
       <nav aria-label="Primary navigation">{menus.map((menu) => <div className="nav-menu" key={menu.label}><button type="button" className={pathname.startsWith(menu.href) ? "active" : ""} onClick={() => setOpen(open === menu.label ? "" : menu.label)} aria-expanded={open === menu.label}>{menu.label}<span>⌄</span></button>{open === menu.label ? <div className="nav-dropdown">{menu.items.map(([label,href]) => <Link href={href} key={label}>{label}</Link>)}</div> : null}</div>)}</nav>
       <div className="nav-actions"><CloudSyncButton/><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
     </header>
