@@ -15,7 +15,7 @@ export default function CloudSyncButton() {
       const data = await response.json();
       if (!response.ok) throw new Error(data.error || "Sync failed.");
       setState("done");
-      window.alert(`Synced ${data.decks} decks and ${data.cards} cards to your phone.`);
+      window.alert(`Synced ${data.decks} decks and ${data.cards} cards to your phone.${data.phoneReviewsMerged ? ` Merged ${data.phoneReviewsMerged} phone reviews first.` : ""}`);
     } catch (error) {
       setState("error");
       window.alert(error instanceof Error ? error.message : "Sync failed.");
