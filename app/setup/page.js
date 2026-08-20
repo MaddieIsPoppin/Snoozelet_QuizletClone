@@ -1,33 +1,17 @@
 import BrandMark from "@/components/BrandMark";
 import { recoverLoginAction } from "@/app/actions";
-import { isHostedWithoutDatabase } from "@/lib/db";
 
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
 export default function SetupPage() {
-  const missingDatabase = isHostedWithoutDatabase();
-
   return (
     <main className="page narrow">
       <section className="auth-panel">
         <BrandMark />
         <p className="eyebrow">Deployment setup</p>
-        <h1>{missingDatabase ? "Connect the database" : "Setup looks ready"}</h1>
-        {missingDatabase ? (
-          <>
-            <p>
-              Add your Turso database URL and token in Netlify, then redeploy. The app needs
-              those values before accounts and decks can be saved.
-            </p>
-            <div className="setup-list">
-              <code>TURSO_DATABASE_URL</code>
-              <code>TURSO_AUTH_TOKEN</code>
-            </div>
-          </>
-        ) : (
-          <p>The hosted database variables are present. You can go back and sign in.</p>
-        )}
+        <h1>Local storage is ready</h1>
+        <p>Snoozelet now uses only the database stored on this laptop. Cloud credentials are ignored and cannot replace your local study history.</p>
         <form action={recoverLoginAction}>
           <button className="button primary" type="submit">
             Clear session and go to login

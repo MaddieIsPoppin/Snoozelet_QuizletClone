@@ -278,12 +278,6 @@ export default async function DeckPage({ params }) {
             <span className="deck-mode-arrow">→</span>
           </Link>
 
-          <Link className="deck-mode-card" href={`/decks/${deck.id}/typed`}>
-            <div className="deck-mode-icon">T</div>
-            <div><h3>Typed Answer</h3><p>Produce the answer and receive concept-aware feedback.</p></div>
-            <span className="deck-mode-arrow">→</span>
-          </Link>
-
           <Link className="deck-mode-card deck-mode-primary" href={`/decks/${deck.id}/recall`}>
             <div className="deck-mode-icon">R</div>
             <div><h3>Deep Recall</h3><p>Missed cards return until you can retrieve them.</p></div>

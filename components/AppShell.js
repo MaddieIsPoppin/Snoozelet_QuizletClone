@@ -4,15 +4,14 @@ import Link from "next/link";
 import { useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import ComfortSettings from "@/components/ComfortSettings";
-import ServiceWorkerRegistration from "@/components/ServiceWorkerRegistration";
-import PwaControls from "@/components/PwaControls";
-import CloudSyncButton from "@/components/CloudSyncButton";
+import LocalSaveStatus from "@/components/LocalSaveStatus";
+import StaleCacheCleanup from "@/components/StaleCacheCleanup";
 
 const menus = [
   { label: "Study", href: "/study", items: [["Study workspace","/study"],["Weak cards","/study?scope=weak"]] },
   { label: "Library", href: "/library", items: [["Modules and Study Units","/library"],["Create or import","/decks/new"]] },
   { label: "AI Help", href: "/ai", items: [["AI workspace","/ai"],["Use ChatGPT","/ai?provider=chatgpt"],["Use Gemini","/ai?provider=gemini"]] },
-  { label: "Notes", href: "/notes", items: [["All notes","/notes"],["Write a note","/notes#new-note"]] },
+  { label: "Resources", href: "/notes", items: [["Note links","/notes"],["Add a link","/notes#add-resource"]] },
   { label: "Training", href: "/games", items: [["Recognition training","/games"],["Match","/games?mode=match"],["Speed training","/games?mode=blast"]] },
   { label: "Progress", href: "/progress", items: [["Study statistics","/progress"],["Review history","/progress#history"],["Backup","/progress#backup"]] },
 ];
@@ -27,11 +26,11 @@ export default function AppShell({ children }) {
   if (authPage) return children;
   const studying = /^\/decks\/[^/]+\/(learn|flashcards|multiple-choice|typed|recall|test)$/.test(pathname);
   return <div className={`workstation-shell${studying ? " active-session" : ""}`}>
-    <ServiceWorkerRegistration/><PwaControls/>
+    <StaleCacheCleanup/>
     <header className="workstation-nav" ref={navRef}>
       <Link className="workstation-brand" href="/"><span className="brand-crescent" aria-hidden="true">◐</span><span><strong>Snoozelet</strong><small>Active recall workstation</small></span></Link>
       <nav aria-label="Primary navigation">{menus.map((menu) => <div className="nav-menu" key={menu.label}><button type="button" className={pathname.startsWith(menu.href) ? "active" : ""} onClick={() => setOpen(open === menu.label ? "" : menu.label)} aria-expanded={open === menu.label}>{menu.label}<span>⌄</span></button>{open === menu.label ? <div className="nav-dropdown">{menu.items.map(([label,href]) => <Link href={href} key={label}>{label}</Link>)}</div> : null}</div>)}</nav>
-      <div className="nav-actions"><CloudSyncButton/><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
+      <div className="nav-actions"><LocalSaveStatus/><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
     </header>
     <main className="workstation-main">{children}</main>
     <nav className="workstation-mobile-nav" aria-label="Mobile navigation">{menus.map((menu) => <Link className={pathname.startsWith(menu.href) ? "active" : ""} href={menu.href} key={menu.label}>{menu.label}</Link>)}</nav>

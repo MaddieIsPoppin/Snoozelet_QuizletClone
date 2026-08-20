@@ -12,7 +12,7 @@ function Get-SnoozeletHealth {
 }
 
 $health = Get-SnoozeletHealth
-if ($health -and $health.databaseMode -eq "local") { Start-Process $url; exit 0 }
+if ($health -and $health.databaseMode -eq "local" -and $health.release -eq "web-stable-1") { Start-Process $url; exit 0 }
 if ($health) {
   $listener = netstat.exe -ano | Select-String "^\s*TCP\s+.*:3000\s+.*LISTENING\s+(\d+)\s*$" | Select-Object -First 1
   if ($listener -and $listener.Matches.Count) {
@@ -29,15 +29,19 @@ if (Test-Path $pidFile) {
 
 $npm = (Get-Command npm.cmd -ErrorAction Stop).Source
 $node = (Get-Command node.exe -ErrorAction Stop).Source
-$bootstrapScript = Join-Path $projectRoot "scripts\bootstrap-local-db.js"
-& $node $bootstrapScript *>> $logFile
+$verifyScript = Join-Path $projectRoot "scripts\verify-local-db.js"
+& $node $verifyScript *>> $logFile
+if ($LASTEXITCODE -ne 0) { Add-Content -Path $errorLogFile -Value "Local database verification failed. See $logFile"; exit 1 }
+$buildLogFile = Join-Path $runtimeDir "build.log"
+& $npm run build *>> $buildLogFile
+if ($LASTEXITCODE -ne 0) { Add-Content -Path $errorLogFile -Value "Build failed. See $buildLogFile"; exit 1 }
 $env:SNOOZELET_DATABASE_MODE = "local"
 $process = Start-Process -FilePath $npm -ArgumentList @("start") -WorkingDirectory $projectRoot -WindowStyle Hidden -RedirectStandardOutput $logFile -RedirectStandardError $errorLogFile -PassThru
 Set-Content -Path $pidFile -Value $process.Id
 for ($attempt = 0; $attempt -lt 40; $attempt++) {
   Start-Sleep -Milliseconds 500
   $health = Get-SnoozeletHealth
-  if ($health -and $health.databaseMode -eq "local") { Start-Process $url; exit 0 }
+  if ($health -and $health.databaseMode -eq "local" -and $health.release -eq "web-stable-1") { Start-Process $url; exit 0 }
   if ($process.HasExited) { break }
 }
 Add-Content -Path $logFile -Value "`nLauncher: Snoozelet did not become ready. Run Diagnose Snoozelet.bat."

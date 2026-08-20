@@ -234,6 +234,7 @@ export async function createResourceLinkAction(formData) {
   await createResourceLink({ userId: user.id, subjectId: formData.get("subjectId"), folderId: formData.get("folderId"), title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
   if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+  revalidatePath("/notes");
 }
 
 export async function deleteResourceLinkAction(formData) {
@@ -242,6 +243,7 @@ export async function deleteResourceLinkAction(formData) {
   revalidatePath("/library");
   if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+  revalidatePath("/notes");
 }
 
 export async function updateResourceLinkAction(formData) {
@@ -249,6 +251,7 @@ export async function updateResourceLinkAction(formData) {
   await updateResourceLink({ resourceId: formData.get("resourceId"), userId: user.id, title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
   if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+  revalidatePath("/notes");
 }
 
 export async function createNoteAction(formData) {

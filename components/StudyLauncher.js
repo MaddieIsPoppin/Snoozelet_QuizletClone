@@ -7,7 +7,6 @@ const modes = [
   { id: "multiple-choice", icon: "A", name: "Multiple choice", description: "Choose between related answers." },
   { id: "learn", icon: "◎", name: "Learn", description: "Guided, adaptive practice.", recommended: true },
   { id: "flashcards", icon: "▱", name: "Flashcards", description: "Flip and rate your recall." },
-  { id: "typed", icon: "⌨", name: "Typed Answer", description: "Produce the answer in your own words." },
   { id: "recall", icon: "↑", name: "Deep Recall", description: "Hard retrieval with missed cards repeated." },
   { id: "test", icon: "✓", name: "Practice test", description: "Build a mixed test." },
   { id: "match", icon: "◇", name: "Match", description: "Pair terms and definitions." },

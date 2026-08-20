@@ -3,7 +3,7 @@ export default function manifest() {
     id: "/",
     name: "Snoozelet Active Recall Workstation",
     short_name: "Snoozelet",
-    description: "Portable flashcards, study games, and progress that sync across your devices.",
+    description: "A focused local study workspace for flashcards, recall, and revision.",
     start_url: "/?source=android-pwa",
     scope: "/",
     display: "standalone",
