@@ -11,7 +11,7 @@ export async function GET() {
       database: result?.ok === 1 ? "connected" : "unavailable",
       databaseMode: "local",
       databasePath: getDatabaseInfo().path,
-      release: "web-stable-2"
+      release: "web-stable-3"
     });
   } catch {
     return NextResponse.json(

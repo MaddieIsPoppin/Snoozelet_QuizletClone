@@ -202,6 +202,13 @@ export async function deleteDeckAction(formData) {
   redirect("/library");
 }
 
+export async function deleteDeckFromLibraryAction(formData) {
+  const user = await requireUser();
+  const deckId = String(formData.get("deckId"));
+  await deleteDeck(deckId, user.id);
+  revalidatePath("/library");
+}
+
 export async function createDeckFolderAction(formData) {
   const user = await requireUser();
   await createDeckFolder({ name: formData.get("name"), subjectId: formData.get("subjectId"), userId: user.id });
