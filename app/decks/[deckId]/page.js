@@ -14,6 +14,7 @@ import CardCreationGuide from "@/components/CardCreationGuide";
 import PendingForm from "@/components/PendingForm";
 import SmartPasteImporter from "@/components/SmartPasteImporter";
 import Breadcrumbs from "@/components/Breadcrumbs";
+import ConfirmActionForm from "@/components/ConfirmActionForm";
 
 import { requireUser } from "@/lib/auth";
 import { getCards, getDeck } from "@/lib/db";
@@ -21,10 +22,11 @@ import { getCards, getDeck } from "@/lib/db";
 export const dynamic = "force-dynamic";
 export const runtime = "nodejs";
 
-export default async function DeckPage({ params }) {
+export default async function DeckPage({ params, searchParams }) {
   const user = await requireUser();
 
   const { deckId } = await params;
+  const query = await searchParams;
 
   const deck = await getDeck(
     deckId,
@@ -42,6 +44,8 @@ export default async function DeckPage({ params }) {
 
   return (
     <main className="deck-page-v2">
+      {query?.created === "1" ? <div className="success-banner" role="status"><span>✓</span><div><strong>Deck created and saved locally</strong><p>You can add cards below or start studying immediately.</p></div></div> : null}
+      {query?.saved ? <div className="success-banner" role="status"><span>✓</span><div><strong>{query.saved === "deleted" ? "Card deleted" : query.saved === "import" ? "Cards imported" : query.saved === "deck" ? "Deck details saved" : "Card saved"}</strong><p>Your local database is up to date.</p></div></div> : null}
       <Breadcrumbs module={deck.subject_name} moduleId={deck.subject_id} unit={deck.folder_name} unitId={deck.folder_id} deck={deck.title} />
 
       {/* ====================================================
@@ -51,10 +55,10 @@ export default async function DeckPage({ params }) {
       <header className="deck-page-header">
 
         <Link
-          href="/"
+          href="/library"
           className="deck-back-link"
         >
-          ← My decks
+          ← Library
         </Link>
 
         <div className="deck-header-actions">
@@ -118,17 +122,6 @@ export default async function DeckPage({ params }) {
 
             <span>
               Due
-            </span>
-          </article>
-
-
-          <article>
-            <strong>
-              {deck.weak_count}
-            </strong>
-
-            <span>
-              Weak
             </span>
           </article>
 
@@ -524,22 +517,7 @@ export default async function DeckPage({ params }) {
         </div>
 
 
-        <form action={deleteDeckAction}>
-
-          <input
-            name="deckId"
-            type="hidden"
-            value={deck.id}
-          />
-
-          <button
-            className="button danger"
-            type="submit"
-          >
-            Delete deck
-          </button>
-
-        </form>
+        <ConfirmActionForm action={deleteDeckAction} fields={{deckId:deck.id}} message={`Delete ${deck.title} and all of its cards?`} label="Delete deck"/>
 
       </section>
 

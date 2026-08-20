@@ -422,6 +422,7 @@ export default function DeckCardList({
                       <form
                         action={deleteCardAction}
                         className="deck-delete-card-form"
+                        onSubmit={(event) => { if (!window.confirm("Delete this card?")) event.preventDefault(); }}
                       >
 
                         <input

@@ -7,5 +7,5 @@ export const dynamic = "force-dynamic";
 export default async function LibraryPage() {
   const user = await requireUser();
   const [decks, folders, subjects] = await Promise.all([getDecks(user.id), getDeckFolders(user.id), getSubjects(user.id)]);
-  return <main className="workspace-page library-page"><header className="workspace-header library-hero"><div><p className="eyebrow">Modules</p><h1>My Modules</h1><p>Create your course structure, then drag each deck into the right Study Unit.</p></div></header><DeckLibrary decks={decks} folders={folders} subjects={subjects} /></main>;
+  return <main className="workspace-page library-page"><header className="workspace-header library-hero"><div><p className="eyebrow">Library</p><h1>Everything you study</h1><p>Folders contain Study Units, and Study Units contain decks—just like files on your laptop.</p></div></header><DeckLibrary decks={decks} folders={folders} subjects={subjects} /></main>;
 }

@@ -1,62 +1,44 @@
 "use client";
-
 import Link from "next/link";
-import { useMemo, useState, useTransition } from "react";
+import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
-import { assignDeckFolderAction, createSubjectAction } from "@/app/actions";
+import { assignDeckFolderAction, createDeckFolderAction, createSubjectAction, deleteDeckFolderAction, deleteSubjectAction, updateDeckFolderAction, updateSubjectAction } from "@/app/actions";
 
-export default function DeckLibrary({ decks = [], folders = [], subjects = [] }) {
-  const router = useRouter();
-  const [query, setQuery] = useState("");
-  const [draggedDeck, setDraggedDeck] = useState(null);
-  const [dropTarget, setDropTarget] = useState(null);
-  const [localFolders, setLocalFolders] = useState(() => Object.fromEntries(decks.map((deck) => [deck.id, deck.folder_id])));
-  const [message, setMessage] = useState("");
-  const [isMoving, startTransition] = useTransition();
-  const visibleDecks = useMemo(() => { const term = query.trim().toLowerCase(); return decks.filter((deck) => !localFolders[deck.id] && (!term || `${deck.title} ${deck.description || ""}`.toLowerCase().includes(term))); }, [decks, localFolders, query]);
-  const unitsFor = (subjectId) => folders.filter((folder) => String(folder.subject_id) === String(subjectId));
-  const decksIn = (folderId) => decks.filter((deck) => String(localFolders[deck.id] || "") === String(folderId));
+export default function DeckLibrary({decks=[],folders=[],subjects=[]}) {
+  const router=useRouter();
+  const[query,setQuery]=useState("");
+  const[openModules,setOpenModules]=useState(()=>new Set(subjects.map(s=>String(s.id))));
+  const[openUnits,setOpenUnits]=useState(()=>new Set(folders.map(f=>String(f.id))));
+  const[notice,setNotice]=useState("");
+  const[pending,startTransition]=useTransition();
+  const term=query.trim().toLowerCase();
+  const matches=(...values)=>!term||values.some(value=>String(value||"").toLowerCase().includes(term));
+  const unitsFor=id=>folders.filter(f=>String(f.subject_id)===String(id));
+  const decksFor=id=>decks.filter(d=>String(d.folder_id)===String(id));
+  const looseDecks=decks.filter(d=>!d.folder_id&&matches(d.title,d.description));
+  const looseUnits=folders.filter(f=>!f.subject_id&&(matches(f.name)||decksFor(f.id).some(d=>matches(d.title,d.description))));
+  const visibleSubjects=subjects.filter(subject=>matches(subject.name,subject.description)||unitsFor(subject.id).some(unit=>matches(unit.name)||decksFor(unit.id).some(deck=>matches(deck.title,deck.description))));
+  const toggle=(setter,id)=>setter(current=>{const next=new Set(current);next.has(String(id))?next.delete(String(id)):next.add(String(id));return next;});
+  const run=(action,data,success)=>startTransition(async()=>{try{await action(data);setNotice(success);router.refresh();}catch(error){setNotice(error?.message||"That change could not be saved.");}});
+  const submitCreate=(event,action,success)=>{event.preventDefault();const form=event.currentTarget;run(action,new FormData(form),success);form.reset();};
+  function moveDeck(deck,folderId){const data=new FormData();data.set("deckId",deck.id);data.set("folderId",folderId);run(assignDeckFolderAction,data,`${deck.title} moved.`);}
+  function remove(action,idField,id,label){if(!window.confirm(`Delete ${label}? Items inside will be moved back to the library, not erased.`))return;const data=new FormData();data.set(idField,id);run(action,data,`${label} removed.`);}
 
-  function moveDeck(deckId, folderId) {
-    const deck = decks.find((item) => String(item.id) === String(deckId));
-    const unit = folders.find((item) => String(item.id) === String(folderId));
-    if (!deck || !unit || String(localFolders[deck.id]) === String(unit.id)) return;
-    const previous = localFolders[deck.id];
-    setLocalFolders((current) => ({ ...current, [deck.id]: unit.id }));
-    setMessage(`Moving ${deck.title} to ${unit.subject_name} › ${unit.name}…`);
-    const data = new FormData(); data.set("deckId", deck.id); data.set("folderId", unit.id);
-    startTransition(async () => { try { await assignDeckFolderAction(data); setMessage(`${deck.title} moved to ${unit.name}.`); router.refresh(); } catch { setLocalFolders((current) => ({ ...current, [deck.id]: previous })); setMessage("That deck could not be moved. Please try again."); } });
-  }
-
-  function dropOnUnit(event, folderId) {
-    event.preventDefault();
-    const deckId = event.dataTransfer.getData("text/plain") || draggedDeck;
-    setDraggedDeck(null); setDropTarget(null); moveDeck(deckId, folderId);
-  }
-
-  return <div className="modules-workspace">
-    <section className="module-create-flow">
-      <div className="module-create-copy"><div className="flow-step">1</div><div><p className="eyebrow">Create</p><h2>Add a Module</h2><p>A Module is a course such as CMPG321. Open it afterwards to add Study Units.</p></div></div>
-      <form action={createSubjectAction} className="module-inline-form"><label>Module code<input name="name" placeholder="CMPG321" maxLength="100" required /></label><label>Module name<input name="description" placeholder="Database Systems" maxLength="500" /></label><button className="button primary" type="submit">Add Module</button></form>
-    </section>
-    <section className="deck-organiser">
-      <header className="organiser-heading"><div><p className="eyebrow">Organise</p><h2>Put every deck where it belongs</h2><p>Only unorganised decks appear in the tray. Drag one onto a Study Unit, or use Move to on a phone.</p></div><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search unorganised decks" aria-label="Search unorganised decks" /></header>
-      {message ? <p className="move-toast" role="status" aria-live="polite">{isMoving ? "◌ " : "✓ "}{message}</p> : null}
-      <div className="organiser-layout">
-        <aside className="deck-tray"><div className="deck-tray-title"><strong>Decks</strong><span>{visibleDecks.length}</span></div><div className="deck-tray-list">
-          {visibleDecks.map((deck) => { const unit = folders.find((folder) => String(folder.id) === String(localFolders[deck.id] || "")); return <article className={`organiser-deck ${draggedDeck === deck.id ? "is-dragging" : ""}`} draggable onDragStart={(event) => { event.dataTransfer.setData("text/plain", String(deck.id)); event.dataTransfer.effectAllowed = "move"; setDraggedDeck(deck.id); }} onDragEnd={() => { setDraggedDeck(null); setDropTarget(null); }} key={deck.id}>
-            <div className="deck-drag-handle" aria-hidden="true">⠿</div><div className="organiser-deck-copy"><Link href={`/decks/${deck.id}`}>{deck.title}</Link><small>{unit ? `${unit.subject_name} › ${unit.name}` : "Unorganised"} · {deck.card_count} cards</small></div>
-            <label className="mobile-move"><span>Move to</span><select value={localFolders[deck.id] || ""} onChange={(event) => moveDeck(deck.id, event.target.value)} disabled={isMoving || !folders.length}><option value="" disabled>Choose Study Unit</option>{folders.map((folder) => <option value={folder.id} key={folder.id}>{folder.subject_name} › {folder.name}</option>)}</select></label>
-          </article>; })}
-          {!visibleDecks.length ? <p className="organiser-empty">Every deck is organised.</p> : null}
-        </div><Link className="button primary new-deck-shortcut" href="/decks/new">+ Create deck</Link></aside>
-        <div className="module-board">
-          {subjects.map((subject) => { const units = unitsFor(subject.id); return <section className="board-module" key={subject.id}><header><div><span className="module-symbol">◎</span><div><h3>{subject.name}</h3><p>{subject.description || "Module"}</p></div></div><Link href={`/subjects/${subject.id}`}>Manage Module →</Link></header>
-            {units.length ? <div className="unit-drop-grid">{units.map((unit) => { const contained = decksIn(unit.id); const active = String(dropTarget) === String(unit.id); return <div className={`unit-drop-zone ${active ? "is-over" : ""}`} onDragOver={(event) => { event.preventDefault(); event.dataTransfer.dropEffect = "move"; setDropTarget(unit.id); }} onDragLeave={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setDropTarget(null); }} onDrop={(event) => dropOnUnit(event, unit.id)} key={unit.id}><div className="unit-drop-heading"><Link href={`/study-units/${unit.id}`}>{unit.name}</Link><span>{contained.length}</span></div>{contained.length ? <div className="unit-deck-chips">{contained.map((deck) => <Link href={`/decks/${deck.id}`} key={deck.id}>{deck.title}</Link>)}</div> : <p>Drop a deck here</p>}</div>; })}</div> : <div className="no-units"><p>This Module needs a Study Unit before decks can be added.</p><Link className="button primary" href={`/subjects/${subject.id}`}>+ Add Study Unit</Link></div>}
-          </section>; })}
-          {!subjects.length ? <div className="organiser-empty board-empty"><h3>Create your first Module above</h3><p>It will appear here as a place for your Study Units and decks.</p></div> : null}
-        </div>
-      </div>
-    </section>
-  </div>;
+  return <section className="file-library">
+    <header className="file-toolbar"><div className="file-breadcrumb"><span className="file-home-icon">S</span><div><strong>My Library</strong><small>{subjects.length} folders · {folders.length} subfolders · {decks.length} decks</small></div></div><div className="file-toolbar-actions"><label className="file-search"><span>⌕</span><input type="search" value={query} onChange={e=>setQuery(e.target.value)} placeholder="Search everything"/></label><details className="new-menu"><summary className="button primary">＋ New</summary><div><form onSubmit={e=>submitCreate(e,createSubjectAction,"Folder created.")}><strong>New folder</strong><input name="name" placeholder="Module or course name" required/><input name="description" placeholder="Optional description"/><button className="button primary" disabled={pending}>Create folder</button></form><Link className="button" href="/decks/new">New deck</Link></div></details></div></header>
+    {notice?<p className="library-notice" role="status">{pending?"Saving…":notice}</p>:null}
+    <div className="file-column-head"><span>Name</span><span>Contents</span><span>Updated</span><span>Actions</span></div>
+    <div className="file-tree">
+      {visibleSubjects.map(subject=>{const moduleOpen=openModules.has(String(subject.id));const units=unitsFor(subject.id);return <section className="file-folder" key={subject.id}>
+        <div className="file-row module-row"><button className="file-open" type="button" onClick={()=>toggle(setOpenModules,subject.id)}><span className="chevron">{moduleOpen?"⌄":"›"}</span><span className="folder-icon">▰</span><span><strong>{subject.name}</strong><small>{subject.description||"Folder"}</small></span></button><span>{units.length} folders</span><span>{new Date(subject.updated_at).toLocaleDateString()}</span><details className="file-actions"><summary>•••</summary><div><Link href={`/subjects/${subject.id}`}>Open overview</Link><form action={updateSubjectAction}><input type="hidden" name="subjectId" value={subject.id}/><input name="name" defaultValue={subject.name} required/><input name="description" defaultValue={subject.description||""}/><button>Rename / save</button></form><button className="danger-text" type="button" onClick={()=>remove(deleteSubjectAction,"subjectId",subject.id,subject.name)}>Delete folder</button></div></details></div>
+        {moduleOpen?<div className="file-children">
+          {units.filter(unit=>matches(unit.name)||decksFor(unit.id).some(deck=>matches(deck.title,deck.description))).map(unit=>{const unitOpen=openUnits.has(String(unit.id));const contained=decksFor(unit.id).filter(deck=>matches(deck.title,deck.description));return <div className="unit-folder" key={unit.id}><div className="file-row unit-row"><button className="file-open" type="button" onClick={()=>toggle(setOpenUnits,unit.id)}><span className="chevron">{unitOpen?"⌄":"›"}</span><span className="folder-icon secondary">▰</span><span><strong>{unit.name}</strong><small>Study Unit</small></span></button><span>{decksFor(unit.id).length} decks</span><span>{new Date(unit.updated_at).toLocaleDateString()}</span><details className="file-actions"><summary>•••</summary><div><Link href={`/study-units/${unit.id}`}>Open folder</Link><Link href={`/decks/new?studyUnit=${unit.id}`}>New deck here</Link><form action={updateDeckFolderAction}><input type="hidden" name="folderId" value={unit.id}/><input name="name" defaultValue={unit.name} required/><button>Rename</button></form><button className="danger-text" type="button" onClick={()=>remove(deleteDeckFolderAction,"folderId",unit.id,unit.name)}>Delete folder</button></div></details></div>{unitOpen?<div className="file-decks">{contained.map(deck=><div className="file-row deck-file" key={deck.id}><Link className="file-open" href={`/decks/${deck.id}`}><span className="deck-file-icon">▤</span><span><strong>{deck.title}</strong><small>{deck.description||"Flashcard deck"}</small></span></Link><span>{deck.card_count} cards</span><span>{new Date(deck.updated_at).toLocaleDateString()}</span><details className="file-actions"><summary>•••</summary><div><Link href={`/decks/${deck.id}/learn`}>Study now</Link><Link href={`/decks/${deck.id}`}>Edit cards</Link><label>Move to<select value={deck.folder_id||""} onChange={e=>moveDeck(deck,e.target.value)}>{folders.map(f=><option value={f.id} key={f.id}>{f.subject_name} / {f.name}</option>)}</select></label></div></details></div>)}{!contained.length?<div className="empty-folder"><span>Empty folder</span><Link href={`/decks/new?studyUnit=${unit.id}`}>＋ Add a deck</Link></div>:null}</div>:null}</div>})}
+          <form className="inline-folder-create" onSubmit={e=>submitCreate(e,createDeckFolderAction,"Subfolder created.")}><input type="hidden" name="subjectId" value={subject.id}/><input name="name" placeholder="＋ New Study Unit" required/><button disabled={pending}>Create</button></form>
+        </div>:null}
+      </section>})}
+      {looseDecks.length?<section className="loose-files"><div className="file-section-label">Unfiled decks</div>{looseDecks.map(deck=><div className="file-row deck-file" key={deck.id}><Link className="file-open" href={`/decks/${deck.id}`}><span className="deck-file-icon">▤</span><span><strong>{deck.title}</strong><small>{deck.description||"Flashcard deck"}</small></span></Link><span>{deck.card_count} cards</span><span>{new Date(deck.updated_at).toLocaleDateString()}</span><details className="file-actions"><summary>•••</summary><div><Link href={`/decks/${deck.id}`}>Open deck</Link><label>Move to<select defaultValue="" onChange={e=>moveDeck(deck,e.target.value)}><option value="" disabled>Choose folder</option>{folders.map(f=><option value={f.id} key={f.id}>{f.subject_name} / {f.name}</option>)}</select></label></div></details></div>)}</section>:null}
+      {looseUnits.length?<section className="loose-files"><div className="file-section-label">Folders without a Module</div>{looseUnits.map(unit=><div key={unit.id}><div className="file-row unit-row"><Link className="file-open" href={`/study-units/${unit.id}`}><span className="folder-icon secondary">▰</span><span><strong>{unit.name}</strong><small>Unfiled Study Unit</small></span></Link><span>{decksFor(unit.id).length} decks</span><span>{new Date(unit.updated_at).toLocaleDateString()}</span><details className="file-actions"><summary>•••</summary><div><Link href={`/decks/new?studyUnit=${unit.id}`}>New deck here</Link><button className="danger-text" type="button" onClick={()=>remove(deleteDeckFolderAction,"folderId",unit.id,unit.name)}>Delete folder</button></div></details></div>{decksFor(unit.id).map(deck=><div className="file-row deck-file" key={deck.id}><Link className="file-open" href={`/decks/${deck.id}`}><span className="deck-file-icon">▤</span><span><strong>{deck.title}</strong><small>{deck.card_count} cards</small></span></Link><span>{deck.card_count} cards</span><span>{new Date(deck.updated_at).toLocaleDateString()}</span><span/></div>)}</div>)}</section>:null}
+      {!visibleSubjects.length&&!looseDecks.length&&!looseUnits.length?<div className="workspace-empty"><strong>{term?"Nothing matches your search":"Your library is empty"}</strong><p>{term?"Try a different name.":"Create a folder or deck to get started."}</p></div>:null}
+    </div>
+  </section>;
 }

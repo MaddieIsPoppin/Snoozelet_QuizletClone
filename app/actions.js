@@ -15,6 +15,9 @@ import {
   createLearningGoal,
   deleteLearningGoal,
   createSubject,
+  updateSubject,
+  deleteSubject,
+  updateDeckFolder,
   assignFolderSubject,
   createResourceLink,
   deleteResourceLink,
@@ -114,7 +117,7 @@ export async function createDeckAction(formData) {
   const deckId = await createDeckWithCards({ title, description, cards, folderId: formData.get("folderId"), userId: user.id });
 
   revalidatePath("/");
-  redirect(`/decks/${deckId}`);
+  redirect(`/decks/${deckId}?created=1`);
 }
 
 export async function addCardAction(formData) {
@@ -126,6 +129,7 @@ export async function addCardAction(formData) {
   const hint = String(formData.get("hint") || "").trim();
   await addCards(deckId, [{ term, definition, hint, ...cardImageFromForm(formData) }], user.id);
   revalidatePath(`/decks/${deckId}`);
+  redirect(`/decks/${deckId}?saved=card`);
 }
 
 export async function importCardsAction(formData) {
@@ -142,6 +146,7 @@ export async function importCardsAction(formData) {
 
   await addCards(deckId, cards, user.id);
   revalidatePath(`/decks/${deckId}`);
+  redirect(`/decks/${deckId}?saved=import`);
 }
 
 export async function updateCardAction(formData) {
@@ -162,6 +167,7 @@ export async function updateCardAction(formData) {
     userId: user.id,
   });
   revalidatePath(`/decks/${deckId}`);
+  redirect(`/decks/${deckId}?saved=card`);
 }
 
 export async function updateDeckAction(formData) {
@@ -175,6 +181,7 @@ export async function updateDeckAction(formData) {
   });
   revalidatePath(`/decks/${deckId}`);
   revalidatePath("/library");
+  redirect(`/decks/${deckId}?saved=deck`);
 }
 
 export async function deleteCardAction(formData) {
@@ -184,6 +191,7 @@ export async function deleteCardAction(formData) {
 
   await deleteCard({ cardId, deckId, userId: user.id });
   revalidatePath(`/decks/${deckId}`);
+  redirect(`/decks/${deckId}?saved=deleted`);
 }
 
 export async function deleteDeckAction(formData) {
@@ -191,7 +199,7 @@ export async function deleteDeckAction(formData) {
   const deckId = String(formData.get("deckId"));
   await deleteDeck(deckId, user.id);
   revalidatePath("/");
-  redirect("/");
+  redirect("/library");
 }
 
 export async function createDeckFolderAction(formData) {
@@ -219,6 +227,24 @@ export async function createStudyUnitAction(_previousState, formData) {
 export async function createSubjectAction(formData) {
   const user = await requireUser();
   await createSubject({ name: formData.get("name"), description: formData.get("description"), userId: user.id });
+  revalidatePath("/library");
+}
+
+export async function updateSubjectAction(formData) {
+  const user=await requireUser();
+  await updateSubject({subjectId:formData.get("subjectId"),name:formData.get("name"),description:formData.get("description"),userId:user.id});
+  revalidatePath("/library");
+}
+
+export async function deleteSubjectAction(formData) {
+  const user=await requireUser();
+  await deleteSubject({subjectId:formData.get("subjectId"),userId:user.id});
+  revalidatePath("/library");
+}
+
+export async function updateDeckFolderAction(formData) {
+  const user=await requireUser();
+  await updateDeckFolder({folderId:formData.get("folderId"),name:formData.get("name"),userId:user.id});
   revalidatePath("/library");
 }
 

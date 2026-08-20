@@ -8,11 +8,10 @@ import LocalSaveStatus from "@/components/LocalSaveStatus";
 import StaleCacheCleanup from "@/components/StaleCacheCleanup";
 
 const menus = [
-  { label: "Study", href: "/study", items: [["Study workspace","/study"],["Weak cards","/study?scope=weak"]] },
+  { label: "Study", href: "/study", items: [["Choose what to study","/study"],["Continue last deck","/"]] },
   { label: "Library", href: "/library", items: [["Modules and Study Units","/library"],["Create or import","/decks/new"]] },
   { label: "AI Help", href: "/ai", items: [["AI workspace","/ai"],["Use ChatGPT","/ai?provider=chatgpt"],["Use Gemini","/ai?provider=gemini"]] },
   { label: "Resources", href: "/notes", items: [["Note links","/notes"],["Add a link","/notes#add-resource"]] },
-  { label: "Training", href: "/games", items: [["Recognition training","/games"],["Match","/games?mode=match"],["Speed training","/games?mode=blast"]] },
   { label: "Progress", href: "/progress", items: [["Study statistics","/progress"],["Review history","/progress#history"],["Backup","/progress#backup"]] },
 ];
 
@@ -28,7 +27,7 @@ export default function AppShell({ children }) {
   return <div className={`workstation-shell${studying ? " active-session" : ""}`}>
     <StaleCacheCleanup/>
     <header className="workstation-nav" ref={navRef}>
-      <Link className="workstation-brand" href="/"><span className="brand-crescent" aria-hidden="true">◐</span><span><strong>Snoozelet</strong><small>Active recall workstation</small></span></Link>
+      <Link className="workstation-brand" href="/study"><span className="brand-crescent" aria-hidden="true">◐</span><span><strong>Snoozelet</strong><small>Open. Study. Remember.</small></span></Link>
       <nav aria-label="Primary navigation">{menus.map((menu) => <div className="nav-menu" key={menu.label}><button type="button" className={pathname.startsWith(menu.href) ? "active" : ""} onClick={() => setOpen(open === menu.label ? "" : menu.label)} aria-expanded={open === menu.label}>{menu.label}<span>⌄</span></button>{open === menu.label ? <div className="nav-dropdown">{menu.items.map(([label,href]) => <Link href={href} key={label}>{label}</Link>)}</div> : null}</div>)}</nav>
       <div className="nav-actions"><LocalSaveStatus/><ComfortSettings label="Theme & settings"/><Link className="button primary" href="/decks/new">Create / Import</Link></div>
     </header>
