@@ -1,42 +1,114 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { useMemo, useState, useTransition } from "react";
+import { useRouter } from "next/navigation";
 import { createResourceLinkAction, deleteResourceLinkAction, updateResourceLinkAction } from "@/app/actions";
-import ConfirmActionForm from "@/components/ConfirmActionForm";
-import PendingForm from "@/components/PendingForm";
+import { detectResourceType } from "@/lib/resources";
 
-const labels = { notes: "Google Docs / notes", notebooklm: "NotebookLM", video: "Video", textbook: "Textbook / PDF", website: "Website", test: "Previous test" };
-const icons = { notes: "▤", notebooklm: "AI", video: "▶", textbook: "▥", website: "↗", test: "✓" };
+export const resourceTypes = {
+  google_docs: ["Google Docs", "DOC"], google_slides: ["Google Slides", "SLD"], google_sheets: ["Google Sheets", "SHT"],
+  google_drive: ["Google Drive", "DRV"], youtube: ["YouTube", "▶"], notebooklm: ["NotebookLM", "AI"], pdf: ["PDF", "PDF"],
+  notes: ["Notes", "▤"], video: ["Video", "▶"], textbook: ["Textbook", "▥"], test: ["Previous test", "✓"], website: ["Website", "↗"],
+};
 
 export default function ResourceLibrary({ resources, subjects, folders }) {
-  const [query, setQuery] = useState("");
-  const [filter, setFilter] = useState("all");
+  const router = useRouter();
   const [subjectId, setSubjectId] = useState("");
-  const visibleFolders = folders.filter((folder) => !subjectId || String(folder.subject_id) === subjectId);
-  const filtered = useMemo(() => {
-    const needle = query.trim().toLowerCase();
-    return resources.filter((item) => (filter === "all" || item.type === filter) && (!needle || [item.title, item.description, item.subject_name, item.folder_name, item.type].some((value) => String(value || "").toLowerCase().includes(needle))));
-  }, [filter, query, resources]);
+  const [unitId, setUnitId] = useState("");
+  const [query, setQuery] = useState("");
+  const [type, setType] = useState("all");
+  const [sort, setSort] = useState("newest");
+  const [editing, setEditing] = useState(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [notice, setNotice] = useState("");
+  const [pending, startTransition] = useTransition();
+  const selectedSubject = subjects.find((item) => String(item.id) === subjectId);
+  const units = folders.filter((item) => String(item.subject_id) === subjectId);
+  const hasUnassigned = resources.some((item) => !item.subject_id);
+  const wholeModuleCount = resources.filter((item) => String(item.subject_id) === subjectId && !item.folder_id).length;
 
-  return <div className="resource-library">
-    <section className="resource-library-toolbar">
-      <div><h2>{resources.length} saved {resources.length === 1 ? "resource" : "resources"}</h2><p>Links stay with their Module and Study Unit.</p></div>
-      <div className="resource-toolbar-actions">
-        <label className="file-search"><span>⌕</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search resources" aria-label="Search resources" /></label>
-        <select value={filter} onChange={(event) => setFilter(event.target.value)} aria-label="Filter resource type"><option value="all">All types</option>{Object.entries(labels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select>
-        <a className="button primary" href="#add-resource">＋ Add resource</a>
-      </div>
-    </section>
-    {filtered.length ? <div className="resource-grid resource-library-grid">{filtered.map((resource) => <article className="resource-card" key={resource.id}>
-      <span className="resource-kind" aria-hidden="true">{icons[resource.type] || "↗"}</span>
-      <div><small>{[resource.subject_name, resource.folder_name].filter(Boolean).join(" / ") || labels[resource.type]}</small><h3>{resource.title}</h3><p>{resource.description || labels[resource.type] || "External study resource"}</p><a href={resource.url} target="_blank" rel="noreferrer">Open in new tab ↗</a>
-        <details className="resource-edit"><summary>Edit</summary><form action={updateResourceLinkAction} className="form-stack"><input type="hidden" name="resourceId" value={resource.id} /><input type="hidden" name="subjectId" value={resource.subject_id || ""} /><input type="hidden" name="folderId" value={resource.folder_id || ""} /><label>Title<input name="title" defaultValue={resource.title} required /></label><label>URL<input name="url" type="url" defaultValue={resource.url} required /></label><label>Type<select name="type" defaultValue={resource.type}>{Object.entries(labels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label><label>Description<input name="description" defaultValue={resource.description || ""} /></label><button className="button" type="submit">Save changes</button></form></details>
-      </div>
-      <ConfirmActionForm action={deleteResourceLinkAction} fields={{ resourceId: resource.id, subjectId: resource.subject_id || "", folderId: resource.folder_id || "" }} message={`Remove ${resource.title}?`} label="Remove" className="resource-remove" />
-    </article>)}</div> : <div className="workspace-empty"><strong>{query || filter !== "all" ? "No matching resources" : "No resources yet"}</strong><p>{query || filter !== "all" ? "Try a different search or filter." : "Add a Google Doc, video, PDF, or useful website."}</p><a className="button primary" href="#add-resource">Add resource</a></div>}
-    <details className="resource-drawer" id="add-resource">
-      <summary className="button primary">＋ Add resource</summary>
-      <section className="resource-add-panel"><div><p className="eyebrow">New resource</p><h2>Add a study link</h2><p>Snoozelet stores only the link and where it belongs. Your document stays with its original service.</p></div><PendingForm action={createResourceLinkAction} submitLabel="Save resource" pendingLabel="Saving locally…"><label>Title<input name="title" maxLength="120" placeholder="Week 4 lecture notes" required /></label><label>URL<input name="url" type="url" placeholder="https://docs.google.com/…" required /></label><div className="note-context-fields"><label>Module<select name="subjectId" value={subjectId} onChange={(event) => setSubjectId(event.target.value)} required><option value="">Choose Module</option>{subjects.map((subject) => <option value={subject.id} key={subject.id}>{subject.name}</option>)}</select></label><label>Study Unit<select name="folderId" defaultValue=""><option value="">Whole Module</option>{visibleFolders.map((folder) => <option value={folder.id} key={folder.id}>{folder.name}</option>)}</select></label><label>Type<select name="type" defaultValue="notes">{Object.entries(labels).map(([value, label]) => <option value={value} key={value}>{label}</option>)}</select></label></div><label>Description<input name="description" maxLength="300" placeholder="Optional reminder" /></label><button className="button primary" type="submit">Save resource</button></PendingForm></section>
-    </details>
+  const visible = useMemo(() => {
+    const needle = query.trim().toLowerCase();
+    let result = resources.filter((item) => {
+      if (subjectId === "unassigned") { if (item.subject_id) return false; }
+      else if (subjectId && String(item.subject_id) !== subjectId) return false;
+      if (unitId === "whole" && item.folder_id) return false;
+      if (unitId && unitId !== "whole" && String(item.folder_id) !== unitId) return false;
+      return (type === "all" || item.type === type) && (!needle || [item.title, item.description].some((value) => String(value || "").toLowerCase().includes(needle)));
+    });
+    result = [...result].sort(sort === "name" ? (a, b) => a.title.localeCompare(b.title) : (a, b) => String(b.created_at).localeCompare(String(a.created_at)));
+    return result;
+  }, [query, resources, sort, subjectId, type, unitId]);
+
+  function chooseSubject(id) { setSubjectId(String(id)); setUnitId(""); }
+  function openCreate() { setEditing(null); setDrawerOpen(true); setNotice(""); }
+  function openEdit(resource) { setEditing(resource); setDrawerOpen(true); setNotice(""); }
+  function run(action, data, success, close = true) {
+    startTransition(async () => {
+      try { await action(data); setNotice(success); if (close) setDrawerOpen(false); router.refresh(); }
+      catch (error) { setNotice(error?.message || "That resource could not be saved."); }
+    });
+  }
+  function remove(resource) {
+    if (!window.confirm(`Remove ${resource.title} from Snoozelet? The original external file will not be deleted.`)) return;
+    const data = new FormData(); data.set("resourceId", resource.id); data.set("subjectId", resource.subject_id || ""); data.set("folderId", resource.folder_id || "");
+    run(deleteResourceLinkAction, data, `${resource.title} removed.`, false);
+  }
+  async function copyLink(resource) { await navigator.clipboard.writeText(resource.url); setNotice("Link copied."); }
+
+  return <div className="resource-browser">
+    <div className="resource-browser-toolbar">
+      <div><strong>{subjectId ? selectedSubject?.name || "Unassigned resources" : "All resources"}</strong><small>{subjectId && unitId ? "Search is scoped to this location" : "Search titles and descriptions"}</small></div>
+      <label className="file-search"><span>⌕</span><input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search resources" aria-label="Search resources" /></label>
+      <select value={type} onChange={(event) => setType(event.target.value)} aria-label="Filter by resource type"><option value="all">All types</option>{Object.entries(resourceTypes).map(([value, [label]]) => <option value={value} key={value}>{label}</option>)}</select>
+      <select value={sort} onChange={(event) => setSort(event.target.value)} aria-label="Sort resources"><option value="newest">Newest added</option><option value="name">Name A–Z</option></select>
+      <button className="button primary" type="button" onClick={openCreate}>＋ Add resource</button>
+    </div>
+    {notice ? <p className="library-notice" role="status">{pending ? "Saving…" : notice}</p> : null}
+    <div className="resource-hierarchy">
+      <section className="resource-path-column"><header><span>1</span><div><strong>Modules</strong><small>Choose a course</small></div></header>
+        <button className={!subjectId ? "selected" : ""} aria-pressed={!subjectId} type="button" onClick={() => chooseSubject("")}><span><strong>All resources</strong><small>{resources.length} resources</small></span><b>›</b></button>
+        {subjects.map((subject) => { const count = resources.filter((item) => String(item.subject_id) === String(subject.id)).length; return <button className={subjectId === String(subject.id) ? "selected" : ""} aria-pressed={subjectId === String(subject.id)} title={subject.name} type="button" onClick={() => chooseSubject(subject.id)} key={subject.id}><span><strong>{subject.name}</strong><small>{count} resources</small></span><b>›</b></button>; })}
+        {hasUnassigned ? <button className={subjectId === "unassigned" ? "selected" : ""} aria-pressed={subjectId === "unassigned"} type="button" onClick={() => chooseSubject("unassigned")}><span><strong>Unassigned resources</strong><small>{resources.filter((item) => !item.subject_id).length} need organising</small></span><b>›</b></button> : null}
+      </section>
+      <section className="resource-path-column"><header><span>2</span><div><strong>Study Units</strong><small>{selectedSubject ? selectedSubject.name : "Select a Module"}</small></div></header>
+        {!subjectId ? <div className="resource-column-empty">Select a Module to narrow the list.</div> : subjectId === "unassigned" ? <button className="selected" type="button"><span><strong>Unassigned</strong><small>No saved location</small></span></button> : <><button className={unitId === "whole" ? "selected" : ""} aria-pressed={unitId === "whole"} type="button" onClick={() => setUnitId("whole")}><span><strong>Whole Module</strong><small>{wholeModuleCount} resources</small></span><b>›</b></button>{units.map((unit) => { const count = resources.filter((item) => String(item.folder_id) === String(unit.id)).length; return <button className={unitId === String(unit.id) ? "selected" : ""} aria-pressed={unitId === String(unit.id)} title={unit.name} type="button" onClick={() => setUnitId(String(unit.id))} key={unit.id}><span><strong>{unit.name}</strong><small>{count} resources</small></span><b>›</b></button>; })}</>}
+      </section>
+      <section className="resource-results"><header><div><strong>Resources</strong><small>{visible.length} shown</small></div></header>
+        {visible.length ? <div className="resource-row-list">{visible.map((resource) => <article className="resource-row" key={resource.id}><span className="resource-kind" aria-hidden="true">{resourceTypes[resource.type]?.[1] || "↗"}</span><div><strong title={resource.title}>{resource.title}</strong><small>{resourceTypes[resource.type]?.[0] || resource.type} · {[resource.subject_name, resource.folder_name || (resource.subject_id ? "Whole Module" : "Unassigned")].filter(Boolean).join(" / ")}</small>{resource.description ? <p>{resource.description}</p> : null}</div><a className="button primary" href={resource.url} target="_blank" rel="noopener noreferrer">Open resource ↗</a><details className="file-actions"><summary aria-label={`Actions for ${resource.title}`}>•••</summary><div><button type="button" onClick={() => openEdit(resource)}>Edit / move</button><button type="button" onClick={() => copyLink(resource)}>Copy link</button><button className="danger-text" type="button" onClick={() => remove(resource)}>Remove</button></div></details></article>)}</div> : <div className="workspace-empty"><strong>{subjectId && !unitId && subjectId !== "unassigned" ? "Choose a Study Unit" : "No resources here"}</strong><p>{subjectId && !unitId && subjectId !== "unassigned" ? "Select Whole Module or a Study Unit to see its resources." : "Add a resource here or adjust the search and filters."}</p><button className="button primary" type="button" onClick={openCreate}>Add resource</button></div>}
+      </section>
+    </div>
+    {drawerOpen ? <ResourceEditor resource={editing} resources={resources} subjects={subjects} folders={folders} initialSubjectId={subjectId && subjectId !== "unassigned" ? subjectId : ""} initialUnitId={unitId && unitId !== "whole" ? unitId : ""} pending={pending} onClose={() => setDrawerOpen(false)} onSubmit={(data) => run(editing ? updateResourceLinkAction : createResourceLinkAction, data, editing ? "Resource updated." : "Resource saved.")} /> : null}
   </div>;
+}
+
+function ResourceEditor({ resource, resources, subjects, folders, initialSubjectId, initialUnitId, pending, onClose, onSubmit }) {
+  const [title, setTitle] = useState(resource?.title || "");
+  const [url, setUrl] = useState(resource?.url || "");
+  const [subjectId, setSubjectId] = useState(String(resource?.subject_id || initialSubjectId || ""));
+  const [folderId, setFolderId] = useState(String(resource?.folder_id || initialUnitId || ""));
+  const [type, setType] = useState(resource?.type || "website");
+  const [manualType, setManualType] = useState(Boolean(resource));
+  const [error, setError] = useState("");
+  const availableFolders = folders.filter((item) => String(item.subject_id) === subjectId);
+  function changeUrl(value) { setUrl(value); if (!manualType) { const detected = detectResourceType(value); if (detected) setType(detected); } }
+  function submit(event) {
+    event.preventDefault(); setError("");
+    let parsed; try { parsed = new URL(url); } catch { setError("Enter a complete URL beginning with http:// or https://."); return; }
+    if (!["http:", "https:"].includes(parsed.protocol)) { setError("Resource links must begin with http:// or https://."); return; }
+    if (!title.trim()) { setError("Enter a meaningful resource title."); return; }
+    if (!subjectId) { setError("Choose a Module."); return; }
+    if (resources.some((item) => String(item.id) !== String(resource?.id) && item.url === parsed.href)) { setError("This exact resource link is already saved."); return; }
+    const data = new FormData(event.currentTarget); onSubmit(data);
+  }
+  return <div className="resource-modal" role="dialog" aria-modal="true" aria-labelledby="resource-editor-title"><button className="resource-modal-backdrop" type="button" onClick={onClose} aria-label="Close resource editor" /><section><header><div><p className="eyebrow">{resource ? "Edit resource" : "New resource"}</p><h2 id="resource-editor-title">{resource ? "Update or move resource" : "Add a study resource"}</h2></div><button type="button" onClick={onClose} aria-label="Close">×</button></header><form onSubmit={submit} noValidate>
+    {resource ? <input type="hidden" name="resourceId" value={resource.id} /> : null}
+    <label>Resource title<input name="title" value={title} onChange={(event) => setTitle(event.target.value)} placeholder="CPU Scheduling Lecture Notes" maxLength="120" required /></label>
+    <label>URL<input name="url" type="url" value={url} onChange={(event) => changeUrl(event.target.value)} placeholder="https://…" required /></label>
+    <div className="resource-editor-grid"><label>Module<select name="subjectId" value={subjectId} onChange={(event) => { setSubjectId(event.target.value); setFolderId(""); }} required><option value="">Choose Module</option>{subjects.map((subject) => <option value={subject.id} key={subject.id}>{subject.name}</option>)}</select></label><label>Study Unit<select name="folderId" value={folderId} onChange={(event) => setFolderId(event.target.value)} disabled={!subjectId}><option value="">Whole Module</option>{availableFolders.map((folder) => <option value={folder.id} key={folder.id}>{folder.name}</option>)}</select></label></div>
+    <label>Resource type<select name="type" value={type} onChange={(event) => { setType(event.target.value); setManualType(true); }}>{Object.entries(resourceTypes).map(([value, [label]]) => <option value={value} key={value}>{label}</option>)}</select><small>{detectResourceType(url) ? `Suggested from URL: ${resourceTypes[detectResourceType(url)]?.[0]}` : "Paste a supported URL to detect its provider."}</small></label>
+    <label>Description <span className="optional">Optional</span><textarea name="description" defaultValue={resource?.description || ""} rows="4" maxLength="300" /></label>
+    {error ? <p className="form-error" role="alert">{error}</p> : null}
+    <footer><button className="button" type="button" onClick={onClose}>Cancel</button><button className="button primary" type="submit" disabled={pending}>{pending ? "Saving…" : "Save resource"}</button></footer>
+  </form></section></div>;
 }

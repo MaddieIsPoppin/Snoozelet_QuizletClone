@@ -259,8 +259,8 @@ export default function BlastGame({
     setWrongCount((value) => value + 1);
 
     const remainingLives = loseLife();
-    if (remainingLives === 0) transitionRef.current = window.setTimeout(endGame, 600);
-    else scheduleNext();
+    if (remainingLives === 0) transitionRef.current = window.setTimeout(endGame, 900);
+    else scheduleNext(Math.max(800, betweenQuestions));
   }
 
   function handleAnswer(option, index) {
@@ -320,7 +320,7 @@ export default function BlastGame({
         (value) => value + 1
       );
 
-      scheduleNext();
+      scheduleNext(Math.min(700, Math.max(400, betweenQuestions)));
 
       return;
     }
@@ -334,8 +334,8 @@ export default function BlastGame({
     );
 
     const remainingLives = loseLife();
-    if (remainingLives === 0) transitionRef.current = window.setTimeout(endGame, 600);
-    else scheduleNext();
+    if (remainingLives === 0) transitionRef.current = window.setTimeout(endGame, 900);
+    else scheduleNext(Math.max(800, betweenQuestions));
   }
 
   useEffect(() => {
@@ -586,13 +586,13 @@ export default function BlastGame({
         <h1>{prompt}</h1>
 
         {feedbackType === "timeout" ? (
-          <div className="blast-feedback timeout">
-            Time&apos;s up — {correctAnswer}
+          <div className="blast-feedback timeout" role="status" aria-live="assertive">
+            <strong>Time&apos;s up</strong><span>Correct answer: {correctAnswer}</span>
           </div>
         ) : feedbackType === "correct" ? (
-          <div className="blast-feedback correct">+{lastPoints} · {combo} correct</div>
+          <div className="blast-feedback correct" role="status" aria-live="assertive"><strong>✓ Correct</strong><span>+{lastPoints} · {combo} correct run</span></div>
         ) : feedbackType === "wrong" ? (
-          <div className="blast-feedback wrong">Correct answer: {correctAnswer}</div>
+          <div className="blast-feedback wrong" role="status" aria-live="assertive"><strong>× Incorrect</strong><span>Correct answer: {correctAnswer}</span></div>
         ) : null}
       </section>
 
@@ -624,6 +624,7 @@ export default function BlastGame({
               type="button"
               className={className}
               disabled={locked}
+              aria-label={`${index + 1}. ${option}${feedbackType === "correct" && feedbackId === index ? ". Correct" : feedbackType === "wrong" && feedbackId === index ? ". Incorrect" : feedbackType && normalize(option) === normalize(correctAnswer) ? ". Correct answer" : ""}`}
               onClick={() =>
                 handleAnswer(option, index)
               }
@@ -632,6 +633,9 @@ export default function BlastGame({
               <span>
                 {option}
               </span>
+              {feedbackType === "correct" && feedbackId === index ? <b className="blast-result-icon" aria-hidden="true">✓</b> : null}
+              {feedbackType === "wrong" && feedbackId === index ? <b className="blast-result-icon" aria-hidden="true">×</b> : null}
+              {feedbackType === "wrong" && feedbackId !== index && normalize(option) === normalize(correctAnswer) ? <b className="blast-result-icon" aria-hidden="true">✓</b> : null}
             </button>
           );
         })}

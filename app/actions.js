@@ -281,7 +281,7 @@ export async function deleteResourceLinkAction(formData) {
 
 export async function updateResourceLinkAction(formData) {
   const user = await requireUser();
-  await updateResourceLink({ resourceId: formData.get("resourceId"), userId: user.id, title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
+  await updateResourceLink({ resourceId: formData.get("resourceId"), userId: user.id, subjectId: formData.get("subjectId"), folderId: formData.get("folderId"), title: formData.get("title"), url: formData.get("url"), type: formData.get("type"), description: formData.get("description") });
   if (formData.get("folderId")) revalidatePath(`/study-units/${formData.get("folderId")}`);
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
   revalidatePath("/notes");

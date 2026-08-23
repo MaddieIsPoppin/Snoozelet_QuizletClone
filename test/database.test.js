@@ -77,6 +77,22 @@ test("database integration", async (suite) => {
     );
   });
 
+  await suite.test("organizes, moves, and deduplicates external resources", async () => {
+    const moduleOne = await db.createSubject({ name: "Resource Module One", userId: ownerId });
+    const moduleTwo = await db.createSubject({ name: "Resource Module Two", userId: ownerId });
+    const unitOne = await db.createDeckFolder({ name: "Resource Unit One", subjectId: moduleOne, userId: ownerId });
+    const unitTwo = await db.createDeckFolder({ name: "Resource Unit Two", subjectId: moduleTwo, userId: ownerId });
+    await db.createResourceLink({ userId: ownerId, subjectId: moduleOne, folderId: unitOne, title: "Lecture notes", url: "https://docs.google.com/document/d/resource-test", type: "google_docs", description: "Week one" });
+    const resource = (await db.getResourceLinks(ownerId)).find((item) => item.title === "Lecture notes");
+    assert.equal(Number(resource.folder_id), unitOne);
+    await assert.rejects(db.createResourceLink({ userId: ownerId, subjectId: moduleOne, folderId: unitOne, title: "Duplicate", url: resource.url, type: "website" }), /already saved/);
+    await assert.rejects(db.updateResourceLink({ resourceId: resource.id, userId: ownerId, subjectId: moduleOne, folderId: unitTwo, title: resource.title, url: resource.url, type: resource.type }), /selected Module/);
+    await db.updateResourceLink({ resourceId: resource.id, userId: ownerId, subjectId: moduleTwo, folderId: unitTwo, title: "Moved lecture notes", url: resource.url, type: "google_docs", description: "Moved" });
+    const moved = (await db.getResourceLinks(ownerId)).find((item) => Number(item.id) === Number(resource.id));
+    assert.equal(moved.subject_name, "Resource Module Two");
+    assert.equal(moved.folder_name, "Resource Unit Two");
+  });
+
   await suite.test("creates private exam expeditions and a readiness world", async () => {
     await db.createLearningGoal({
       userId: ownerId,

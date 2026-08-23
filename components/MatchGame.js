@@ -25,6 +25,7 @@ export default function MatchGame({
   const [tiles, setTiles] = useState([]);
 
   const [selectedTile, setSelectedTile] = useState(null);
+  const [mobileColumn, setMobileColumn] = useState("term");
 
   const [matchedIds, setMatchedIds] = useState([]);
 
@@ -45,6 +46,7 @@ export default function MatchGame({
   const timerRef = useRef(null);
   const wrongTimerRef = useRef(null);
   const correctTimerRef = useRef(null);
+  const resolvingRef = useRef(false);
 
   useEffect(() => {
     setMounted(true);
@@ -86,27 +88,21 @@ export default function MatchGame({
   }, [cards.length]);
 
   function buildTiles(selectedCards) {
-    const generatedTiles = [];
-
-    selectedCards.forEach((card) => {
-      generatedTiles.push({
+    const terms = selectedCards.map((card) => ({
         id: `term-${card.id}`,
         pairId: card.id,
         type: "term",
         text: card.term,
         card,
-      });
-
-      generatedTiles.push({
+      }));
+    const definitions = selectedCards.map((card) => ({
         id: `definition-${card.id}`,
         pairId: card.id,
         type: "definition",
         text: card.definition,
         card,
-      });
-    });
-
-    return shuffle(generatedTiles);
+      }));
+    return [...shuffle(terms), ...shuffle(definitions)];
   }
 
   function startGame() {
@@ -124,6 +120,8 @@ export default function MatchGame({
     );
 
     setSelectedTile(null);
+    setMobileColumn("term");
+    resolvingRef.current = false;
     setMatchedIds([]);
     setCorrectTileIds([]);
     setWrongTileIds([]);
@@ -173,8 +171,7 @@ export default function MatchGame({
       !gameStarted ||
       gameFinished ||
       matchedIds.includes(tile.id) ||
-      wrongTileIds.length > 0 ||
-      correctTileIds.length > 0
+      resolvingRef.current
     ) {
       return;
     }
@@ -195,6 +192,11 @@ export default function MatchGame({
       return;
     }
 
+    if (selectedTile.type === tile.type) {
+      setSelectedTile(tile);
+      return;
+    }
+
     const isValidMatch =
       selectedTile.pairId === tile.pairId &&
       selectedTile.type !== tile.type;
@@ -203,6 +205,7 @@ export default function MatchGame({
      * CORRECT MATCH
      */
     if (isValidMatch) {
+      resolvingRef.current = true;
       const pairIds = [
         selectedTile.id,
         tile.id,
@@ -230,6 +233,8 @@ export default function MatchGame({
 
           setCorrectTileIds([]);
           setSelectedTile(null);
+          setMobileColumn("term");
+          resolvingRef.current = false;
 
           /*
            * Last pair completed.
@@ -253,6 +258,8 @@ export default function MatchGame({
       (value) => value + 1
     );
 
+    resolvingRef.current = true;
+
     setWrongTileIds([
       selectedTile.id,
       tile.id,
@@ -268,6 +275,7 @@ export default function MatchGame({
       window.setTimeout(() => {
         setWrongTileIds([]);
         setSelectedTile(null);
+        resolvingRef.current = false;
       }, 650);
   }
 
@@ -469,66 +477,26 @@ export default function MatchGame({
         </span>
       </div>
 
-      <div className="match-grid">
-        {tiles.map((tile) => {
-          const matched =
-            matchedIds.includes(tile.id);
-
-          const selected =
-            selectedTile?.id === tile.id;
-
-          const wrong =
-            wrongTileIds.includes(tile.id);
-
-          const correct =
-            correctTileIds.includes(tile.id);
-
-          let className =
-            `match-tile match-tile-${tile.type}`;
-
-          if (matched) {
-            className +=
-              " match-tile-matched";
-          }
-
-          if (selected) {
-            className +=
-              " match-tile-selected";
-          }
-
-          if (wrong) {
-            className +=
-              " match-tile-wrong";
-          }
-
-          if (correct) {
-            className +=
-              " match-tile-correct";
-          }
-
-          return (
-            <button
-              key={tile.id}
-              type="button"
-              className={className}
-              disabled={matched}
-              onClick={() =>
-                handleTileClick(tile)
-              }
-            >
-              {(() => { const keyNumber = tiles.filter((item) => !matchedIds.includes(item.id)).findIndex((item) => item.id === tile.id) + 1; return keyNumber <= 9 ? <kbd className="match-key">{keyNumber}</kbd> : null; })()}
-              <span className="match-tile-type">
-                {tile.type === "term"
-                  ? "Term"
-                  : "Definition"}
-              </span>
-
-              <span className="match-tile-text">
-                {tile.text}
-              </span>
-            </button>
-          );
-        })}
+      <div className="match-mobile-tabs" role="tablist" aria-label="Match columns"><button className={mobileColumn === "term" ? "active" : ""} type="button" role="tab" aria-selected={mobileColumn === "term"} onClick={() => setMobileColumn("term")}>Terms{selectedTile?.type === "term" ? " · 1 selected" : ""}</button><button className={mobileColumn === "definition" ? "active" : ""} type="button" role="tab" aria-selected={mobileColumn === "definition"} onClick={() => setMobileColumn("definition")}>Definitions{selectedTile?.type === "definition" ? " · 1 selected" : ""}</button></div>
+      <div className="match-columns">
+        {["term", "definition"].map((column) => <section className={`match-column match-column-${column}${mobileColumn === column ? " mobile-active" : ""}`} aria-label={column === "term" ? "Terms" : "Definitions"} key={column}>
+          <header><div><strong>{column === "term" ? "Terms" : "Definitions"}</strong><small>Select one {column}</small></div><span>{tiles.filter((tile) => tile.type === column && !matchedIds.includes(tile.id)).length} left</span></header>
+          <div>{tiles.filter((tile) => tile.type === column).map((tile) => {
+            const matched = matchedIds.includes(tile.id);
+            const selected = selectedTile?.id === tile.id;
+            const wrong = wrongTileIds.includes(tile.id);
+            const correct = correctTileIds.includes(tile.id);
+            let className = `match-tile match-tile-${tile.type}`;
+            if (matched) className += " match-tile-matched";
+            if (selected) className += " match-tile-selected";
+            if (wrong) className += " match-tile-wrong";
+            if (correct) className += " match-tile-correct";
+            return <button key={tile.id} type="button" className={className} disabled={matched} aria-pressed={selected} aria-label={`${column === "term" ? "Term" : "Definition"}: ${tile.text}${matched ? ". Matched" : selected ? ". Selected" : wrong ? ". Incorrect pair" : correct ? ". Correct pair" : ""}`} onClick={() => handleTileClick(tile)}>
+              <span className="match-tile-text">{tile.text}</span>
+              {correct || matched ? <b className="match-result-icon" aria-hidden="true">✓</b> : wrong ? <b className="match-result-icon" aria-hidden="true">×</b> : selected ? <b className="match-result-icon" aria-hidden="true">Selected</b> : null}
+            </button>;
+          })}</div>
+        </section>)}
       </div>
     </section>
   );
