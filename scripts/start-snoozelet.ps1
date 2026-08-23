@@ -12,7 +12,7 @@ function Get-SnoozeletHealth {
 }
 
 $health = Get-SnoozeletHealth
-if ($health -and $health.databaseMode -eq "local" -and $health.release -eq "web-stable-3") { Start-Process $url; exit 0 }
+if ($health -and $health.databaseMode -eq "local" -and $health.release -eq "web-stable-4") { Start-Process $url; exit 0 }
 if ($health) {
   $listener = netstat.exe -ano | Select-String "^\s*TCP\s+.*:3000\s+.*LISTENING\s+(\d+)\s*$" | Select-Object -First 1
   if ($listener -and $listener.Matches.Count) {
@@ -41,7 +41,7 @@ Set-Content -Path $pidFile -Value $process.Id
 for ($attempt = 0; $attempt -lt 40; $attempt++) {
   Start-Sleep -Milliseconds 500
   $health = Get-SnoozeletHealth
-  if ($health -and $health.databaseMode -eq "local" -and $health.release -eq "web-stable-3") { Start-Process $url; exit 0 }
+  if ($health -and $health.databaseMode -eq "local" -and $health.release -eq "web-stable-4") { Start-Process $url; exit 0 }
   if ($process.HasExited) { break }
 }
 Add-Content -Path $logFile -Value "`nLauncher: Snoozelet did not become ready. Run Diagnose Snoozelet.bat."

@@ -57,14 +57,22 @@ export default function TypedQuestion({
       <form
         className="typed-answer-form"
         onSubmit={onSubmit}
+        onKeyDown={(event) => {
+          if (event.ctrlKey && event.key === "Enter" && !feedback) {
+            event.preventDefault();
+            event.currentTarget.requestSubmit();
+          }
+        }}
         autoComplete="off"
       >
         <TextField
+          textarea
+          rows={5}
           value={typedAnswer}
           onChange={(event) =>
             updateAnswer(event.target.value)
           }
-          placeholder="Your answer"
+          placeholder="Write your answer…"
           autoComplete="off"
           autoCorrect="off"
           autoCapitalize="none"
@@ -74,12 +82,7 @@ export default function TypedQuestion({
         />
 
         {!feedback ? (
-          <button
-            className="button primary"
-            type="submit"
-          >
-            Check
-          </button>
+          <div className="typed-submit-row"><small>Press Ctrl + Enter to check</small><button className="button primary" type="submit">Check answer</button></div>
         ) : null}
       </form>
 

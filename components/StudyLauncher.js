@@ -49,22 +49,22 @@ export default function StudyLauncher({ decks, folders, subjects, purpose = "stu
     <div className="study-path" aria-label="Study selection">
       <div className="path-column">
         <div className="path-heading"><span>1</span><div><strong>Module</strong><small>Choose your course</small></div></div>
-        {subjects.filter((subject) => organised.some((deck) => String(deck.subject_id) === String(subject.id))).map((subject) => <button className={subjectId === String(subject.id) ? "selected" : ""} type="button" onClick={() => chooseModule(subject.id)} key={subject.id}><span>◎</span><strong>{subject.name}</strong><b>›</b></button>)}
+        {subjects.filter((subject) => organised.some((deck) => String(deck.subject_id) === String(subject.id))).map((subject) => <button className={subjectId === String(subject.id) ? "selected" : ""} type="button" title={subject.name} aria-pressed={subjectId === String(subject.id)} onClick={() => chooseModule(subject.id)} key={subject.id}><span>◎</span><strong>{subject.name}</strong><b>›</b></button>)}
       </div>
       <div className="path-column">
         <div className="path-heading"><span>2</span><div><strong>Study Unit</strong><small>Narrow the topic</small></div></div>
-        {availableUnits.map((unit) => <button className={effectiveUnit === String(unit.id) ? "selected" : ""} type="button" onClick={() => chooseUnit(unit.id)} key={unit.id}><span>▤</span><strong>{unit.name}</strong><b>›</b></button>)}
+        {availableUnits.map((unit) => <button className={effectiveUnit === String(unit.id) ? "selected" : ""} type="button" title={unit.name} aria-pressed={effectiveUnit === String(unit.id)} onClick={() => chooseUnit(unit.id)} key={unit.id}><span>▤</span><strong>{unit.name}</strong><b>›</b></button>)}
       </div>
       <div className="path-column">
         <div className="path-heading"><span>3</span><div><strong>Deck</strong><small>Pick the flashcard set</small></div></div>
-        {availableDecks.map((deck) => <button className={String(effectiveDeck?.id) === String(deck.id) ? "selected" : ""} type="button" onClick={() => setDeckId(String(deck.id))} key={deck.id}><span>▱</span><span><strong>{deck.title}</strong><small>{deck.card_count} cards · {deck.due_count} due</small></span><b>✓</b></button>)}
+        {availableDecks.map((deck) => <button className={String(effectiveDeck?.id) === String(deck.id) ? "selected" : ""} type="button" title={deck.title} aria-pressed={String(effectiveDeck?.id) === String(deck.id)} onClick={() => setDeckId(String(deck.id))} key={deck.id}><span>▱</span><span><strong>{deck.title}</strong><small>{deck.card_count} cards · {deck.due_count} due</small></span><b>{String(effectiveDeck?.id) === String(deck.id) ? "Selected" : ""}</b></button>)}
       </div>
     </div>
     {purpose === "ai" ? <div className="launcher-footer"><div><strong>{effectiveDeck?.title || "Choose a deck"}</strong><span>Generate a focused AI study prompt</span></div>{effectiveDeck ? <Link className="button primary launcher-start" href={`/decks/${effectiveDeck.id}/ai`}>Open AI Help →</Link> : null}</div> : <>
       <div className="launcher-divider" />
       <div className="launcher-step"><span className="step-number">4</span><div><h2>Choose a learning mode</h2><p>Use the method that fits this session.</p></div></div>
-      <div className="activity-choice-grid">{modes.map((item) => <button type="button" className={mode === item.id ? "selected" : ""} onClick={() => setMode(item.id)} key={item.id}><span className="activity-choice-icon">{item.icon}</span><span><strong>{item.name}{item.recommended ? <em>Recommended</em> : null}</strong><small>{item.description}</small></span><b>{mode === item.id ? "✓" : ""}</b></button>)}</div>
-      <div className="launcher-footer"><div><strong>{effectiveDeck?.title || "Choose a deck"}</strong><span>{modes.find((item) => item.id === mode)?.name}</span></div>{effectiveDeck ? <Link className="button primary launcher-start" href={studyHref}>Start studying →</Link> : null}</div>
+      <div className="activity-choice-grid">{modes.map((item) => <button type="button" className={mode === item.id ? "selected" : ""} aria-pressed={mode === item.id} onClick={() => setMode(item.id)} key={item.id}><span className="activity-choice-icon">{item.icon}</span><span><strong>{item.name}{item.recommended ? <em>Recommended</em> : null}</strong><small>{item.description}</small></span><b>{mode === item.id ? "Selected" : ""}</b></button>)}</div>
+      <div className="launcher-footer"><div><strong>{effectiveDeck?.title || "Choose a deck"}</strong><span>{effectiveDeck ? `${modes.find((item) => item.id === mode)?.name} · ${effectiveDeck.card_count} cards` : "Choose a Module, Study Unit, and Deck first"}</span></div>{effectiveDeck ? <Link className="button primary launcher-start" href={studyHref}>Start {modes.find((item) => item.id === mode)?.name} · {effectiveDeck.card_count} cards</Link> : <button className="button primary" type="button" disabled>Choose a deck to start</button>}</div>
     </>}
   </section>;
 }
