@@ -433,7 +433,24 @@ test("database integration", async (suite) => {
     const backup = await db.getBackupData(ownerId);
     assert.equal(backup.format, "snoozelet-backup");
     assert.ok(backup.decks.some((deck) => deck.title === "Renamed deck"));
+    assert.ok(Array.isArray(backup.combinedDecks));
     assert.equal((await db.getBackupData(otherUserId)).decks.length, 0);
+  });
+
+  await suite.test("combines Decks by reference without duplicating or deleting source cards", async () => {
+    const secondDeckId = await db.createDeckWithCards({ userId: ownerId, title: "Second source", cards: [{ term: "Cell", definition: "Basic unit" }] });
+    const groupId = await db.createDeckGroup({ userId: ownerId, name: "Biology combined", deckIds: [deckId, secondDeckId, deckId] });
+    const groups = await db.getDeckGroups(ownerId);
+    const group = groups.find((item) => Number(item.id) === groupId);
+    assert.equal(Number(group.deck_count), 2);
+    assert.equal(group.decks.length, 2);
+    const snapshot = await db.getCombinedStudySnapshot([deckId, secondDeckId, deckId], ownerId);
+    assert.equal(new Set(snapshot.cards.map((card) => Number(card.id))).size, snapshot.cards.length);
+    assert.ok(snapshot.cards.every((card) => card.source_deck_title));
+    await db.deleteDeckGroup({ userId: ownerId, groupId });
+    assert.equal(await db.queryOne("SELECT id FROM deck_groups WHERE id = ?", [groupId]), null);
+    assert.ok(await db.getDeck(deckId, ownerId));
+    assert.ok(await db.getDeck(secondDeckId, ownerId));
   });
 
   await suite.test("deleting a card removes its stats and review logs", async () => {

@@ -1233,6 +1233,7 @@ function goToNextFlashcard() {
           <h1>
             {deck.title}
           </h1>
+          {currentCard.source_deck_title ? <p className="card-source-label">Source Deck: {currentCard.source_deck_title}</p> : null}
         </div>
 
         {mode !== "test" ? (

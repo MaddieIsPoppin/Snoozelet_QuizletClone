@@ -60,7 +60,7 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(preserved.answer, "answer");
   assert.equal(preserved.expected, "answer");
   assert.equal(preserved.attempt_id, null);
-  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]);
+  assert.deepEqual(versions.map(({ version }) => Number(version)), [1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11]);
   const goalTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'learning_goals'");
   assert.equal(goalTable.name, "learning_goals");
   const subjectTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'subjects'");
@@ -69,6 +69,10 @@ test("review idempotency migration preserves existing review rows", async () => 
   assert.equal(resourceTable.name, "resource_links");
   const notesTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'notes'");
   assert.equal(notesTable.name, "notes");
+  const groupTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'deck_groups'");
+  const groupItemTable = await db.queryOne("SELECT name FROM sqlite_master WHERE type = 'table' AND name = 'deck_group_items'");
+  assert.equal(groupTable.name, "deck_groups");
+  assert.equal(groupItemTable.name, "deck_group_items");
   assert.ok(cardColumns.some((column) => column.name === "image_url"));
   assert.ok(cardColumns.some((column) => column.name === "image_public_id"));
   assert.ok(cardColumns.some((column) => column.name === "image_alt"));

@@ -584,6 +584,7 @@ export default function BlastGame({
         </p>
 
         <h1>{prompt}</h1>
+        {currentCard?.source_deck_title ? <small className="card-source-label">Source Deck: {currentCard.source_deck_title}</small> : null}
 
         {feedbackType === "timeout" ? (
           <div className="blast-feedback timeout" role="status" aria-live="assertive">

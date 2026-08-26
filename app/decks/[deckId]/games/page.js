@@ -1,0 +1,4 @@
+import Link from "next/link";
+import { loadStudyRoute } from "@/lib/study-route";
+export const dynamic="force-dynamic";
+export default async function DeckGamesPage({params}){const{deck}=await loadStudyRoute(params);return <main className="workspace-page"><Link className="back-link" href={`/decks/${deck.id}`}>← Back to Deck</Link><header className="workspace-header compact-header"><div><p className="eyebrow">Games</p><h1>Choose a game</h1><p>Play with {deck.title}.</p></div></header><section className="four-mode-grid game-grid"><Link href={`/decks/${deck.id}/match`}><strong>Match</strong><small>Pair terms and definitions in clear columns.</small></Link><Link href={`/decks/${deck.id}/blast`}><strong>Blast</strong><small>Answer rapidly with immediate feedback.</small></Link></section></main>;}

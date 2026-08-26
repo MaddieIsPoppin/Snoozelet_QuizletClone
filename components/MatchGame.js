@@ -493,6 +493,7 @@ export default function MatchGame({
             if (correct) className += " match-tile-correct";
             return <button key={tile.id} type="button" className={className} disabled={matched} aria-pressed={selected} aria-label={`${column === "term" ? "Term" : "Definition"}: ${tile.text}${matched ? ". Matched" : selected ? ". Selected" : wrong ? ". Incorrect pair" : correct ? ". Correct pair" : ""}`} onClick={() => handleTileClick(tile)}>
               <span className="match-tile-text">{tile.text}</span>
+              {tile.card.source_deck_title ? <small className="match-source-label">{tile.card.source_deck_title}</small> : null}
               {correct || matched ? <b className="match-result-icon" aria-hidden="true">✓</b> : wrong ? <b className="match-result-icon" aria-hidden="true">×</b> : selected ? <b className="match-result-icon" aria-hidden="true">Selected</b> : null}
             </button>;
           })}</div>

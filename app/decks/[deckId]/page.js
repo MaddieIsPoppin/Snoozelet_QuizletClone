@@ -65,7 +65,7 @@ export default async function DeckPage({ params, searchParams }) {
 
           <Link
             className="button primary"
-            href={`/decks/${deck.id}/learn`}
+            href={`/decks/${deck.id}/multiple-choice`}
           >
             ▶ Start studying
           </Link>
@@ -179,9 +179,14 @@ export default async function DeckPage({ params, searchParams }) {
 
         <div className="deck-study-grid">
 
+          <Link className="deck-mode-card top-level-mode" href={`/decks/${deck.id}/multiple-choice`}><div className="deck-mode-icon">A</div><div><h3>Multiple Choice</h3><p>Choose the right answer from related cards.</p></div><span className="deck-mode-arrow">→</span></Link>
+          <Link className="deck-mode-card top-level-mode" href={`/decks/${deck.id}/flashcards`}><div className="deck-mode-icon">▱</div><div><h3>Flashcards</h3><p>Flip cards and rate your recall.</p></div><span className="deck-mode-arrow">→</span></Link>
+          <Link className="deck-mode-card top-level-mode" href={`/decks/${deck.id}/typed`}><div className="deck-mode-icon">T</div><div><h3>Typed</h3><p>Type the important concepts in your own words.</p></div><span className="deck-mode-arrow">→</span></Link>
+          <Link className="deck-mode-card top-level-mode" href={`/decks/${deck.id}/games`}><div className="deck-mode-icon">G</div><div><h3>Games</h3><p>Choose Match or Blast.</p></div><span className="deck-mode-arrow">→</span></Link>
+
           <Link
             className="deck-mode-card deck-mode-primary"
-            href={`/decks/${deck.id}/learn`}
+            href={`/decks/${deck.id}/multiple-choice`}
           >
 
             <div className="deck-mode-icon">

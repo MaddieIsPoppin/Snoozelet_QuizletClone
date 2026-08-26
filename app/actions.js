@@ -25,6 +25,9 @@ import {
   createNote,
   updateNote,
   deleteNote,
+  createDeckGroup,
+  updateDeckGroup,
+  deleteDeckGroup,
 } from "@/lib/db";
 import { clearSession, createSession, createUser, requireUser, verifyUser } from "@/lib/auth";
 import { parseCards } from "@/lib/import";
@@ -320,6 +323,26 @@ export async function deleteDeckFolderAction(formData) {
   await deleteDeckFolder({ folderId: formData.get("folderId"), userId: user.id });
   revalidatePath("/library");
   if (formData.get("subjectId")) revalidatePath(`/subjects/${formData.get("subjectId")}`);
+}
+
+function deckIdsFromForm(formData) { return formData.getAll("deckIds").map(String); }
+
+export async function createDeckGroupAction(formData) {
+  const user=await requireUser();
+  await createDeckGroup({userId:user.id,name:formData.get("name"),deckIds:deckIdsFromForm(formData)});
+  revalidatePath("/library");
+}
+
+export async function updateDeckGroupAction(formData) {
+  const user=await requireUser();
+  await updateDeckGroup({userId:user.id,groupId:formData.get("groupId"),name:formData.get("name"),deckIds:deckIdsFromForm(formData)});
+  revalidatePath("/library");
+}
+
+export async function deleteDeckGroupAction(formData) {
+  const user=await requireUser();
+  await deleteDeckGroup({userId:user.id,groupId:formData.get("groupId")});
+  revalidatePath("/library");
 }
 
 export async function createLearningGoalAction(formData) {
